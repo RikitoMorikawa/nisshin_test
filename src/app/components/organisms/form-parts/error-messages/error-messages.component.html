@@ -1,0 +1,42 @@
+<div class="ml-1 text-sm text-red">
+  <p *ngIf="errors?.['required']">
+    {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+  </p>
+  <p *ngIf="errors?.['email']">
+    {{ errorConst.FORM_ERROR.EMAIL_FORMAT_VIOLATION }}
+  </p>
+  <p *ngIf="errors?.['maxlength']">
+    {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+  </p>
+  <p *ngIf="errors?.['minlength']">
+    {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+  </p>
+  <p
+    *ngIf="errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+    {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+  </p>
+  <p
+    *ngIf="errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_2DIGIT_REG_EX + ''">
+    {{ errorConst.FORM_ERROR.NUMERIC_2DIGIT_VIOLATION }}
+  </p>
+
+  <p
+    *ngIf="errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_2DIGIT_DECIMAL_REG_EX + ''">
+    {{ errorConst.FORM_ERROR.NUMERIC_2DIGIT_DECIMAL_VIOLATION }}
+  </p>
+
+  <p
+    *ngIf="errors?.['pattern']?.requiredPattern === regExConst.FULL_WIDTH_KATAKANA_REG_EX + ''">
+    {{ errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION }}
+  </p>
+  <p
+    *ngIf="errors?.['pattern']?.requiredPattern === regExConst.PASSWORD_REG_EX + ''">
+    {{ errorConst.FORM_ERROR.PASSWORD_FORMAT_VIOLATION }}
+  </p>
+  <p *ngIf="errors?.['beforeFromDate']">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+  <p *ngIf="errors?.['maxFileSize']">
+    {{ errorConst.FORM_ERROR.EXCEEDED_FILE_SIZE_LIMIT }}
+  </p>
+</div>

@@ -1,0 +1,219 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/inventory-control/stock-transfer', text: '在庫移動一覧' },
+    { text: '在庫移動新規登録' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">在庫移動新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="addForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">区分情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <app-select-container
+                  nameAttrValue="from_store_id"
+                  idAttrValue="from-store-id"
+                  [formCtrl]="addForm.controls.from_store_id"
+                  [options]="fromStoreOptions"
+                  [invalid]="
+                    formControlStateManager(addForm.controls.from_store_id)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '在庫移動元店舗', required: true }
+                    ">
+                  </ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.from_store_id }
+                    "
+                    message>
+                  </ng-container>
+                </app-select-container>
+                <app-select-container
+                  nameAttrValue="to_store_id"
+                  idAttrValue="to-store-id"
+                  [formCtrl]="addForm.controls.to_store_id"
+                  [options]="toStoreOptions"
+                  [invalid]="
+                    formControlStateManager(addForm.controls.to_store_id)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '在庫移動先店舗' }
+                    ">
+                  </ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.to_store_id }
+                    "
+                    message>
+                  </ng-container>
+                </app-select-container>
+                <app-real-time-suggest-container
+                  [idCtrl]="addForm.controls.product_id"
+                  [nameCtrl]="addForm.controls.product_name"
+                  nameAttrValue="product_name"
+                  idAttrValue="product-name"
+                  [apiInput]="getProductSuggests()"
+                  (selectedData)="handleSelectedProductData($event)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '商品名', required: true }
+                    ">
+                  </ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.product_name }
+                    "
+                    message>
+                  </ng-container>
+                </app-real-time-suggest-container>
+                <app-text-container
+                  inputType="number"
+                  nameAttrValue="quantity"
+                  idAttrValue="quantity"
+                  [formCtrl]="addForm.controls.quantity"
+                  [textRight]="true"
+                  [invalid]="
+                    formControlStateManager(addForm.controls.quantity)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '商品点数', required: true }
+                    ">
+                  </ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.quantity }
+                    "
+                    message>
+                  </ng-container>
+                </app-text-container>
+                <app-text-container
+                  nameAttrValue="remarks"
+                  idAttrValue="remarks"
+                  [formCtrl]="addForm.controls.remarks"
+                  [invalid]="formControlStateManager(addForm.controls.remarks)">
+                  <ng-container
+                    *ngTemplateOutlet="labels; context: { label: '備考' }">
+                  </ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.remarks }
+                    "
+                    message>
+                  </ng-container>
+                </app-text-container>
+              </div>
+              <div class="flex flex-row gap-4">
+                <app-date-term
+                  [formCtrl]="addForm.controls.stock_transfer_date"
+                  nameAttrValue="stock_transfer_date"
+                  idAttrValue="stock-transfer-date"
+                  [invalid]="
+                    formControlStateManager(
+                      addForm.controls.stock_transfer_date
+                    )
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '在庫変動日', required: true }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: addForm.controls.stock_transfer_date }
+                    "
+                    message></ng-container>
+                </app-date-term>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="addForm.invalid || addForm.pristine">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <!--p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p-->
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['beforeFromDate']">
+      {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+    </p>
+  </ng-container>
+</ng-template>

@@ -1,0 +1,117 @@
+<table class="whitespace-nowrap border-separate border-spacing-0 w-full">
+  <thead *ngIf="header">
+    <th
+      *ngFor="let item of header"
+      (click)="changeSort(item)"
+      class="sticky top-0 bg-white text-left border-y border-slate-400 p-4 hover:transition-all duration-300"
+      [ngClass]="
+        item ? 'hover:bg-iron-blue-200 cursor-pointer' : 'cursor-auto'
+      ">
+      <div class="flex items-center gap-2">
+        <span>{{ item }}</span>
+        <app-icon
+          class="w-6"
+          *ngIf="item"
+          [icon]="
+            sort.column === item && sort.order === 'desc'
+              ? 'sort-desc'
+              : 'sort-asc'
+          "
+          [ngClass]="sort.column === item ? 'fill-primary' : 'fill-slate-300'">
+        </app-icon>
+      </div>
+    </th>
+  </thead>
+  <tbody>
+    <tr
+      *ngFor="let row of data"
+      class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+      <td *ngFor="let item of row" class="border-b border-iron-blue-300 p-4">
+        <ng-container *ngIf="isLinkData(item)">
+          <ng-container
+            *ngIf="item.target; then isTabLink; else normalLink"></ng-container>
+          <ng-template #isTabLink>
+            <span
+              style="cursor: pointer"
+              class="text-blue underline"
+              (click)="textClick(item.href)">
+              {{ item.text }}
+            </span>
+          </ng-template>
+          <ng-template #normalLink>
+            <a
+              class="text-blue underline"
+              [routerLink]="item.href"
+              [queryParams]="item.queryParams">
+              {{ item.text }}
+            </a>
+          </ng-template>
+        </ng-container>
+        <ng-container *ngIf="isCurrency(item)">
+          <div
+            style="width: 100%; height: 100%"
+            [style.text-align]="item.align">
+            {{
+              item.unit
+                ? item.text.toLocaleString() + ' 円'
+                : item.text.toLocaleString()
+            }}
+          </div>
+        </ng-container>
+        <ng-container *ngIf="isCheckBox(item)">
+          <input
+            type="checkbox"
+            name="item.name"
+            [value]="item.value"
+            (click)="addNewItem(item.value)"
+            [checked]="item.selected"
+            style="transform: scale(1.5); margin-left: 0.5em" />
+        </ng-container>
+        <ng-container *ngIf="isInputNumber(item)">
+          <input
+            type="text"
+            name="item.name"
+            [id]="item.id"
+            [value]="item.value"
+            (change)="item.value = getValue($event)" />
+        </ng-container>
+        <ng-container *ngIf="isDummyText(item)">
+          <span>
+            {{ item.dummy }}
+          </span>
+        </ng-container>
+        <ng-container *ngIf="isConsumptionTax(item)">
+          <span>
+            {{ item.value }}
+          </span>
+        </ng-container>
+        <ng-container
+          *ngIf="isTemplateRef(item)"
+          [ngTemplateOutlet]="$any(item)"></ng-container>
+        <span
+          *ngIf="
+            !isCurrency(item) &&
+            !isLinkData(item) &&
+            !isTemplateRef(item) &&
+            !isCheckBox(item) &&
+            !isInputNumber(item) &&
+            !isDummyText(item) &&
+            !isConsumptionTax(item)
+          "
+          >{{ item }}
+        </span>
+      </td>
+    </tr>
+  </tbody>
+  <tfoot *ngIf="footer">
+    <tr
+      class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+      <td
+        *ngFor="let foot of footer"
+        class="border-b border-iron-blue-300 p-4"
+        style="height: 100%; text-align: right">
+        {{ foot ? foot.toLocaleString() : '' }}
+      </td>
+    </tr>
+  </tfoot>
+</table>

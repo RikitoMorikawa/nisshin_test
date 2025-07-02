@@ -1,0 +1,9 @@
+<select
+  name="{{ nameAttrValue }}"
+  id="{{ idAttrValue }}"
+  [formControl]="formCtrl"
+  [ngClass]="invalid ? 'invalid' : ''">
+  <option *ngFor="let option of options" [value]="option.value">
+    {{ option.text }}
+  </option>
+</select>

@@ -1,0 +1,39 @@
+<!-- ↓ パンくずリスト（新規） ↓ -->
+<app-breadcrumb-org
+  *ngIf="!liquidationId"
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/liquidation', text: '精算項目一覧' },
+    { text: '精算項目新規登録' }
+  ]">
+</app-breadcrumb-org>
+
+<!-- ↓ タイトル部（新規） ↓ -->
+<h2 class="mt-8 text-xl">精算項目新規登録</h2>
+<div class="flex items-center justify-between mt-6 mb-2">
+  <app-cancel-link-org routerLink="/setting/liquidation"></app-cancel-link-org>
+  <app-last-updater-org *ngIf="updater">
+    登録者：{{ updater ? updater : 'データ取得中...' }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ フォーム ↓ -->
+<app-form-org class="block mt-8 mb-24" [formGroup]="form"></app-form-org>
+
+<!-- ↓ 登録ボタン（新規） ↓ -->
+<div
+  *ngIf="!liquidationId"
+  class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+  <app-button (click)="onClickReset()">クリア</app-button>
+  <app-button
+    btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+    [buttonDisabled]="form.invalid"
+    (click)="onClickSave()">
+    保存
+  </app-button>
+</div>
+
+<!-- ↓ ロード画面 ↓ -->
+<app-loading-container [isLoading]="loading"></app-loading-container>

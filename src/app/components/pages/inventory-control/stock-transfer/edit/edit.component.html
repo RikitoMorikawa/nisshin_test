@@ -1,0 +1,237 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/inventory-control/stock-transfer', text: '在庫移動一覧' },
+    { path: detailPath, text: '在庫移動詳細' },
+    { text: '在庫移動編集' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">在庫移動編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{
+          last_update_user ? last_update_user : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="editForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">
+          {{ stockTransfer.store_name }} 【{{ stockTransfer.product_name }}】
+          移動在庫編集
+        </h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <!--
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [formCtrl]="editForm.controls.name"
+                  [invalid]="
+                    formControlStateManager(editForm.controls.name)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">区分名（255文字以内）</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(editForm.controls.name)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="editForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="editForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="value"
+                  idAttrValue="value"
+                  [formCtrl]="editForm.controls.value"
+                  [invalid]="
+                    formControlStateManager(editForm.controls.value)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">区分値（255文字以内）</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(editForm.controls.value)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="editForm.controls.value.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="editForm.controls.value.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                -->
+
+                <app-text-container
+                  class="w-1/3"
+                  inputType="number"
+                  nameAttrValue="quantity"
+                  idAttrValue="quantity"
+                  [formCtrl]="editForm.controls.quantity"
+                  [invalid]="
+                    formControlStateManager(editForm.controls.quantity)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '商品点数', required: true }
+                    "></ng-container>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(editForm.controls.quantity)"
+                    message>
+                    <ng-container
+                      *ngIf="editForm.controls.quantity.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="editForm.controls.quantity.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="remarks"
+                  idAttrValue="remarks"
+                  [formCtrl]="editForm.controls.remarks"
+                  [invalid]="
+                    formControlStateManager(editForm.controls.remarks)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">備考</span>
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(editForm.controls.remarks)"
+                    message>
+                    <ng-container
+                      *ngIf="editForm.controls.remarks.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-date-term
+                  [formCtrl]="editForm.controls.stock_transfer_date"
+                  nameAttrValue="stock_transfer_date"
+                  idAttrValue="stock-transfer-date"
+                  [invalid]="
+                    formControlStateManager(
+                      editForm.controls.stock_transfer_date
+                    )
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '在庫変動日', required: true }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: editForm.controls.stock_transfer_date }
+                    "
+                    message></ng-container>
+                </app-date-term>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button btnType="button" (click)="handleClickClearButton()"
+          >クリア</app-button
+        >
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="editForm.invalid || formInvalid">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <!--p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p-->
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['beforeFromDate']">
+      {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+    </p>
+  </ng-container>
+</ng-template>

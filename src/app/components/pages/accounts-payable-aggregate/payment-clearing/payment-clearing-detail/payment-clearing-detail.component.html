@@ -1,0 +1,24 @@
+<ul class="">
+  <li class="flex flex-row items-center bg-slate-100">
+    <div class="py-3 px-3 border-l-gray-200 bg-slate-100 w-44">
+      支払区分<span
+        _ngcontent-vao-c201=""
+        class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+        必須
+      </span>
+    </div>
+    <div class="py-3 px-3 border-l-gray-200 bg-slate-100 w-44">金額</div>
+    <div class="py-3 px-3 border-l-gray-200 bg-slate-100 w-44">支払予定額</div>
+    <div class="py-3 px-3 border-l-gray-200 bg-slate-100 w-44">支払日</div>
+    <div class="py-3 px-3 border-l-gray-200 bg-slate-100 min-w-[200px]">
+      備考
+    </div>
+  </li>
+</ul>
+<app-input-pair
+  *ngFor="let group of formArray.controls; let i = index"
+  [formGroup]="group"
+  [paymentDetail]="paymentDetail"
+  [index]="i"
+  (add)="addTagForm()"
+  (remove)="removeTagForm(i)"></app-input-pair>

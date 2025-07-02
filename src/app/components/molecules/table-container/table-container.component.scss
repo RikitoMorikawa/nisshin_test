@@ -1,0 +1,37 @@
+.custom-pagination {
+  //padding-left: 0px !important;
+}
+
+.custom-pagination .page-number,
+.custom-pagination .pagination-first-page,
+.custom-pagination .pagination-previous,
+.custom-pagination .pagination-next,
+.custom-pagination .pagination-last-page {
+  @apply block border border-iron-blue-400 w-6 text-center;
+  -webkit-user-select: none;
+  border: transparent !important;
+  border-radius: 4px !important;
+  cursor: pointer;
+}
+
+.custom-pagination .current,
+.btn-info {
+  // background: #2199e8 !important;
+  background: #3b82f6 !important;
+  color: #ffffff;
+  cursor: default;
+}
+
+.custom-pagination .page-number:hover,
+.custom-pagination .pagination-first-page:hover,
+.custom-pagination .pagination-previous:hover,
+.custom-pagination .pagination-next:hover,
+.custom-pagination .pagination-last-page:hover {
+  background: #ccc !important;
+  border-radius: 4px !important;
+  border: transparent !important;
+}
+
+.custom-pagination .current:hover {
+  background: #2199e8 !important;
+}

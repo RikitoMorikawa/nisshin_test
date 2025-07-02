@@ -1,0 +1,189 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '精算項目一覧' }
+  ]">
+</app-breadcrumb-org>
+
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="searchButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ isOpen ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon
+      class="w-6"
+      [class]="rotateAnimation"
+      icon="arrow-down-s-fill"></app-icon>
+  </app-button>
+</div>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<div
+  class="search width-limit-break bg-white"
+  [ngClass]="isOpen ? 'is-open shadow' : ''">
+  <form class="w-[1280px] mx-auto px-4">
+    <div class="flex gap-6 mb-6">
+      <app-text-clear-container class="w-2/5" [formCtrl]="ctrls.name"
+        >精算項目名</app-text-clear-container
+      >
+      <app-select-clear-container
+        [formCtrl]="ctrls.display_division_id"
+        [options]="options.display_division">
+        表示区分
+      </app-select-clear-container>
+      <app-select-clear-container
+        [formCtrl]="ctrls.liquidation_division_id"
+        [options]="options.liquidation_division">
+        精算区分
+      </app-select-clear-container>
+      <!--
+      <app-text-clear-container class="w-2/5" [formCtrl]="ctrls.product_id"
+        >商品</app-text-clear-container
+      >
+      <app-text-clear-container class="w-2/5" [formCtrl]="ctrls.order_quantity"
+        >発注数量</app-text-clear-container
+      >
+      <app-text-clear-container
+        class="w-2/5"
+        [formCtrl]="ctrls.receiving_quantity"
+        >受入数量</app-text-clear-container
+      >
+      -->
+    </div>
+    <!--
+    <div class="flex gap-6 mb-6">
+      <app-select-clear-container
+        [formCtrl]="ctrls.order_rep_id"
+        [options]="options.order_rep">
+        発注担当者</app-select-clear-container
+      >
+
+      <app-select-clear-container
+        [formCtrl]="ctrls.receiving_rep_id"
+        [options]="options.receiving_rep">
+        受入担当者</app-select-clear-container
+      >
+      <app-select-clear-container
+        [formCtrl]="ctrls.cancel_rep_id"
+        [options]="options.cancel_rep">
+        取消担当者</app-select-clear-container
+      >
+    </div>
+    <div class="flex gap-6 mb-10">
+      <app-date-term-clear-container
+        [dateFromFormCtrl]="ctrls.order_date.controls.from"
+        [dateToFormCtrl]="ctrls.order_date.controls.to"
+        [invalid]="!!ctrls.order_date.errors">
+        <span>発注日</span>
+        <ng-container
+          *ngIf="ctrls.order_date.errors?.['afterToday'] then afterToday"
+          message></ng-container>
+        <ng-container
+          *ngIf="ctrls.order_date.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+      <app-date-term-clear-container
+        [dateFromFormCtrl]="ctrls.receiving_date.controls.from"
+        [dateToFormCtrl]="ctrls.receiving_date.controls.to"
+        [invalid]="!!ctrls.receiving_date.errors">
+        <span>受入日</span>
+        <ng-container
+          *ngIf="ctrls.receiving_date.errors?.['afterToday'] then afterToday"
+          message></ng-container>
+        <ng-container
+          *ngIf="ctrls.receiving_date.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+    </div>
+    <div class="flex gap-6 mb-10">
+      <app-date-term-clear-container
+        [dateFromFormCtrl]="ctrls.created_at.controls.from"
+        [dateToFormCtrl]="ctrls.created_at.controls.to"
+        [invalid]="!!ctrls.created_at.errors">
+        <span>登録日</span>
+        <ng-container
+          *ngIf="ctrls.created_at.errors?.['afterToday'] then afterToday"
+          message></ng-container>
+        <ng-container
+          *ngIf="ctrls.created_at.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+      <app-date-term-clear-container
+        [dateFromFormCtrl]="ctrls.updated_at.controls.from"
+        [dateToFormCtrl]="ctrls.updated_at.controls.to"
+        [invalid]="!!ctrls.updated_at.errors">
+        <span>更新日</span>
+        <ng-container
+          *ngIf="ctrls.updated_at.errors?.['afterToday'] then afterToday"
+          message></ng-container>
+        <ng-container
+          *ngIf="ctrls.updated_at.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+    </div>
+    -->
+    <div class="flex gap-8">
+      <app-button (click)="onClickReset()"> 入力内容クリア </app-button>
+      <app-button
+        *ngIf="form.valid; else disable"
+        btnFillColor="text-white bg-success hover:bg-success-hover"
+        (click)="onClickSubmit()">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>
+
+<ng-template #afterToday>
+  <span class="text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_FROM_BEFORE_TODAY }}
+  </span>
+</ng-template>
+<ng-template #beforeFromDate>
+  <span class="text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </span>
+</ng-template>
+
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-end gap-8 mb-2">
+  <app-new-registration-link-org
+    routerLink="./add"></app-new-registration-link-org>
+  <!--app-bulk-registration-link-org
+    routerLink="./bulk-add"></app-bulk-registration-link-org>
+  <app-export-link-org
+    [apiResponse$]="supplier$"
+    [mappings]="csvMappings"
+    [filename]="filename"
+    (statusChange)="exportEventListener($event)">
+  </app-export-link-org--->
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<!--app-table [eventListener]="subject" (err)="handleError($event)"></app-table-->
+<app-table-with-pagination
+  [params]="tableParams"
+  (pageChange)="eventListener.next($event)"
+  >精算項目一覧</app-table-with-pagination
+>
+
+<!-- ↓ エクスポート中の待機画面 ↓ -->
+<app-loading-container [isLoading]="loading"></app-loading-container>

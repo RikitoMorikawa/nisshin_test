@@ -1,0 +1,235 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="breadcrumbList"></app-breadcrumb-org>
+<main class="mb-8">
+  <!-- ↓ ページタイトル ↓ -->
+  <h1 class="mt-8 text-xl">{{ pageTitle }}</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        {{ authorTitle }}：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="form" (ngSubmit)="handleClickSaveButton()">
+    <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">伝票ヘッダー</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="mt-6 flex flex-row gap-10">
+        <div class="grow">
+          <table class="w-full">
+            <tr class="border border-slate-200">
+              <td class="border bg-slate-100 p-4 min-w-[50px]">
+                <p class="text-xm">返品<br />値引</p>
+              </td>
+              <td class="border bg-slate-100 p-4 min-w-[150px]">発注日</td>
+              <td class="border bg-slate-100 p-4 min-w-[150px]">仕入日</td>
+              <td class="border bg-slate-100 p-4 min-w-[150px]">希望納入日</td>
+              <td class="border bg-slate-100 p-4 min-w-[200px]">仕入先名</td>
+              <td class="border bg-slate-100 p-4 min-w-[160px]">届け先店舗</td>
+              <td class="border bg-slate-100 p-4 min-w-[160px]">発注担当者</td>
+            </tr>
+            <tr
+              *ngIf="accountsPayableAggregate"
+              class="border border-slate-200">
+              <td class="border p-4">
+                <app-checkbox
+                  nameAttrValue="minusflug"
+                  idAttrValue="minusflug"
+                  type="checkbox"
+                  [formCtrl]="checkflg.minusflug"
+                  (change)="check($event)"
+                  style="transform: scale(1.5); margin-left: 0.5em">
+                </app-checkbox>
+              </td>
+              <td class="border p-4">
+                <app-date-clear-container
+                  nameAttrValue="order_date"
+                  idAttrValue="order-date"
+                  [formCtrl]="ctrls.order_date"
+                  [invalid]="formControlStateManager(ctrls.order_date)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '', required: 'true' }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: ctrls.order_date }
+                    "
+                    message></ng-container>
+                </app-date-clear-container>
+              </td>
+              <td class="border p-4">
+                <app-date-clear-container
+                  nameAttrValue="purchase_date"
+                  idAttrValue="purchase-date"
+                  [formCtrl]="ctrls.purchase_date"
+                  [invalid]="formControlStateManager(ctrls.purchase_date)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '', required: 'true' }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: ctrls.purchase_date }
+                    "
+                    message></ng-container>
+                </app-date-clear-container>
+              </td>
+              <td class="border p-4">
+                <app-date-clear-container
+                  nameAttrValue="preferred_delivery_date"
+                  idAttrValue="preferred-delivery-date"
+                  [formCtrl]="ctrls.preferred_delivery_date"
+                  [invalid]="
+                    formControlStateManager(ctrls.preferred_delivery_date)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '', required: 'true' }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: ctrls.preferred_delivery_date }
+                    "
+                    message></ng-container>
+                </app-date-clear-container>
+              </td>
+              <td class="border p-4">
+                {{ accountsPayableAggregate.supplier_name }}
+              </td>
+              <td class="border p-4">
+                <app-select-suggest-container
+                  nameAttrValue="store_id"
+                  idAttrValue="store-id"
+                  placeholder="選択してください"
+                  [formCtrl]="ctrls.store_id"
+                  [suggests]="storeSuggests"
+                  [invalid]="formControlStateManager(ctrls.store_id)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '', required: 'true' }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: ctrls.store_id }
+                    "
+                    message></ng-container>
+                </app-select-suggest-container>
+              </td>
+              <td class="border p-4">
+                <app-select-suggest-container
+                  nameAttrValue="order_employee_id"
+                  idAttrValue="order-employee-id"
+                  placeholder="選択してください"
+                  [formCtrl]="ctrls.order_employee_id"
+                  [suggests]="employeeSuggests"
+                  [invalid]="formControlStateManager(ctrls.order_employee_id)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '', required: 'true' }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: ctrls.order_employee_id }
+                    "
+                    message></ng-container>
+                </app-select-suggest-container>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-8 mt-4">
+      <!-- ↓ スペース調整用の空 div ↓ -->
+      <div></div>
+    </div>
+    <app-purchase-detail-table
+      [purchaseDetailForms]="purchaseDetailForms"
+      [purchaseDetailRemoveForms]="purchaseDetailRemoveForms"
+      [isDiscount]="isDiscount"
+      [total_cost]="tortal_cost"></app-purchase-detail-table>
+    <div class="flex justify-end gap-8 mt-4">
+      <!-- ↓ スペース調整用の空 div ↓ -->
+      <div></div>
+    </div>
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="form.invalid"
+        >保存</app-button
+      >
+      <!--
+      -->
+    </div>
+  </form>
+  <div class="flex justify-end gap-8 mt-4">
+    <!-- ↓ スペース調整用の空 div ↓ -->
+    <div></div>
+  </div>
+</main>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 日付指定エラーメッセージのテンプレート ↓ -->
+<ng-template #dateErrors let-ctrls="ctrls">
+  <ng-container *ngIf="ctrls.errors?.['endingDateIsSmaller']">
+    <p class="mt-1 pl-1 text-sm text-red">
+      {{ errorConst.FORM_ERROR.DATE_SPECIFICATION_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

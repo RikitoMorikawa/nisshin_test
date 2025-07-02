@@ -1,0 +1,81 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '入金一覧' },
+    { text: '入金詳細閲覧' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">入金詳細閲覧</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ listPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath">編集</app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="deposit"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">入金ヘッダー</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <table class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[100px]">入金ID</td>
+            <td class="border bg-slate-100 p-4 min-w-[410px]">請求先</td>
+            <td class="border bg-slate-100 p-4 min-w-[220px]">登録者</td>
+            <td class="border bg-slate-100 p-4 min-w-[470px]">備考</td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border p-4">{{ deposit.id }}</td>
+            <td class="border p-4">{{ deposit.client_name }}</td>
+            <td class="border p-4">
+              {{
+                deposit.employee_created_last_name &&
+                  ' ' &&
+                  deposit.employee_created_first_name
+              }}
+            </td>
+            <td class="border p-4">{{ deposit.remarks_1 }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="mt-6 pt-8 pb-8 px-6 bg-white shadow border border-gray-100">
+    <h2 class="text-lg">入金明細</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <table class="mt-6 w-full shadow">
+      <tr class="border border-slate-200">
+        <td class="border bg-slate-100 p-4">入金区分</td>
+        <td class="border bg-slate-100 p-4">入金額</td>
+        <td class="border bg-slate-100 p-4">入金日</td>
+        <td class="border bg-slate-100 p-4">備考</td>
+      </tr>
+      <tr
+        *ngFor="let depositDt of depositDetail"
+        class="border border-slate-200">
+        <td class="border p-4">
+          {{ getdepositClass(depositDt.deposit_detail_division_code) }}
+        </td>
+        <td class="border p-4 text-right">
+          {{
+            depositDt.deposit_amount
+              ? depositDt.deposit_amount.toLocaleString()
+              : ''
+          }}
+        </td>
+        <td class="border p-4">{{ getDateFormat(depositDt.deposit_date) }}</td>
+        <td class="border p-4">{{ depositDt.remarks_1 }}</td>
+      </tr>
+    </table>
+  </div>
+</main>

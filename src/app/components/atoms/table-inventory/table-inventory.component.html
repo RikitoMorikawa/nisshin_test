@@ -1,0 +1,61 @@
+<table class="whitespace-nowrap border-separate border-spacing-0 w-full">
+  <thead *ngIf="header">
+    <th
+      *ngFor="let item of header"
+      (click)="changeSort(item)"
+      class="sticky top-0 bg-white text-left border-y border-slate-400 p-4 hover:transition-all duration-300"
+      [ngClass]="
+        item ? 'hover:bg-iron-blue-200 cursor-pointer' : 'cursor-auto'
+      ">
+      <div class="flex items-center gap-2">
+        <span>{{ item }}</span>
+        <app-icon
+          class="w-6"
+          *ngIf="item"
+          [icon]="
+            sort.column === item && sort.order === 'desc'
+              ? 'sort-desc'
+              : 'sort-asc'
+          "
+          [ngClass]="
+            sort.column === item ? 'fill-primary' : 'fill-slate-300'
+          "></app-icon>
+      </div>
+    </th>
+  </thead>
+
+  <tbody>
+    <tr
+      *ngFor="let row of data"
+      class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+      <td *ngFor="let item of row" class="border-b border-iron-blue-300 p-4">
+        <ng-container *ngIf="isLinkData(item)">
+          <app-link
+            class="text-blue underline"
+            [linkParameter]="{ path: item.href }"
+            >{{ item.text }}</app-link
+          >
+        </ng-container>
+        <ng-container *ngIf="isImageData(item)">
+          <img style="max-width: 30%; max-height: 30%" [src]="item.src" />
+        </ng-container>
+        <ng-container *ngIf="isInputText(item)">
+          <app-text-clear-container
+            [formCtrl]="ctrls(item)"></app-text-clear-container>
+        </ng-container>
+        <ng-container
+          *ngIf="isTemplateRef(item)"
+          [ngTemplateOutlet]="$any(item)"></ng-container>
+        <span
+          *ngIf="
+            !isLinkData(item) &&
+            !isTemplateRef(item) &&
+            !isImageData(item) &&
+            !isInputText(item)
+          "
+          >{{ item }}</span
+        >
+      </td>
+    </tr>
+  </tbody>
+</table>

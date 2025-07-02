@@ -1,0 +1,105 @@
+<div
+  class="bg-white border-t-4 border-t-primary-light border border-slate-50 rounded-b-lg shadow">
+  <!-- ↓ タイトルと表示数切り替えボタン ↓ -->
+  <div class="flex justify-between items-center px-4 py-2">
+    <app-title>
+      <ng-content></ng-content>
+    </app-title>
+    <app-select class="mr-6" [formCtrl]="select" [options]="options">
+    </app-select>
+  </div>
+
+  <!-- ↓ テーブル ↓ -->
+  <div class="overflow-auto">
+    <app-table-inventory
+      [class.hidden]="loading"
+      [header]="_params.header"
+      [data]="
+        _params.body
+          | paginate
+            : { currentPage: page, itemsPerPage, totalItems: _params.total }
+      "
+      (event)="sort = $event; updatePage(page)">
+    </app-table-inventory>
+    <div class="border-y border-t-slate-400 py-4" [class.hidden]="!loading">
+      <app-spinner class="text-xs"></app-spinner>
+    </div>
+  </div>
+
+  <!-- ↓ ページネーション ↓ -->
+  <pagination-template
+    class="flex items-center justify-between gap-2 px-4 py-10"
+    #p="paginationApi"
+    (pageChange)="updatePage($event)">
+    <p class="w-1/3">
+      {{ _params.total | number }} 件中 {{ counts.start | number }} ～
+      {{ counts.end | number }} 件 表示中
+    </p>
+    <div class="flex items-center gap-2">
+      <!-- ↓ 先頭ページへボタン ↓ -->
+      <app-icon
+        *ngIf="!p.isFirstPage()"
+        class="w-6 cursor-pointer hover:opacity-60"
+        icon="skip-back-line"
+        (click)="p.setCurrent(1)"></app-icon>
+      <app-icon
+        *ngIf="p.isFirstPage()"
+        class="w-6 fill-iron-blue-400"
+        icon="skip-back-line"></app-icon>
+
+      <!-- ↓ 前へボタン ↓ -->
+      <app-icon
+        *ngIf="!p.isFirstPage()"
+        class="w-6 rotate-180 cursor-pointer hover:opacity-60"
+        icon="back-line"
+        (click)="p.previous()"></app-icon>
+      <app-icon
+        *ngIf="p.isFirstPage()"
+        class="w-6 rotate-180 fill-iron-blue-400"
+        icon="back-line"></app-icon>
+
+      <!-- ↓ ページ数表示 ↓ -->
+      <div
+        class="min-w-[1.75rem] rounded text-center cursor-pointer p-1"
+        [ngClass]="
+          p.getCurrent() === page.value
+            ? 'cursor-auto bg-primary text-white'
+            : 'hover:text-slate-400'
+        "
+        *ngFor="let page of p.pages">
+        <span
+          (click)="p.setCurrent(page.value)"
+          *ngIf="p.getCurrent() !== page.value"
+          >{{ page.label }}</span
+        >
+        <span *ngIf="p.getCurrent() === page.value">{{ page.label }}</span>
+      </div>
+
+      <!-- ↓ 後ろへボタン ↓ -->
+      <app-icon
+        *ngIf="!p.isLastPage()"
+        class="w-6 cursor-pointer hover:opacity-60"
+        icon="back-line"
+        (click)="p.next()">
+      </app-icon>
+      <app-icon
+        *ngIf="p.isLastPage()"
+        class="w-6 fill-iron-blue-400"
+        icon="back-line"></app-icon>
+
+      <!-- ↓ 最終ページへボタン ↓ -->
+      <app-icon
+        *ngIf="!p.isLastPage()"
+        class="w-6 cursor-pointer hover:opacity-60"
+        icon="skip-forward-line"
+        (click)="p.setCurrent(p.getLastPage())"></app-icon>
+      <app-icon
+        *ngIf="p.isLastPage()"
+        class="w-6 fill-iron-blue-400"
+        icon="skip-forward-line"></app-icon>
+    </div>
+
+    <!-- ↓ スペース調整用の空div ↓ -->
+    <div class="w-1/3"></div>
+  </pagination-template>
+</div>

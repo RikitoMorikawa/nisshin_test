@@ -1,0 +1,155 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="toggleSearchPanel()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ isOpen ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon class="w-6" [class]="rotateAnimation" icon="arrow-down-s-fill">
+    </app-icon>
+  </app-button>
+</div>
+
+<!-- ↓ フォーム部分 ↓ -->
+<div
+  class="price-ranking-search width-limit-break bg-white"
+  [ngClass]="isOpen ? 'is-open shadow' : ''">
+  <form
+    [formGroup]="searchForm"
+    (submit)="handleClickSearchSubmitButton()"
+    class="w-[1280px] mx-auto px-4">
+    <div class="flex gap-6">
+      <div class="w-1/3">
+        <app-real-time-suggest-container
+          [idCtrl]="sfc.product_id"
+          [nameCtrl]="sfc.product_name"
+          nameAttrValue="product_name"
+          idAttrValue="product-name"
+          [apiInput]="getProductSuggests()"
+          [invalid]="formControlStateManager(sfc.product_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '商品', required: false }
+            ">
+          </ng-container>
+        </app-real-time-suggest-container>
+      </div>
+      <div class="w-1/3">
+        <app-select-container
+          nameAttrValue="store_id"
+          idAttrValue="store-id"
+          [formCtrl]="sfc.store_id"
+          [options]="storeOptions"
+          [invalid]="formControlStateManager(sfc.store_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '店舗', required: false }
+            ">
+          </ng-container>
+        </app-select-container>
+      </div>
+      <div class="w-1/3">
+        <app-select-container
+          nameAttrValue="rank_division_id"
+          idAttrValue="rank-division-id"
+          [formCtrl]="sfc.rank_division_id"
+          [options]="priceRankingDivisionOptions"
+          [invalid]="formControlStateManager(sfc.rank_division_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: 'ランク', required: false }
+            ">
+          </ng-container>
+        </app-select-container>
+      </div>
+    </div>
+    <div class="flex gap-4 mt-6">
+      <div class="w-1/2">
+        <app-date-term-clear-container
+          nameAttrValue="created_at"
+          idAttrValue="created-at"
+          toNameAttrValue="created_at_to"
+          toIdAttrValue="created-at-to"
+          [dateFromFormCtrl]="sfc.created_at.controls.from"
+          [dateToFormCtrl]="sfc.created_at.controls.to"
+          [invalid]="!!sfc.created_at.errors">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '登録日', required: false }
+            "></ng-container>
+          <ng-container
+            *ngIf="sfc.created_at.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+      </div>
+      <div class="w-1/2">
+        <app-date-term-clear-container
+          nameAttrValue="update_at"
+          idAttrValue="update-at"
+          toNameAttrValue="update_at_to"
+          toIdAttrValue="update-at-to"
+          [dateFromFormCtrl]="sfc.update_at.controls.from"
+          [dateToFormCtrl]="sfc.update_at.controls.to"
+          [invalid]="!!sfc.update_at.errors">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '更新日', required: false }
+            "></ng-container>
+          <ng-container
+            *ngIf="sfc.update_at.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+      </div>
+    </div>
+    <div class="flex gap-8 mt-10">
+      <app-button btnType="button" (click)="handleClickSearchClearButton()">
+        入力内容クリア
+      </app-button>
+      <app-button
+        *ngIf="searchForm.valid; else disable"
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>
+
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- 日付エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

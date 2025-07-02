@@ -1,0 +1,28 @@
+<ng-container [ngSwitch]="level">
+  <h1 *ngSwitchCase="'h1'" class="text-3xl font-bold">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h1>
+  <h2 *ngSwitchCase="'h2'" class="text-2xl font-bold">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h2>
+  <h3 *ngSwitchCase="'h3'" class="text-xl font-bold">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h3>
+  <h4 *ngSwitchCase="'h4'" class="text-base font-bold">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h4>
+  <h5 *ngSwitchCase="'h5'" class="text-sm font-bold my-4">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h5>
+  <h6 *ngSwitchCase="'h6'" class="text-xs font-bold my-4">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h6>
+  <!-- デフォルトのスタイル -->
+  <h4 *ngSwitchDefault class="text-base font-bold">
+    <ng-container *ngTemplateOutlet="content"></ng-container>
+  </h4>
+</ng-container>
+
+<ng-template #content>
+  <ng-content></ng-content>
+</ng-template>

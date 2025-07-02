@@ -1,0 +1,66 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="searchButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ isOpen ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon class="w-6" [class]="rotateAnimation" icon="arrow-down-s-fill">
+    </app-icon>
+  </app-button>
+</div>
+
+<!-- ↓ フォーム部分 ↓ -->
+<div
+  class="search width-limit-break bg-white"
+  [ngClass]="isOpen ? 'is-open shadow' : ''">
+  <form class="w-[1280px] mx-auto px-4">
+    <div class="flex gap-6 mt-6">
+      <app-date-term-clear-container
+        class="w-3/6"
+        [dateFromFormCtrl]="ctrls.purchase_date.controls.from"
+        [dateToFormCtrl]="ctrls.purchase_date.controls.to"
+        [invalid]="!!ctrls.purchase_date.errors">
+        仕入日
+        <ng-container
+          *ngIf="ctrls.purchase_date.errors?.['beforeFromDate'] then  beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+    </div>
+    <!-- ↓ 実行ボタン ↓ -->
+    <div class="flex gap-8 mt-10">
+      <app-button (click)="onClickReset()">入力内容クリア</app-button>
+      <app-button
+        btnFillColor="text-white bg-success hover:bg-success-hover"
+        [buttonDisabled]="searchForm.invalid"
+        (click)="onClickSubmit()">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['minlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

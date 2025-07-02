@@ -1,0 +1,8 @@
+<label class="ml-1 mb-1 flex items-center gap-2" [for]="for">
+  <ng-content></ng-content>
+  <span
+    *ngIf="required"
+    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+    必須
+  </span>
+</label>

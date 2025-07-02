@@ -1,0 +1,7 @@
+<app-template-bulk-add
+  [service]="apiService"
+  [descriptions]="descriptions"
+  (statusChange)="listenStateChange($event)"
+  [fileNamePrefix]="fileNamePrefix">
+  <ng-container pageTitle>得意先現場一括登録</ng-container>
+</app-template-bulk-add>

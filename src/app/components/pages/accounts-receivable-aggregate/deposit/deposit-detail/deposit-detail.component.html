@@ -1,0 +1,27 @@
+<ul class="">
+  <li class="flex flex-row items-center bg-slate-100">
+    <div
+      class="py-3 px-3 border-l-gray-200 bg-slate-100 min-w-[220px] bg-white">
+      入金区分
+    </div>
+    <div
+      class="py-3 px-3 border-l-gray-200 bg-slate-100 min-w-[220px] bg-white">
+      金額
+    </div>
+    <div
+      class="py-3 px-3 border-l-gray-200 bg-slate-100 min-w-[220px] bg-white">
+      入金日
+    </div>
+    <div
+      class="py-3 px-3 border-l-gray-200 bg-slate-100 min-w-[520px] bg-white">
+      備考
+    </div>
+  </li>
+</ul>
+<app-input-pair
+  *ngFor="let group of formArray.controls; let i = index"
+  [formGroup]="group"
+  [depositDetail]="depositDetail"
+  [index]="i"
+  (add)="addTagForm()"
+  (remove)="removeTagForm(i)"></app-input-pair>

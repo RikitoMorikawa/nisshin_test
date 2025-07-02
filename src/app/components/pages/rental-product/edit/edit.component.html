@@ -1,0 +1,604 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: 'レンタル商品一覧' },
+    { path: detailPagePath, text: 'レンタル商品詳細' },
+    { text: 'レンタル商品編集' }
+  ]"></app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">レンタル商品編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ lastUpdater ? lastUpdater : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+
+  <form [formGroup]="form" (ngSubmit)="handleClickSaveButton()">
+    <div class="mt-8 pt-5 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">基本情報入力</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <!-- 商品名 -->
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/2">
+          <app-text-container
+            nameAttrValue="name"
+            idAttrValue="name"
+            [formCtrl]="fc.name"
+            [invalid]="formControlStateManager(fc.name)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '商品名', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.name }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/2">
+          <app-text-container
+            nameAttrValue="name_kana"
+            idAttrValue="name_kana"
+            [formCtrl]="fc.name_kana"
+            [invalid]="formControlStateManager(fc.name_kana)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '商品名カナ', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.name_kana }"
+              message>
+            </ng-container>
+          </app-text-container>
+          <ng-container *ngIf="fc.name_kana.errors?.['pattern']" message>
+            <p class="mt-1 pl-1 text-sm text-red">
+              {{
+                errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION
+              }}
+            </p>
+          </ng-container>
+        </div>
+      </div>
+      <!-- 規格 バーコードなど -->
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/4">
+          <app-select-suggest-container
+            nameAttrValue="store_id"
+            idAttrValue="store-id"
+            [formCtrl]="fc.store_id"
+            [suggests]="storeSuggests"
+            [invalid]="formControlStateManager(fc.store_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '店舗', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.store_id }"
+              message>
+            </ng-container>
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="product_barcode"
+            idAttrValue="product-barcode"
+            [formCtrl]="fc.product_barcode"
+            [invalid]="formControlStateManager(fc.product_barcode)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '商品識別用バーコード', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.product_barcode }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="barcode"
+            idAttrValue="barcode"
+            [formCtrl]="fc.barcode"
+            [invalid]="formControlStateManager(fc.barcode)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'バーコード', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.barcode }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="standard"
+            idAttrValue="standard"
+            [formCtrl]="fc.standard"
+            [invalid]="formControlStateManager(fc.standard)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '規格', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.standard }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2 pt-5 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg pb-2">
+        価格情報入力
+        <span
+          class="ml-2 px-3 py-1 text-sm items-center text-white bg-warning-dark rounded-full"
+          >全て必須項目です</span
+        >
+      </h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="sales_tax_division_id"
+            idAttrValue="sales-tax-division-id"
+            [options]="salesTaxDivisionOptions"
+            [formCtrl]="fc.sales_tax_division_id"
+            [invalid]="formControlStateManager(fc.sales_tax_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '消費税区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.sales_tax_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="sales_fraction_division_id"
+            idAttrValue="sales-fraction-division-id"
+            [options]="salesFractionDivisionOptions"
+            [formCtrl]="fc.sales_fraction_division_id"
+            [invalid]="formControlStateManager(fc.sales_fraction_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '消費税端数区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.sales_fraction_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="discount_division_id"
+            idAttrValue="discount-division-id"
+            [options]="discountDivisionOptions"
+            [formCtrl]="fc.discount_division_id"
+            [invalid]="formControlStateManager(fc.discount_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '値引区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.discount_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="point_division_id"
+            idAttrValue="point-division-id"
+            [options]="pointDivisionOptions"
+            [formCtrl]="fc.point_division_id"
+            [invalid]="formControlStateManager(fc.point_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'ポイント区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.point_division_id }"
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+      </div>
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="cost_price"
+            idAttrValue="cost-price"
+            [formCtrl]="fc.cost_price"
+            [invalid]="formControlStateManager(fc.cost_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '原価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.cost_price }"
+              message>
+            </ng-container>
+            <ng-container *ngIf="fc.cost_price.errors?.['pattern']" message>
+              <p class="mt-1 pl-1 text-sm text-red">
+                {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+              </p>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="gross_profit_rate"
+            idAttrValue="gross-profit-rate"
+            [formCtrl]="fc.gross_profit_rate"
+            [invalid]="formControlStateManager(fc.gross_profit_rate)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '粗利率', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.gross_profit_rate }"
+              message>
+            </ng-container>
+            <ng-container
+              *ngIf="fc.gross_profit_rate.errors?.['pattern']"
+              message>
+              <p class="mt-1 pl-1 text-sm text-red">
+                {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+              </p>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="selling_price"
+            idAttrValue="selling-price"
+            [formCtrl]="fc.selling_price"
+            [invalid]="formControlStateManager(fc.selling_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '売価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.selling_price }"
+              message>
+            </ng-container>
+            <ng-container *ngIf="fc.selling_price.errors?.['pattern']" message>
+              <p class="mt-1 pl-1 text-sm text-red">
+                {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+              </p>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            nameAttrValue="delivery_charge"
+            idAttrValue="delivery-charge"
+            [formCtrl]="fc.delivery_charge"
+            [invalid]="formControlStateManager(fc.delivery_charge)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '配送料', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.delivery_charge }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+      <!-- 計算・クリアボタン、エラーメッセージ -->
+      <div class="flex flex-row gap-6 mt-4">
+        <app-button btnType="button" (click)="handleClickClearValueButton()">
+          値をクリア
+        </app-button>
+        <app-button
+          btnType="button"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          btnLineHoverColor="hover:border-success-hover"
+          (click)="handleClickCalcButton()"
+          [buttonDisabled]="notAbleToCalcMessage !== null">
+          原価を計算
+        </app-button>
+      </div>
+      <div *ngIf="notAbleToCalcMessage !== null">
+        <p class="mt-4 text-rose-500">{{ notAbleToCalcMessage }}</p>
+      </div>
+    </div>
+    <div class="mt-2 pt-5 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg pb-2">
+        ステータス・区分情報入力
+        <span
+          class="ml-2 px-3 py-1 text-sm items-center text-white bg-warning-dark rounded-full"
+          >全て必須項目です</span
+        >
+      </h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="status_division_id"
+            idAttrValue="status-division-id"
+            [options]="statusDivisionOptions"
+            [formCtrl]="fc.status_division_id"
+            [invalid]="formControlStateManager(fc.status_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'ステータス区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { fc: fc.status_division_id }"
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="product_division_id"
+            idAttrValue="product-division-id"
+            [options]="productDivisionOptions"
+            [formCtrl]="fc.product_division_id"
+            [invalid]="formControlStateManager(fc.product_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '商品区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.product_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="data_permission_division_id"
+            idAttrValue="data-permission-division-id"
+            [options]="dataPermissionDivisionOptions"
+            [formCtrl]="fc.data_permission_division_id"
+            [invalid]="formControlStateManager(fc.data_permission_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '公開区分', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.data_permission_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="delivery_charge_flag"
+            idAttrValue="delivery-charge-flag"
+            [options]="deliveryChargeFlagOptions"
+            [formCtrl]="fc.delivery_charge_flag"
+            [invalid]="formControlStateManager(fc.delivery_charge_flag)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '配送料金設定', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { fc: fc.delivery_charge_flag }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+      </div>
+    </div>
+    <div
+      class="mt-2 mb-24 pt-5 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg pb-2">
+        備考などその他の情報入力
+        <span
+          class="ml-2 px-3 py-1 text-sm items-center bg-slate-200 rounded-full"
+          >全て任意項目です</span
+        >
+      </h2>
+      <hr class="border-t-slate-200 border-t-4" />
+      <div class="flex mt-6">
+        <app-file-with-preview
+          class="w-1/4"
+          [fileCtrl]="fc.image"
+          [pathCtrl]="fc.image_path">
+          <p class="text-sm">※ 画像のファイルサイズは最大3Mバイト</p>
+        </app-file-with-preview>
+        <div class="grow flex flex-col gap-4">
+          <app-textarea [formCtrl]="fc.remarks_1" [rows]="2"
+            >備考1</app-textarea
+          >
+          <app-textarea [formCtrl]="fc.remarks_2" [rows]="2"
+            >備考2</app-textarea
+          >
+          <app-textarea [formCtrl]="fc.remarks_3" [rows]="2"
+            >備考3（レジ備考）</app-textarea
+          >
+          <app-textarea [formCtrl]="fc.remarks_4" [rows]="2"
+            >備考4</app-textarea
+          >
+          <div class="flex gap-6">
+            <div class="w-1/3">
+              <app-select-suggest-container
+                nameAttrValue="large_category_id"
+                idAttrValue="large-category-id"
+                [formCtrl]="fc.large_category_id"
+                [suggests]="largeCategorySuggests"
+                [invalid]="formControlStateManager(fc.large_category_id)"
+                [isAtBottom]="true">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '大分類', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: fc.large_category_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-suggest-container>
+            </div>
+            <div class="w-1/3">
+              <app-select-suggest-container
+                nameAttrValue="medium_category_id"
+                idAttrValue="medium-category-id"
+                [formCtrl]="fc.medium_category_id"
+                [suggests]="mediumCategorySuggests"
+                [invalid]="formControlStateManager(fc.medium_category_id)"
+                [isAtBottom]="true">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '中分類', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: fc.medium_category_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-suggest-container>
+            </div>
+            <div class="w-1/3">
+              <app-select-suggest-container
+                nameAttrValue="small_category_id"
+                idAttrValue="small-category-id"
+                [formCtrl]="fc.small_category_id"
+                [suggests]="smallCategorySuggests"
+                [invalid]="formControlStateManager(fc.small_category_id)"
+                [isAtBottom]="true">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '小分類', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: fc.small_category_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-suggest-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 保存ボタン -->
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button btnType="button" (click)="handleClickClearButton()"
+        >クリア</app-button
+      >
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="form.invalid || form.pristine"
+        >保存</app-button
+      >
+    </div>
+  </form>
+</main>
+<!-- データ取得中に表示するテンプレート -->
+<ng-template #initializing>
+  <p class="text-3xl text-center text-slate-500 mt-6">データ取得中...</p>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ 必須エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-fc="fc">
+  <ng-container *ngIf="formControlStateManager(fc)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="fc.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="fc.errors?.['maxLength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+  </ng-container>
+</ng-template>

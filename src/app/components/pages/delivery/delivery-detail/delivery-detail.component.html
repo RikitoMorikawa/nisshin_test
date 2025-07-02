@@ -1,0 +1,148 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '配送一覧' },
+    { text: '配送詳細' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">配送詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ listPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPagePath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ lastUpdaterName ? lastUpdaterName : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading && delivery"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{ getSalesTypeName(delivery.sales_type_id) }}配送詳細
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">配送ID</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.id }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">お客様名</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.name }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">配送区分</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.division_delivery_type_value }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">配送日時</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ dateTimeFormatter(delivery.delivery_specified_time) }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">配送先</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.shipping_address }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">
+              連絡先電話番号
+            </div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{
+                delivery.additional_tel ? delivery.additional_tel : delivery.tel
+              }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">備考1</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.remarks_1 }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">備考2</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ delivery.remarks_2 }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">登録日時</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ dateTimeFormatter(delivery.created_at) }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">登録者</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{
+                delivery.employee_created_last_name +
+                  ' ' +
+                  delivery.employee_created_first_name
+              }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">更新日時</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{ dateTimeFormatter(delivery.updated_at) }}
+            </div>
+          </li>
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200 bg-slate-100">
+            <div class="py-3 px-3 bg-slate-100 min-w-[300px]">更新者</div>
+            <div
+              class="py-3 px-3 border-l border-l-gray-200 min-h-[48px] bg-white grow">
+              {{
+                delivery.employee_updated_last_name +
+                  ' ' +
+                  delivery.employee_updated_first_name
+              }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

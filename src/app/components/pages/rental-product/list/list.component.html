@@ -1,0 +1,36 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: 'レンタル商品一覧' }]"></app-breadcrumb-org>
+<div class="mt-6 mb-12">
+  <button
+    routerLink="/rental-slip"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    レンタル受付票一覧
+  </button>
+  <button
+    routerLink="/rental-slip/rental-product"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    レンタル商品一覧
+  </button>
+</div>
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)"></app-search>
+<main>
+  <!-- ↓ ボタン類 ↓ -->
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/rental-slip/rental-product/add"></app-new-registration-link-org>
+    </div>
+  </div>
+  <!-- ↓ テーブル ↓ -->
+  <div>
+    <app-table
+      [eventListener]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

@@ -1,0 +1,9 @@
+<div class="mt-8 p-8 pb-12 bg-white shadow border border-gray-300">
+  <h2 class="text-lg">
+    <!-- ↓ コンテンツ投影 ↓ -->
+    <ng-content select="[formTitle]"></ng-content>
+  </h2>
+  <hr class="block w-full mb-6 border-t-primary-light-hover border-t-4" />
+  <!-- ↓ コンテンツ投影 ↓ -->
+  <ng-content select="[formContent]"></ng-content>
+</div>

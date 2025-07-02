@@ -1,0 +1,28 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/sales', text: '売上伝票一覧' },
+    { path: '../', text: '売上伝票詳細' },
+    { text: '売上明細一覧' }
+  ]">
+</app-breadcrumb-org>
+
+<!-- ↓ 各種ボタン ↓ -->
+<h2 class="mt-8 text-xl">伝票番号（{{ sales_slip_cd }}）明細一覧</h2>
+<div class="flex justify-between mt-4">
+  <app-back-to-link-org path="../">伝票詳細へ戻る</app-back-to-link-org>
+  <app-export-link-org
+    [apiResponse$]="export$"
+    [mappings]="csvMappings"
+    [fileNamePrefix]="fileNamePrefix"
+    (statusChange)="onExportStatusChange($event)">
+  </app-export-link-org>
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<app-table-with-pagination
+  class="app-table block mt-2"
+  [params]="tableParams"
+  (pageChange)="pages = $event">
+  売上明細一覧
+</app-table-with-pagination>

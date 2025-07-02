@@ -1,0 +1,83 @@
+<!-- ↓ 一覧画面のテンプレート ↓ -->
+<app-template-list
+  [tableParams]="tableParams"
+  [formCtrl]="form"
+  [export$]="export$"
+  (paramsChange)="updateTable($event)"
+  (exportStatusChange)="onExportStatusChange($event)"
+  [fileNamePrefix]="fileNamePrefix">
+  >
+  <!-- ↓ 投影するテーブルのタイトル ↓ -->
+  <ng-container tableTitle>得意先現場一覧</ng-container>
+
+  <!-- ↓ 投影する絞り込みフォーム ↓ -->
+  <ng-container search>
+    <div class="flex gap-6">
+      <app-input
+        nameAttrValue="field_id"
+        idAttrValue="field-id"
+        class="w-2/12"
+        [formCtrl]="fc.id"
+        [useClear]="true">
+        現場ID
+      </app-input>
+      <app-real-time-suggest-container
+        class="w-5/12"
+        [idCtrl]="fc.id"
+        [nameCtrl]="fc.name"
+        nameAttrValue="field_name"
+        idAttrValue="field-name"
+        [apiInput]="getWorkingFieldSuggests()">
+        現場名
+      </app-real-time-suggest-container>
+      <app-input
+        nameAttrValue="client_id"
+        idAttrValue="client-id"
+        class="w-2/12"
+        [formCtrl]="fc.client_id"
+        [useClear]="true">
+        得意先ID
+      </app-input>
+      <app-real-time-suggest-container
+        class="w-5/12"
+        [idCtrl]="fc.client_id"
+        [nameCtrl]="fc.client_name"
+        nameAttrValue="client_name"
+        idAttrValue="client-name"
+        [apiInput]="getClientSuggests()">
+        得意先名
+      </app-real-time-suggest-container>
+    </div>
+    <div class="flex gap-6 mt-6">
+      <app-date-term-clear-container
+        class="w-1/2"
+        [dateFromFormCtrl]="fc.created_at.controls.from"
+        [dateToFormCtrl]="fc.created_at.controls.to"
+        [invalid]="!!fc.created_at.errors">
+        登録日
+        <ng-container
+          *ngIf="fc.created_at.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+      <app-date-term-clear-container
+        class="w-1/2"
+        [dateFromFormCtrl]="fc.updated_at.controls.from"
+        [dateToFormCtrl]="fc.updated_at.controls.to"
+        [invalid]="!!fc.updated_at.errors">
+        更新日
+        <ng-container
+          *ngIf="fc.updated_at.errors?.['beforeFromDate'] then beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+    </div>
+  </ng-container>
+</app-template-list>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}a
+  </p>
+</ng-template>

@@ -1,0 +1,30 @@
+<!-- パン屑 -->
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '会員一覧' }]"></app-breadcrumb-org>
+<main>
+  <!-- 検索 -->
+  <div>
+    <app-member-search
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+    </app-member-search>
+  </div>
+  <!-- ボタン -->
+  <div class="flex items-center justify-end gap-8 my-2">
+    <app-new-registration-link-org path="add"></app-new-registration-link-org>
+    <app-bulk-registration-link-org
+      path="bulk-add"></app-bulk-registration-link-org>
+    <app-export-link-org
+      [apiResponse$]="export$"
+      [mappings]="csvMappings"
+      [fileNamePrefix]="fileNamePrefix"
+      (statusChange)="onExportStatusChange($event)">
+    </app-export-link-org>
+  </div>
+  <!-- テーブル -->
+  <div>
+    <app-member-table
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-member-table>
+  </div>
+</main>

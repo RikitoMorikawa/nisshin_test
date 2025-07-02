@@ -1,0 +1,96 @@
+<div class="mt-8 mb-4">
+  <!-- 絞り込み開閉ボタン -->
+  <app-button (click)="handleClickSearchButton()" btnType="button">
+    <span class="w-6">
+      <app-icon icon="filter-2-line"></app-icon>
+    </span>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <span [class]="rotateAnimation" class="inline-block w-6">
+      <app-icon icon="arrow-down-s-fill"></app-icon>
+    </span>
+  </app-button>
+  <div
+    [class.is-open]="hasPanelOpened"
+    [class.shadow]="hasPanelOpened"
+    id="member-search-panel"
+    class="search-org-panel bg-white border border-slate-100">
+    <!-- 絞り込みフォーム -->
+    <form [formGroup]="formGroup" (ngSubmit)="handleClickSubmitButton()">
+      <div class="flex flex-row gap-4 grow">
+        <!-- 会員番号 -->
+        <app-text-clear-container
+          class="grow w-1/3"
+          [formCtrl]="ctrls.member_cd"
+          idAttrValue="member-cd"
+          nameAttrValue="member_cd"
+          labelSize="sm">
+          <span forAttrValue="member-cd">会員番号</span>
+        </app-text-clear-container>
+        <!-- 会員 姓 -->
+        <app-text-clear-container
+          class="grow w-1/3"
+          [formCtrl]="ctrls.last_name"
+          idAttrValue="last-name"
+          nameAttrValue="last_name"
+          labelSize="sm">
+          <span forAttrValue="last-name">会員姓</span>
+        </app-text-clear-container>
+        <!-- 会員ステータス区分 -->
+        <app-select-clear-container
+          class="grow w-1/3"
+          [formCtrl]="ctrls.status_division_id"
+          idAttrValue="status-division-id"
+          nameAttrValue="status_division_id"
+          [options]="statusIdOptions"
+          labelSize="sm">
+          <span forAttrValue="status-division-id">会員ステータス区分</span>
+        </app-select-clear-container>
+      </div>
+      <div class="flex flex-row gap-4 grow mt-6">
+        <!-- メールアドレス -->
+        <!-- B2C除外対応
+          <app-text-clear-container
+            class="grow w-1/3"
+            [formCtrl]="ctrls.mail"
+            idAttrValue="mail"
+            nameAttrValue="mail"
+            labelSize="sm">
+            <span forAttrValue="mail">メールアドレス</span>
+          </app-text-clear-container>
+        -->
+        <!-- 電話番号 -->
+        <app-text-clear-container
+          class="grow w-1/3"
+          [formCtrl]="ctrls.tel"
+          idAttrValue="tel"
+          nameAttrValue="tel"
+          labelSize="sm">
+          <span forAttrValue="tel">電話番号</span>
+        </app-text-clear-container>
+        <!-- セルサイズ調整用スペーサー -->
+        <div class="w-1/3"></div>
+      </div>
+      <!-- 絞り込みクリア・実行ボタン -->
+      <div class="mt-10">
+        <app-button class="mr-4" (click)="handleClickClearButton()">
+          入力内容クリア
+        </app-button>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="formGroup.invalid || formGroup.pristine">
+          絞り込み実行
+        </app-button>
+      </div>
+      <p class="mt-2 text-sm text-red">
+        ※
+        入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+      </p>
+    </form>
+  </div>
+</div>

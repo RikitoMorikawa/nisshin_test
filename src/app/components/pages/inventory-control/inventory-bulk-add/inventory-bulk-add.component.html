@@ -1,0 +1,55 @@
+<!-- ↓ タイトル ↓ -->
+<h2 class="mt-8 text-xl">棚卸CSVファイルアップロード</h2>
+<!-- ↓ 各種ボタンと更新者 ↓ -->
+<div class="flex items-center justify-between mt-6 mb-2">
+  <div (click)="handleClickCancel()" class="cursor-pointer">
+    <app-icon-container
+      icon="close-line"
+      appendClassForIcon="fill-danger group-hover:fill-danger-hover">
+      <p class="text-gray-900 group-hover:text-danger-hover">キャンセル</p>
+    </app-icon-container>
+  </div>
+</div>
+<hr class="width-limit-break border-t border-gray-400" />
+<!-- ↓ ボディ部 ↓ -->
+<div class="mt-8 mb-28 py-8 px-6 bg-white shadow border border-gray-300">
+  <p class="text-lg">CSVファイルのヘッダーと値</p>
+
+  <!-- ↓ CSVファイルの説明 ↓ -->
+  <table class="mt-4 w-full shadow">
+    <tr *ngFor="let item of descriptions" class="border border-slate-200">
+      <td class="p-4 w-1/4 bg-slate-100">
+        <div class="flex items-center">
+          <p>{{ item.title }}</p>
+          <span
+            *ngIf="item.required"
+            class="px-3 py-0.5 ml-2 shrink-0 text-xs text-white bg-warning-dark rounded-full">
+            必須
+          </span>
+        </div>
+      </td>
+      <td class="p-4">{{ item.description }}</td>
+    </tr>
+  </table>
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-between mt-8">
+    <div class="flex items-center">
+      <app-file [formCtrl]="ctrl" accept="text/csv"></app-file>
+      <ng-container *ngIf="ctrl.value">
+        <p class="ml-4">{{ filename }}</p>
+        <app-icon
+          class="w-6 cursor-pointer ml-2 fill-red-500"
+          icon="delete-bin-line"
+          (click)="ctrl.reset()">
+        </app-icon>
+      </ng-container>
+    </div>
+
+    <app-button
+      btnFillColor="bg-success hover:bg-success-hover border-success text-white"
+      [buttonDisabled]="ctrl.invalid"
+      (click)="onClickUpload()">
+      アップロード実行
+    </app-button>
+  </div>
+</div>

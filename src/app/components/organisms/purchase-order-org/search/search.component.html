@@ -1,0 +1,113 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="panelOpenButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon
+      class="w-6"
+      [class]="rotateAnimation"
+      icon="arrow-down-s-fill"></app-icon>
+  </app-button>
+</div>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<div class="mb-6">
+  <div
+    class="purchase-order-search width-limit-break bg-white"
+    [ngClass]="hasPanelOpened ? 'is-open shadow' : ''">
+    <form
+      class="w-[1280px] mx-auto px-4"
+      (ngSubmit)="handleClickSubmitButton()">
+      <div class="flex gap-6 mb-6">
+        <app-text-clear-container class="w-1/5" [formCtrl]="ctrls.id"
+          >発注書No</app-text-clear-container
+        >
+        <div class="w-2/5">
+          <app-select-suggest-container
+            nameAttrValue="order_employee_id"
+            idAttrValue="order-employee-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.order_employee_id"
+            [suggests]="employeeSuggests"
+            [invalid]="invalid(ctrls.order_employee_id)">
+            発注担当者
+          </app-select-suggest-container>
+        </div>
+        <div class="w-2/5">
+          <app-select-suggest-container
+            nameAttrValue="supplier_id"
+            idAttrValue="supplier-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.supplier_id"
+            [suggests]="supplierSuggests"
+            [invalid]="invalid(ctrls.supplier_id)">
+            仕入先
+          </app-select-suggest-container>
+        </div>
+      </div>
+      <div class="flex gap-6 mb-6">
+        <app-date-term-clear-container
+          [dateFromFormCtrl]="ctrls.order_date.controls.from"
+          [dateToFormCtrl]="ctrls.order_date.controls.to"
+          [invalid]="!!ctrls.order_date.errors">
+          <span>発注日</span>
+          <ng-container
+            *ngIf="ctrls.order_date.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+        <app-date-term-clear-container
+          [dateFromFormCtrl]="ctrls.preferred_delivery_date.controls.from"
+          [dateToFormCtrl]="ctrls.preferred_delivery_date.controls.to"
+          [invalid]="!!ctrls.preferred_delivery_date.errors">
+          <span>希望納入日</span>
+          <ng-container
+            *ngIf="ctrls.preferred_delivery_date.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+        <app-select-clear-container
+          class="grow"
+          nameAttrValue="purchase_order_status_division_id"
+          idAttrValue="purchase-order-status-division-id"
+          [formCtrl]="ctrls.purchase_order_status_division_id"
+          [options]="statusOptions"
+          [invalid]="invalid(ctrls.purchase_order_status_division_id)">
+          <span>ステータス</span>
+        </app-select-clear-container>
+      </div>
+      <div class="flex gap-8 mt-10">
+        <app-button (click)="handleClickClearButton()">
+          入力内容クリア
+        </app-button>
+        <app-button
+          *ngIf="form.valid; else disable"
+          (click)="handleClickSubmitButton()"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          btnLineHoverColor="hover:border-success-hover">
+          絞り込み実行
+        </app-button>
+      </div>
+      <p class="mt-2 text-sm text-red">
+        ※
+        入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+      </p>
+    </form>
+  </div>
+</div>
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

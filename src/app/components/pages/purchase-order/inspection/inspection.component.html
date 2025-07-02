@@ -1,0 +1,630 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '発注書一覧' },
+    { path: detailPagePath, text: '発注書詳細' },
+    { text: '発注検品' }
+  ]">
+</app-breadcrumb-org>
+
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">発注検品</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <app-last-updater-org>
+      最終更新者：{{ updaterFullName }}
+    </app-last-updater-org>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading && purchaseOrder"
+    class="border border-slate-300 bg-white p-4 mt-6">
+    <div class="relative">
+      <h1 class="absolute top-0 right-[600px] text-2xl">検品</h1>
+      <div class="absolute left-0 top-[6px]">
+        <span class="mr-4">発注No：{{ purchaseOrder.id }}</span>
+        <span
+          >発注日：{{ dateFormatter(purchaseOrder.order_date) }}（希望納入日：{{
+            dateFormatter(purchaseOrder.preferred_delivery_date)
+          }}）</span
+        >
+      </div>
+      <div class="absolute right-0 top-[6px]">
+        <span>ステータス：{{ purchaseOrder.purchase_order_status_value }}</span>
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-2 mt-[32px]">
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <p>
+          <span class="mr-6">注文先</span
+          ><span>{{ purchaseOrder.supplier_id }}</span>
+        </p>
+        <p>{{ purchaseOrder.supplier_name }}</p>
+        <p>〒{{ purchaseOrder.supplier_postal_code }}</p>
+        <p>
+          {{ purchaseOrder.supplier_province
+          }}{{ purchaseOrder.supplier_locality
+          }}{{ purchaseOrder.supplier_street_address }}
+        </p>
+        <p>
+          {{
+            purchaseOrder.supplier_other_address
+              ? purchaseOrder.supplier_other_address
+              : '---'
+          }}
+        </p>
+        <p>
+          <span class="mr-6">TEL：{{ purchaseOrder.supplier_tel }}</span
+          ><span>FAX：{{ purchaseOrder.supplier_fax }}</span>
+        </p>
+      </div>
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <div class="flex flex-row gap-6">
+          <div>
+            <p>発注者</p>
+            <p>{{ basicInformation.name }}</p>
+          </div>
+          <div>
+            <p>担当者</p>
+            <p>
+              {{
+                purchaseOrder.employee_order_last_name +
+                  ' ' +
+                  purchaseOrder.employee_order_first_name
+              }}
+            </p>
+          </div>
+        </div>
+        <p>〒{{ basicInformation.postal_code }}</p>
+        <p>
+          {{
+            basicInformation.province +
+              basicInformation.locality +
+              basicInformation.street_address
+          }}
+        </p>
+        <p>---</p>
+        <p>
+          <span class="mr-6">TEL：{{ basicInformation.tel }}</span
+          ><span>FAX：{{ basicInformation.fax }}</span>
+        </p>
+      </div>
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <div class="flex flex-row gap-6">
+          <div>
+            <p>届け先</p>
+            <p>{{ basicInformation.name }} {{ purchaseOrder.store_name }}</p>
+          </div>
+        </div>
+        <p>〒{{ purchaseOrder.store_postal_code }}</p>
+        <p>
+          {{ purchaseOrder.store_province }}{{ purchaseOrder.store_locality
+          }}{{ purchaseOrder.store_street_address }}
+        </p>
+        <p>
+          {{
+            purchaseOrder.store_other_address
+              ? purchaseOrder.store_other_address
+              : '---'
+          }}
+        </p>
+        <p>
+          <span class="mr-6">TEL：{{ purchaseOrder.store_tel }}</span
+          ><span>FAX：{{ purchaseOrder.store_fax }}</span>
+        </p>
+      </div>
+    </div>
+    <ng-container *ngIf="purchaseOrder.remarks">
+      <div class="border border-slate-300 bg-white p-2 mt-2 text-sm">
+        <p class="font-bold">発注書全体備考</p>
+        <p class="mt-1">{{ purchaseOrder.remarks }}</p>
+      </div>
+    </ng-container>
+    <table
+      class="mt-2 w-[100%] table-fixed border-collapse border border-slate-400">
+      <thead class="text-sm">
+        <tr>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>自コード</p>
+              <p>相コード</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[108px]">
+            <div>
+              <p>JAN</p>
+              <p>棚番</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[350px]">
+            <div>
+              <p>商品名</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[54px]">
+            <div>
+              <p>数量</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[54px]">
+            <div>
+              <p>単位</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>規定在庫</p>
+              <p>最小発注数</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>ケース入数</p>
+              <p>バラ総数</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>単価</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>金額</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>入庫済</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>今回入庫</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>入庫後総数</p>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody class="text-xs">
+        <ng-container *ngIf="orders">
+          <ng-container *ngFor="let order of orders; let i = index">
+            <tr>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.product_id }}</p>
+                  <p>
+                    {{
+                      order.supplier_product_cd
+                        ? order.supplier_product_cd
+                        : '-'
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.ordering_target_barcode }}</p>
+                  <p>
+                    {{ order.division_shelf_value }}-{{
+                      order.division_shelf_col_value
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div>
+                  <p>{{ order.product_name }}</p>
+                  <div class="flex justify-between">
+                    <div>
+                      <p>
+                        {{ order.division_price_tag_value }}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-right">
+                        {{ order.division_seal_print_value }}
+                      </p>
+                    </div>
+                  </div>
+                  <p>{{ order.remarks }}</p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <input
+                    style="width: 95%; text-align: right"
+                    type="text"
+                    name="order_quantity"
+                    [id]="order.id"
+                    [value]="order.order_quantity"
+                    (change)="order.order_quantity = getValue($event)" />
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_unit_name
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.regulated_stock_num }}</p>
+                  <p>{{ order.minimum_order_quantity }}</p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_quantity
+                        : 0
+                    }}
+                  </p>
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_order_all_num
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-right">
+                  <input
+                    style="width: 95%; text-align: right"
+                    type="text"
+                    name="cost_price"
+                    [id]="order.id"
+                    [value]="order.cost_price"
+                    (change)="order.cost_price = getValue($event)" />
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-right">
+                  <p>
+                    {{
+                      order.cost_price
+                        ? (
+                            order.cost_price * order.order_quantity
+                          ).toLocaleString()
+                        : 0
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1 py-[2px]">
+                <!-- 入庫済み空の場合は 0 -->
+                <div class="text-right">
+                  {{
+                    orders_origin_receiving_quantity[i]
+                      ? orders_origin_receiving_quantity[i]
+                      : 0
+                  }}
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1 py-[2px]">
+                <!-- 今回入庫-->
+                <ng-container
+                  *ngFor="let orderForm of ordersForm.controls.order.controls">
+                  <ng-container
+                    *ngIf="order.id === orderForm.controls.id.value">
+                    <app-text
+                      [textRight]="true"
+                      [nameAttrValue]="
+                        'insert_receiving_quantity' + '_' + order.id
+                      "
+                      [idAttrValue]="
+                        'insert_receiving-quantity' + '-' + order.id
+                      "
+                      [formCtrl]="orderForm.controls.insert_receiving_quantity"
+                      (change)="updateReceivingQuantity($event, order.id)">
+                    </app-text>
+                  </ng-container>
+                </ng-container>
+              </td>
+              <td class="border border-slate-300 px-1 py-[2px]">
+                <div class="text-right">
+                  <ng-container
+                    *ngFor="
+                      let orderForm of ordersForm.controls.order.controls
+                    ">
+                    <ng-container
+                      *ngIf="order.id === orderForm.controls.id.value">
+                      <app-text
+                        style="display: none"
+                        [textRight]="true"
+                        [nameAttrValue]="'receiving_quantity' + '_' + order.id"
+                        [idAttrValue]="'receiving-quantity' + '-' + order.id"
+                        [formCtrl]="orderForm.controls.receiving_quantity"
+                        [invalid]="formControlStateManager(orderForm.controls.receiving_quantity) || orderForm.errors?.['receivingQuantityLarge']">
+                      </app-text>
+                    </ng-container>
+                  </ng-container>
+                  {{ order.receiving_quantity }}
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+        </ng-container>
+        <tr class="font-bold">
+          <td class="border border-slate-300 px-1" colspan="7">
+            <div class="text-right">
+              <p>合計</p>
+            </div>
+          </td>
+          <td class="border border-slate-300 px-1">
+            <!-- 単価の列 - 空白にする -->
+            <div class="text-right">
+              <p></p>
+            </div>
+          </td>
+          <td class="border border-slate-300 px-1">
+            <div class="text-right">
+              <p>{{ calculateTotalAmount().toLocaleString() }}</p>
+            </div>
+          </td>
+          <td class="border border-slate-300 px-1" colspan="3">
+            <!-- 残りの列 -->
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="mt-4 flex justify-end">
+      <app-button
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="ordersForm.invalid || !is_save_true"
+        (click)="bulkUpdate()">
+        保存
+      </app-button>
+    </div>
+
+    <ng-container *ngIf="is_delivered">
+      <table
+        class="mt-2 w-[100%] table-fixed border-collapse border border-slate-400 bg-slate-100">
+        <caption>
+          検品済み
+        </caption>
+        <thead class="text-sm">
+          <tr>
+            <th class="border border-slate-300 w-[80px]">
+              <div>
+                <p>自コード</p>
+                <p>相コード</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[108px]">
+              <div>
+                <p>JAN</p>
+                <p>棚番</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[350px]">
+              <div>
+                <p>商品名</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[54px]">
+              <div>
+                <p>数量</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[54px]">
+              <div>
+                <p>単位</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[80px]">
+              <div>
+                <p>規定在庫</p>
+                <p>最小発注数</p>
+              </div>
+            </th>
+            <th class="border border-slate-300 w-[80px]">
+              <div>
+                <p>ケース入数</p>
+                <p>バラ総数</p>
+              </div>
+            </th>
+            <th class="border border-slate-300">
+              <div>
+                <p>単価</p>
+              </div>
+            </th>
+            <th class="border border-slate-300">
+              <div>
+                <p>金額</p>
+              </div>
+            </th>
+            <th class="border border-slate-300">
+              <div>
+                <p>納品済数量</p>
+              </div>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="text-xs bg-slate-100">
+          <ng-container *ngIf="delivered_orders_products">
+            <ng-container
+              *ngFor="
+                let delivered of delivered_orders_products;
+                let i = index
+              ">
+              <tr>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    <p>{{ delivered.product_id }}</p>
+                    <p>
+                      {{
+                        delivered.supplier_product_cd
+                          ? delivered.supplier_product_cd
+                          : '-'
+                      }}
+                    </p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    <p>{{ delivered.ordering_target_barcode }}</p>
+                    <p>
+                      {{ delivered.division_shelf_value }}-{{
+                        delivered.division_shelf_col_value
+                      }}
+                    </p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div>
+                    <p>{{ delivered.product_name }}</p>
+                    <div class="flex justify-between">
+                      <div>
+                        <p>
+                          {{ delivered.division_price_tag_value }}
+                        </p>
+                      </div>
+                      <div>
+                        <p class="text-right">
+                          {{ delivered.division_seal_print_value }}
+                        </p>
+                      </div>
+                    </div>
+                    <p>{{ delivered.remarks }}</p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    {{ delivered.order_quantity }}
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    <p>
+                      {{
+                        delivered_order_status_list[i]
+                          ? delivered_order_status_list[i].ordering_unit_name
+                          : ''
+                      }}
+                    </p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    <p>{{ delivered.regulated_stock_num }}</p>
+                    <p>{{ delivered.minimum_order_quantity }}</p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-center">
+                    <p>
+                      {{
+                        delivered_order_status_list[i]
+                          ? delivered_order_status_list[i].ordering_quantity
+                          : 0
+                      }}
+                    </p>
+                    <p>
+                      {{
+                        delivered_order_status_list[i]
+                          ? delivered_order_status_list[i]
+                              .ordering_order_all_num
+                          : ''
+                      }}
+                    </p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-right">
+                    {{
+                      delivered.cost_price
+                        ? delivered.cost_price.toLocaleString()
+                        : 0
+                    }}
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1">
+                  <div class="text-right">
+                    <p>
+                      {{
+                        delivered.cost_price
+                          ? (
+                              delivered.cost_price * delivered.order_quantity
+                            ).toLocaleString()
+                          : 0
+                      }}
+                    </p>
+                  </div>
+                </td>
+                <td class="border border-slate-300 px-1 py-[2px]">
+                  <div class="text-right">
+                    {{ delivered.receiving_quantity }}
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+          <tr class="font-bold">
+            <td class="border border-slate-300 px-1" colspan="7">
+              <div class="text-right">
+                <p>合計</p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <!-- 単価の列 - 空白にする -->
+              <div class="text-right">
+                <p></p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div class="text-right">
+                <p>{{ calculateDeliveredTotalAmount().toLocaleString() }}</p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <!-- 残りの列 -->
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </ng-container>
+  </div>
+
+  <div *ngIf="common.loading" class="mt-12 text-center">
+    <p class="text-2xl text-slate-600">データ取得中...</p>
+  </div>
+</main>
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>

@@ -1,0 +1,27 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="[{ text: '在庫移動一覧' }]">
+</app-breadcrumb-org>
+
+<!-- ↓ トグル切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-stock-transfer-search
+  class="block mb-4"
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)">
+</app-stock-transfer-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-end gap-8 mb-4">
+  <!-- app-export-pdf-org [apiResponse$]="inventory$" [filename]="filename" (statusChange)="exportEventListener($event)">
+  </app-export-pdf-org-->
+  <div class="mr-8">
+    <app-new-registration-link-org path="add"></app-new-registration-link-org>
+  </div>
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<app-stock-transfer-table
+  [tableEvent]="parentTableEvent"
+  (errorEvent)="handleError($event)"></app-stock-transfer-table>

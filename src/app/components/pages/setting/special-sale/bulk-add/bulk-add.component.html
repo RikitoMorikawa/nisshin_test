@@ -1,0 +1,62 @@
+<!-- ↓ ヘッダ・メニュー部 ↓ -->
+<h2 class="mt-8 text-xl">特売一括登録</h2>
+<div class="mt-6 mb-2 flex flex-row items-center justify-between">
+  <app-cancel-link-org routerLink="../"></app-cancel-link-org>
+  <app-last-updater-org [roleTypeName]="editor.role">
+    登録者：{{ editor.name ? editor.name : 'データ取得中...' }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ テンプレートダウンロードボタン ↓ -->
+<app-template-download-link-org
+  class="flex justify-end mt-8"
+  [api$]="template$"
+  [fileNamePrefix]="fileNamePrefix"
+  (statusChange)="onExportStatusChange($event)">
+</app-template-download-link-org>
+
+<!-- ↓ ボディ部 ↓ -->
+<div class="mt-2 mb-28 py-8 px-6 bg-white shadow border border-gray-300">
+  <p class="text-lg mb-4">CSVファイルのヘッダーと値</p>
+
+  <!-- ↓ CSVファイルの説明 ↓ -->
+  <ul class="mb-8">
+    <li
+      *ngFor="let item of descriptions"
+      class="flex border border-b-0 last:border-b border-slate-400">
+      <div class="flex items-center w-[330px] bg-slate-100 p-4">
+        {{ item.title }}
+        <span
+          *ngIf="item.required"
+          class="px-3 py-0.5 ml-2 text-xs text-white bg-warning-dark rounded-full">
+          必須
+        </span>
+      </div>
+      <div class="grow p-4">{{ item.description }}</div>
+    </li>
+  </ul>
+
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-between mb-2">
+    <div class="flex items-center">
+      <app-file [formCtrl]="ctrl" accept="text/csv"></app-file>
+      <ng-container *ngIf="ctrl.value">
+        <p class="ml-4">{{ filename }}</p>
+        <app-icon
+          class="w-6 cursor-pointer ml-2 fill-red-500"
+          icon="delete-bin-line"
+          (click)="ctrl.reset()">
+        </app-icon>
+      </ng-container>
+    </div>
+
+    <app-button
+      btnFillColor="bg-success hover:bg-success-hover border-success text-white"
+      [buttonDisabled]="ctrl.invalid"
+      (click)="onClickUpload()">
+      アップロード実行
+    </app-button>
+  </div>
+</div>

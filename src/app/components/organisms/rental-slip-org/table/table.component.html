@@ -1,0 +1,20 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="eventListener.next($event)">
+  レンタル受付票一覧
+  <div>
+    <form [formGroup]="searchForms">
+      <div class="w-1/4">
+        <app-select-container
+          nameAttrValue="rental_status"
+          idAttrValue="rental_status"
+          [formCtrl]="fc.rental_status"
+          [options]="searchOptions"
+          placeholder="選択してください"
+          (change)="simplifiedSorting($event)">
+        </app-select-container>
+      </div>
+    </form>
+  </div>
+</app-table-with-pagination>

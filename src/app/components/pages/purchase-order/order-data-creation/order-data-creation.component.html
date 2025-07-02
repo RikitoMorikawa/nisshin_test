@@ -1,0 +1,138 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '発注書一覧' },
+    { text: '発注データ新規登録' }
+  ]"></app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">発注データ新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="form" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="mt-8 mb-24 pt-8 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">発注データ新規登録</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex gap-6 mt-6 mb-6">
+        <div class="w-2/5"></div>
+        <div class="w-2/5"></div>
+      </div>
+      <div class="w-2/3">
+        <div class="flex gap-6">
+          <div class="w-1/2">
+            <app-date-term
+              nameAttrValue="from_date_of_sale"
+              idAttrValue="from-date-of-sale"
+              [formCtrl]="ctrls.dateGroup.controls.from_date_of_sale"
+              [invalid]="formControlStateManager(ctrls.dateGroup.controls.from_date_of_sale) || ctrls.dateGroup.errors?.['endingDateIsSmaller']">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '売上日（自', required: 'true' }
+                "></ng-container>
+              <div
+                *ngIf="formControlStateManager(ctrls.dateGroup.controls.from_date_of_sale) || ctrls.dateGroup.errors?.['endingDateIsSmaller']"
+                message>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      ctrl: ctrls.dateGroup.controls.from_date_of_sale
+                    }
+                  "></ng-container>
+              </div>
+            </app-date-term>
+          </div>
+          <div class="w-1/2">
+            <app-date-term
+              nameAttrValue="to_date_of_sale"
+              idAttrValue="to-date-of-sale"
+              [formCtrl]="ctrls.dateGroup.controls.to_date_of_sale"
+              [invalid]="formControlStateManager(ctrls.dateGroup.controls.to_date_of_sale) || ctrls.dateGroup.errors?.['endingDateIsSmaller']">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '売上日（至', required: 'true' }
+                "></ng-container>
+              <div
+                *ngIf="formControlStateManager(ctrls.dateGroup.controls.to_date_of_sale) || ctrls.dateGroup.errors?.['endingDateIsSmaller']"
+                message>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      ctrl: ctrls.dateGroup.controls.to_date_of_sale
+                    }
+                  "></ng-container>
+              </div>
+            </app-date-term>
+          </div>
+        </div>
+        <ng-container
+          *ngTemplateOutlet="
+            dateErrors;
+            context: { ctrls: ctrls.dateGroup }
+          "></ng-container>
+      </div>
+    </div>
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="form.invalid || form.pristine"
+        >発注データ作成</app-button
+      >
+    </div>
+  </form>
+</main>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 日付指定エラーメッセージのテンプレート ↓ -->
+<ng-template #dateErrors let-ctrls="ctrls">
+  <ng-container *ngIf="ctrls.errors?.['endingDateIsSmaller']">
+    <p class="mt-1 pl-1 text-sm text-red">
+      {{ errorConst.FORM_ERROR.DATE_SPECIFICATION_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

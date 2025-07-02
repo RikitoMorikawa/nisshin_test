@@ -1,0 +1,137 @@
+<app-loading-container
+  [isLoading]="isDuringAcquisition"></app-loading-container>
+<div class="mt-8">
+  <app-button (click)="handleClickSearchPaneToggleButton()" btnType="button">
+    <span class="w-6">
+      <app-icon icon="filter-2-line"></app-icon>
+    </span>
+    <span class="inline-block ml-1 mr-2">
+      {{
+        hasSearchPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示'
+      }}
+    </span>
+    <span [class]="rotateAnimation" class="inline-block w-6">
+      <app-icon icon="arrow-down-s-fill"></app-icon>
+    </span>
+  </app-button>
+  <div class="mt-6">
+    <div
+      [class.is-open]="hasSearchPanelOpened"
+      [class.shadow]="hasSearchPanelOpened"
+      class="accounts-receivable-aggregate-search width-limit-break bg-white">
+      <form
+        class="w-[1280px] mx-auto px-4"
+        [formGroup]="searchForm"
+        (ngSubmit)="handleClickSearchSubmitButton()"
+        autocomplete="off">
+        <div class="flex gap-6 mt-6">
+          <app-text-clear-container [formCtrl]="ctrls.id" class="w-1/6">
+            請求ID
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: ctrls.id }"
+              message>
+            </ng-container>
+          </app-text-clear-container>
+          <div class="w-1/3">
+            <app-select-suggest-container
+              nameAttrValue="client_id"
+              idAttrValue="client-id"
+              placeholder="選択してください"
+              [formCtrl]="ctrls.client_id"
+              [suggests]="clientSuggests"
+              [invalid]="formControlStateManager(ctrls.client_id)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '請求先', required: 'false' }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: ctrls.client_id }"
+                message></ng-container>
+            </app-select-suggest-container>
+          </div>
+        </div>
+        <div class="flex gap-6 mt-6">
+          <app-date-term-clear-container
+            class="w-3/6"
+            [dateFromFormCtrl]="ctrls.billing_date.controls.from"
+            [dateToFormCtrl]="ctrls.billing_date.controls.to"
+            [invalid]="!!ctrls.billing_date.errors">
+            請求日
+            <ng-container
+              *ngIf="ctrls.billing_date.errors?.['beforeFromDate'] then  beforeFromDate"
+              message>
+            </ng-container>
+          </app-date-term-clear-container>
+        </div>
+        <div class="flex gap-6 mt-6">
+          <app-date-term-clear-container
+            class="w-3/6"
+            [dateFromFormCtrl]="ctrls.payment_exp_date.controls.from"
+            [dateToFormCtrl]="ctrls.payment_exp_date.controls.to"
+            [invalid]="!!ctrls.payment_exp_date.errors">
+            入金予定日
+            <ng-container
+              *ngIf="ctrls.payment_exp_date.errors?.['beforeFromDate'] then  beforeFromDate"
+              message>
+            </ng-container>
+          </app-date-term-clear-container>
+        </div>
+        <div class="flex gap-8 mt-10">
+          <app-button btnType="button" (click)="handleClickSearchClearButton()">
+            入力内容クリア
+          </app-button>
+          <app-button
+            *ngIf="searchForm.valid; else disable"
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover">
+            絞り込み実行
+          </app-button>
+        </div>
+        <p class="mt-2 text-sm text-red">
+          ※
+          入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['minlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- 日付エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

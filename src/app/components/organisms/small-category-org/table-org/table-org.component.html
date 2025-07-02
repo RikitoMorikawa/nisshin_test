@@ -1,0 +1,7 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="tableEvent.next($event)">
+  <span *ngIf="selectedLcName">{{ selectedLcName + 'に属する' }}</span>
+  小分類一覧
+</app-table-with-pagination>

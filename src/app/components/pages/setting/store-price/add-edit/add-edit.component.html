@@ -1,0 +1,379 @@
+<!-- ↓ タイトル部（更新） ↓ -->
+<h2 class="mt-8 text-xl">{{ title }}</h2>
+<div class="flex items-center justify-between mt-6 mb-2">
+  <div (click)="handleClickCancel()" class="cursor-pointer">
+    <app-cancel-link-org></app-cancel-link-org>
+  </div>
+  <app-last-updater-org>
+    {{ (id ? '最終更新者：' : '登録者：') + (editor ?? 'データ取得中...') }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ フォーム ↓ -->
+<div class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ ヘッダ部 ↓ -->
+  <h2 class="text-lg">店舗売価情報入力</h2>
+  <hr class="border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ 入力部 ↓ -->
+  <form class="p-6 mt-6 border border-b-0 border-gray-200 shadow">
+    <div class="flex gap-4">
+      <!-- ↓ 対象店舗 ↓ -->
+      <app-select-container
+        class="w-2/3"
+        [formCtrl]="ctrls.store_id"
+        [options]="options.store">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '対象店舗', required: true }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.store_id }"
+          message>
+        </ng-container>
+      </app-select-container>
+    </div>
+
+    <div class="flex gap-6 mt-4">
+      <!-- ↓ 対象商品 ↓ -->
+      <div class="w-1/2 gap-4">
+        <app-real-time-suggest-container
+          nameAttrValue="product_name"
+          idAttrValue="product-name"
+          [idCtrl]="ctrls.product_id"
+          [nameCtrl]="ctrls.product_name"
+          [apiInput]="getSuggests()"
+          [invalid]="invalid(ctrls.product_name)"
+          (selectedData)="handleSelectedRecord($event)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '商品名', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.product_name }"
+            message>
+          </ng-container>
+        </app-real-time-suggest-container>
+        <p class="pl-1 mt-4">商品情報</p>
+        <div class="border rounded p-2 mt-1">
+          <p *ngIf="!product" class="text-slate-400">
+            ※ 該当する商品がありません
+          </p>
+          <app-product-data [product]="product"></app-product-data>
+        </div>
+      </div>
+
+      <div class="w-1/2 flex flex-col gap-4">
+        <!-- ↓ 商品区分 ↓ -->
+        <div class="flex gap-4">
+          <app-select-container
+            [formCtrl]="ctrls.sales_tax_division_id"
+            [options]="options.tax_division">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '消費税区分', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.sales_tax_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+          <app-select-container
+            [formCtrl]="ctrls.sales_fraction_division_id"
+            [options]="options.tax_fraction_division">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '消費税端数区分', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.sales_fraction_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+
+        <!-- ↓ 仕入先区分 ↓ -->
+        <div class="flex gap-4">
+          <app-select-container
+            [formCtrl]="ctrls.supplier_sales_tax_division_id"
+            [options]="options.supplier_tax_division">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先消費税区分', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.supplier_sales_tax_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+          <app-select-container
+            [formCtrl]="ctrls.supplier_sales_fraction_division_id"
+            [options]="options.tax_fraction_division">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先消費税端数区分', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.supplier_sales_fraction_division_id }
+              "
+              message>
+            </ng-container>
+          </app-select-container>
+        </div>
+
+        <p class="mt-6 pl-2">価格情報</p>
+        <hr class="border-t-warning-hover border-t-4 mt-1" />
+        <!-- ↓ 商品 ↓ -->
+        <div class="flex gap-4">
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.supplier_cost_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先単価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.gross_profit_rate"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '粗利率（％）', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.selling_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '売価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: ctrls.selling_price }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <hr class="mt-4" />
+
+        <!-- ↓ B商品 ↓ -->
+        <div class="flex gap-4">
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.b_supplier_cost_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先B単価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.b_supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.b_gross_profit_rate"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'B粗利率（％）', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.b_gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.b_selling_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'B売価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.b_selling_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <hr class="mt-4" />
+
+        <!-- ↓ C商品 ↓ -->
+        <div class="flex gap-4">
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.c_supplier_cost_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先C単価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.c_supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.c_gross_profit_rate"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'C粗利率（％）', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.c_gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+          <app-text-container
+            class="w-1/3"
+            [formCtrl]="ctrls.c_selling_price"
+            [textRight]="true"
+            inputType="number">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'C売価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: ctrls.c_selling_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ↓ ボタン ↓ -->
+<div
+  class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] fixed left-0 right-0 p-2 gap-8">
+  <app-button (click)="onClickReset()"> クリア </app-button>
+  <app-button
+    btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+    [buttonDisabled]="form.invalid"
+    (click)="onClickSave()">
+    保存
+  </app-button>
+</div>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+      必須
+    </span>
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['beforeFromDate']">
+      {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+    </p>
+  </ng-container>
+</ng-template>

@@ -1,0 +1,36 @@
+<!-- ↓ ヘッダ・メニュー部 ↓ -->
+<h2 class="mt-8 text-xl">特売詳細</h2>
+<div class="flex justify-between mt-6 mb-2">
+  <div class="flex gap-6">
+    <app-back-to-link-org path="../../">一覧へ戻る</app-back-to-link-org>
+    <app-edit-link-org routerLink="../../edit/{{ id }}"> </app-edit-link-org>
+    <app-delete-link
+      [removeMethod$]="removeMethod$"
+      redirectPath="/setting/special-sale">
+    </app-delete-link>
+  </div>
+  <app-last-updater-org>
+    最終更新者：{{ updater ? updater : 'データ取得中...' }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ 商品情報 ↓ -->
+<div
+  *ngIf="title"
+  class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ タイトル部 ↓ -->
+  <p class="text-lg">{{ title }}</p>
+  <hr class="mt-2 border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ リスト部 ↓ -->
+  <ul class="mt-6">
+    <li
+      *ngFor="let item of listItems"
+      class="flex items-center border border-t-0 first:border-t border-slate-200">
+      <p class="p-4 w-1/5 bg-slate-100 border-r">{{ item.name }}</p>
+      <p class="p-4 grow">{{ item.value }}</p>
+    </li>
+  </ul>
+</div>

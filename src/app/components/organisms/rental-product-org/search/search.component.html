@@ -1,0 +1,92 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="panelOpenButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon
+      class="w-6"
+      [class]="rotateAnimation"
+      icon="arrow-down-s-fill"></app-icon>
+  </app-button>
+</div>
+<!-- 絞り込み項目 id、ステータス、同一商品識別バーコード、バーコード、公開区分、-->
+<!-- ↓ 絞り込みフォーム ↓ -->
+<div class="mb-6">
+  <div
+    class="rental-product-search width-limit-break bg-white"
+    [ngClass]="hasPanelOpened ? 'is-open shadow' : ''">
+    <form
+      class="w-[1280px] mx-auto px-4"
+      (ngSubmit)="handleClickSubmitButton()">
+      <div class="flex gap-6">
+        <div class="w-1/4">
+          <app-text-container [formCtrl]="fc.id">
+            レンタル商品ID
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="status_division_id"
+            idAttrValue="status-division-id"
+            [formCtrl]="fc.status_division_id"
+            [options]="statusOptions"
+            [invalid]="invalid(fc.status_division_id)">
+            ステータス
+          </app-select-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container [formCtrl]="fc.name"> 商品名 </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container [formCtrl]="fc.barcode">
+            バーコード
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-container
+            nameAttrValue="data_permission_division_id"
+            idAttrValue="data-permission-division-id"
+            [formCtrl]="fc.data_permission_division_id"
+            [options]="publishDivisionOptions"
+            [invalid]="invalid(fc.data_permission_division_id)">
+            公開区分
+          </app-select-container>
+        </div>
+      </div>
+      <div class="flex gap-8 mt-10">
+        <app-button (click)="handleClickClearButton()">
+          入力内容クリア
+        </app-button>
+        <app-button
+          *ngIf="form.valid; else disable"
+          (click)="handleClickSubmitButton()"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          btnLineHoverColor="hover:border-success-hover">
+          絞り込み実行
+        </app-button>
+      </div>
+      <p class="mt-2 text-sm text-red">
+        ※
+        入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+      </p>
+    </form>
+  </div>
+</div>
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

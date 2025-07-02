@@ -1,0 +1,33 @@
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search [formCtrl]="formCtrl" (submitEvent)="listenSubmit()">
+  <ng-content select="[search]"></ng-content>
+</app-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-end gap-8 mt-4">
+  <!-- role_id が 4 でない場合のみ表示 -->
+  <app-new-registration-link-org
+    *ngIf="authorService.author?.role_name !== '一般ユーザー'"
+    routerLink="./add">
+  </app-new-registration-link-org>
+  <app-bulk-registration-link-org
+    *ngIf="authorService.author?.role_name !== '一般ユーザー'"
+    routerLink="./bulk-add">
+  </app-bulk-registration-link-org>
+  <app-export-link
+    [export$]="export$"
+    [fileNamePrefix]="fileNamePrefix"
+    [exportFileExtension]="exportFileExtension"
+    (statusChange)="exportStatusChange.emit($event)">
+  </app-export-link>
+  <!-- ↓ コンテンツ投影（追加のボタン等）↓ -->
+  <ng-content select="[optionalButton]"></ng-content>
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<app-table-with-pagination
+  class="block mt-2"
+  [params]="_tableParams"
+  (pageChange)="pages = $event">
+  <ng-content select="[tableTitle]"></ng-content>
+</app-table-with-pagination>

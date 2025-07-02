@@ -1,0 +1,25 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: settingMenuPath, text: '設定一覧' },
+    { text: 'ランク価格一覧' }
+  ]"></app-breadcrumb-org>
+<!-- ローディング -->
+<main>
+  <!-- 絞り込み -->
+  <div>
+    <app-search (searchEvent)="searchEvent.next($event)"></app-search>
+  </div>
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-end gap-8 mt-6">
+    <app-new-registration-link-org path="./add"></app-new-registration-link-org>
+    <app-bulk-registration-link-org
+      path="./bulk-add"></app-bulk-registration-link-org>
+  </div>
+  <!-- 一覧テーブル -->
+  <div class="mt-2">
+    <app-table
+      [tableEvent]="tableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

@@ -1,0 +1,40 @@
+<app-select-clear-container
+  class="w-1/6"
+  [formCtrl]="ctrls.deposit_detail_division_code"
+  idAttrValue="deposit-detail-division-code"
+  nameAttrValue="deposit_detail_division_code"
+  [options]="depositClassficationOption"
+  labelSize="sm">
+</app-select-clear-container>
+<app-text-container
+  class="w-1/6"
+  [formCtrl]="ctrls.deposit_amount"
+  [textRight]="true"
+  inputType="number"
+  idAttrValue="deposit-detail-{{ index }}-deposit_amount">
+</app-text-container>
+<app-date-term
+  [formCtrl]="ctrls.deposit_date"
+  class="w-1/6"
+  nameAttrValue="deposit_date"
+  idAttrValue="deposit-detail-{{ index }}-deposit_date">
+</app-date-term>
+<app-text-container
+  class="w-1/3"
+  [formCtrl]="ctrls.remarks_1"
+  idAttrValue="deposit-detail-{{ index }}-remarks">
+</app-text-container>
+<!-- ↓ 追加・削除ボタン ↓ -->
+<div class="flex items-center gap-4">
+  <app-icon icon="add-line" class="cursor-pointer w-6" (click)="add.emit()">
+  </app-icon>
+  <app-icon
+    *ngIf="index; else falseContent"
+    icon="delete-bin-line"
+    class="cursor-pointer w-6 fill-red-500"
+    (click)="remove.emit(index)">
+  </app-icon>
+  <ng-template #falseContent>
+    <div class="w-6 width:24px;">　</div>
+  </ng-template>
+</div>

@@ -1,0 +1,508 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/store', text: '店舗一覧' },
+    { path: '/setting/store/detail', text: '店舗詳細' },
+    { text: '店舗編集' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">店舗情報登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="storeAddForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">店舗情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="max-w-[300px] w-[300px]">
+            <div class="px-2 pb-2">
+              <p class="text-sm">
+                ※ 画像のファイルサイズは最大{{ maxFileSizeForDisplay }}Mバイト
+              </p>
+              <app-file
+                [formCtrl]="storeAddForm.controls.logo_image"
+                text="ロゴ画像選択"
+                accept="image/png, image/jpeg">
+              </app-file>
+              <div
+                class="mt-2 text-sm text-danger"
+                *ngIf="
+                  storeAddForm.controls.logo_image.invalid;
+                  else correctImage
+                ">
+                <ng-container
+                  *ngIf="storeAddForm.controls.logo_image.errors?.['limitFileSize']"
+                  [ngTemplateOutlet]="em"
+                  [ngTemplateOutletContext]="exceededFileSizeLimit">
+                </ng-container>
+              </div>
+              <ng-template #correctImage>
+                <div class="mt-4" *ngIf="logoImageUrl">
+                  <img
+                    class="border border-gray-200 shadow rounded-md"
+                    [src]="logoImageUrl"
+                    alt="アップロード画像" />
+                  <div class="flex flex-row items-center mt-2">
+                    <p>{{ logoImageFileName }}</p>
+                    <app-icon
+                      class="w-6 cursor-pointer ml-2 fill-red-500"
+                      icon="delete-bin-line"
+                      (click)="handleClickDeleteIcon()">
+                    </app-icon>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
+          </div>
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [formCtrl]="storeAddForm.controls.name"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.name)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['name'] }}（10文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(storeAddForm.controls.name)"
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name_kana"
+                  idAttrValue="name-kana"
+                  [formCtrl]="storeAddForm.controls.name_kana"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.name_kana)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{
+                        logicalNames['name_kana']
+                      }}（全角カナ7文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.name_kana)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.name_kana.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.name_kana.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="
+                        fullWidthKatakanaRestrictionViolation
+                      ">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="alias"
+                  idAttrValue="alias"
+                  [formCtrl]="storeAddForm.controls.alias"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.alias)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['alias'] }}（2文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(storeAddForm.controls.alias)"
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.alias.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="tel"
+                  idAttrValue="tel"
+                  [formCtrl]="storeAddForm.controls.tel"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.tel)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['tel'] }}（10~16文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(storeAddForm.controls.tel)"
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.tel.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.tel.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.tel.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="fax"
+                  idAttrValue="fax"
+                  [formCtrl]="storeAddForm.controls.fax"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.fax)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['fax'] }}（10~16文字）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(storeAddForm.controls.fax)"
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.fax.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.fax.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="postal_code"
+                  idAttrValue="postal-code"
+                  [formCtrl]="storeAddForm.controls.postal_code"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.postal_code)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['postal_code'] }}（7文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.postal_code)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.postal_code.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.postal_code.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.postal_code.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-select-container
+                  class="w-1/3"
+                  [formCtrl]="storeAddForm.controls.province"
+                  [options]="provincesOptions"
+                  nameAttrValue="province_id"
+                  idAttrValue="province-id"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.province)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">{{
+                      logicalNames['province']
+                    }}</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.province)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.province.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="locality"
+                  idAttrValue="locality"
+                  [formCtrl]="storeAddForm.controls.locality"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.locality)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['locality'] }}（9文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.locality)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.locality.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.locality.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="street_address"
+                  idAttrValue="street-address"
+                  [formCtrl]="storeAddForm.controls.street_address"
+                  [invalid]="
+                    formControlStateManager(
+                      storeAddForm.controls.street_address
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['street_address'] }}（7文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        storeAddForm.controls.street_address
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.street_address.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.street_address.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="other_address"
+                  idAttrValue="other-address"
+                  [formCtrl]="storeAddForm.controls.other_address"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.other_address)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['other_address'] }}（6文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        storeAddForm.controls.other_address
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.other_address.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="payee_1"
+                  idAttrValue="payee-1"
+                  [formCtrl]="storeAddForm.controls.payee_1"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.payee_1)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['payee_1'] }}（20文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.payee_1)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.payee_1.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="payee_2"
+                  idAttrValue="payee_2"
+                  [formCtrl]="storeAddForm.controls.payee_2"
+                  [invalid]="
+                    formControlStateManager(storeAddForm.controls.payee_2)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['payee_2'] }}（20文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(storeAddForm.controls.payee_2)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="storeAddForm.controls.payee_2.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button (click)="onClickReset()">クリア</app-button>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="storeAddForm.invalid || storeAddForm.pristine">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

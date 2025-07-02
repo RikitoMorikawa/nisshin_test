@@ -1,0 +1,8 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="breadcrumbList"></app-breadcrumb-org>
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button *ngIf="breadcrumbList.length < 2"></app-toggle-button>
+<!-- ↓ 子コンポーネント ↓ -->
+<router-outlet></router-outlet>
+<!-- ↓ ローディング画面 ↓ -->
+<app-loading-container [isLoading]="loading"></app-loading-container>

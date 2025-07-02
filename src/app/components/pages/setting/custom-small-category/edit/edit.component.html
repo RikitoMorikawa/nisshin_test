@@ -1,0 +1,131 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/custom-small-category', text: 'カスタム小分類一覧' },
+    { path: detailPath, text: 'カスタム小分類詳細' },
+    { text: 'カスタム小分類編集' }
+  ]"></app-breadcrumb-org>
+<main class="mb-20">
+  <h1 class="mt-8 text-xl">カスタム小分類編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{
+          common.loading
+            ? 'データ取得中...'
+            : csc.employee_updated_last_name +
+              ' ' +
+              csc.employee_updated_first_name
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="cscEditForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">カスタム小分類名称入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <app-select-container
+                  class="w-1/2"
+                  [formCtrl]="cscEditForm.controls.custom_medium_category_id"
+                  [options]="cmcOptions"
+                  nameAttrValue="store_id"
+                  idAttrValue="store-id"
+                  [invalid]="formControlStateManager(cscEditForm.controls.custom_medium_category_id) || cscEditForm.controls.custom_medium_category_id.errors?.['notContains']">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">カスタム中分類名</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        cscEditForm.controls.custom_medium_category_id
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="cscEditForm.controls.custom_medium_category_id.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [formCtrl]="cscEditForm.controls.name"
+                  [invalid]="
+                    formControlStateManager(cscEditForm.controls.name)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >カスタム小分類名（255文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(cscEditForm.controls.name)"
+                    message>
+                    <ng-container
+                      *ngIf="cscEditForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="cscEditForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button btnType="button" (click)="handleClickClearButton()"
+          >クリア</app-button
+        >
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="
+            cscEditForm.invalid || formInvalid || cscEditForm.pristine
+          ">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

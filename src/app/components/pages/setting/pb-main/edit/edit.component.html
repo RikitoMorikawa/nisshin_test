@@ -1,0 +1,250 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    {
+      path: '/setting/main-product-book',
+      text: 'メイン商品ブック一覧'
+    },
+    { path: detailPath, text: 'メイン商品ブック詳細' },
+    { text: 'メイン商品ブック編集' }
+  ]"></app-breadcrumb-org>
+<main class="mb-20">
+  <h1 class="mt-8 text-xl">メイン商品ブック編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{
+          common.loading
+            ? 'データ取得中...'
+            : mpb.employee_updated_last_name +
+              ' ' +
+              mpb.employee_updated_first_name
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="mpbEditForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">メイン商品ブック情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4 [&>*]:w-1/3">
+                <app-select-container
+                  [formCtrl]="
+                    mpbEditForm.controls.product_book_second_category_id
+                  "
+                  [options]="scOptions"
+                  nameAttrValue="product_book_second_category_id"
+                  idAttrValue="product-book-second-category-id"
+                  [invalid]="
+                    formControlStateManager(
+                      mpbEditForm.controls.product_book_second_category_id
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">第2分類選択</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        mpbEditForm.controls.product_book_second_category_id
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.product_book_second_category_id.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+                <app-select-container
+                  [formCtrl]="mpbEditForm.controls.store_id"
+                  [options]="storeOptions"
+                  nameAttrValue="store_id"
+                  idAttrValue="store-id"
+                  [invalid]="
+                    formControlStateManager(mpbEditForm.controls.store_id)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">店舗選択</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(mpbEditForm.controls.store_id)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.store_id.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+                <div></div>
+              </div>
+              <div class="flex flex-row mt-6 gap-4">
+                <app-input
+                  class="w-3/12"
+                  [formCtrl]="mpbEditForm.controls.product_id"
+                  nameAttrValue="product_id"
+                  idAttrValue="product-id">
+                  商品ID（半角数字）
+                </app-input>
+                <app-real-time-suggest-container
+                  class="w-9/12"
+                  [idCtrl]="mpbEditForm.controls.product_id"
+                  [nameCtrl]="mpbEditForm.controls.product_name"
+                  nameAttrValue="product_name"
+                  idAttrValue="product-name"
+                  [apiInput]="getSuggests()">
+                  商品名
+                </app-real-time-suggest-container>
+              </div>
+              <div class="flex flex-row mt-6 gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="gyo"
+                  idAttrValue="gyo"
+                  [formCtrl]="mpbEditForm.controls.gyo"
+                  [invalid]="formControlStateManager(mpbEditForm.controls.gyo)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >プリントコード（半角数字8文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(mpbEditForm.controls.gyo)"
+                    message>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.gyo.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.gyo.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.gyo.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="size_name"
+                  idAttrValue="size-name"
+                  [formCtrl]="mpbEditForm.controls.size_name"
+                  [invalid]="
+                    formControlStateManager(mpbEditForm.controls.size_name)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >サイズ名（10文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(mpbEditForm.controls.size_name)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.size_name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="barcode"
+                  idAttrValue="barcode"
+                  [formCtrl]="mpbEditForm.controls.barcode"
+                  [invalid]="
+                    formControlStateManager(mpbEditForm.controls.barcode)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >JANコード（半角14文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(mpbEditForm.controls.barcode)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.barcode.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="mpbEditForm.controls.barcode.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button btnType="button" (click)="handleClickClearButton()"
+          >クリア</app-button
+        >
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="
+            mpbEditForm.invalid || formInvalid || mpbEditForm.pristine
+          ">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

@@ -1,0 +1,44 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '商品ブック第2分類一覧' }
+  ]"></app-breadcrumb-org>
+<main class="mt-8 mb-20">
+  <div>
+    <app-search
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+      商品ブック第2分類名で絞り込み</app-search
+    >
+  </div>
+  <div
+    class="flex items-center mt-8 mb-2 justify-between"
+    [ngClass]="{
+      'justify-between': selectedLcId,
+      'justify-end': !selectedLcId
+    }">
+    <div *ngIf="selectedLcId" class="ml-4">
+      <app-back-to-link-org
+        path="/setting/product-book-first-category/detail/{{ selectedLcId }}"
+        >{{ selectedLcName }} の詳細へ戻る</app-back-to-link-org
+      >
+    </div>
+    <div class="flex flex-row">
+      <div class="mr-4">
+        <app-new-registration-link-org
+          path="/setting/product-book-second-category/add"></app-new-registration-link-org>
+      </div>
+      <div>
+        <app-bulk-registration-link-org
+          path="/setting/product-book-second-category/bulk-add"></app-bulk-registration-link-org>
+      </div>
+    </div>
+  </div>
+  <div>
+    <app-table
+      [tableEvent]="parentTableEvent"
+      [selectedLcId]="selectedLcId"
+      [selectedLcName]="selectedLcName"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

@@ -1,0 +1,143 @@
+<table class="whitespace-nowrap border-separate border-spacing-0 w-full">
+  <thead>
+    <tr>
+      <th
+        *ngFor="let item of header"
+        (click)="changeSort(item)"
+        class="font-normal border border-x-0 border-slate-300 px-3 py-4 hover:transition-all duration-300"
+        [ngClass]="
+          item ? 'hover:bg-iron-blue-200 cursor-pointer' : 'cursor-auto'
+        ">
+        <div
+          class="flex gap-1"
+          [ngClass]="
+            ['棚卸管理コード', '商品名', '店舗名'].includes(item)
+              ? 'justify-left'
+              : 'justify-center'
+          ">
+          <span>{{ item }}</span>
+          <app-icon
+            *ngIf="item"
+            class="w-6"
+            [icon]="
+              sort.column === item && sort.order === 'desc'
+                ? 'sort-desc'
+                : 'sort-asc'
+            "
+            [ngClass]="
+              sort.column === item ? 'fill-primary' : 'fill-slate-300'
+            ">
+          </app-icon>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let row of data; first as isFirst">
+      <tr
+        class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+        <td
+          *ngFor="let item of row"
+          class="px-3 py-4"
+          [ngClass]="[
+            !isFirst ? 'border-t border-t-iron-blue-300' : '',
+            isTextToLeftData(item) ? 'text-left' : 'text-center'
+          ]">
+          <ng-container *ngIf="isLinkData(item)">
+            <a
+              class="text-primary-light border-b border-primary-light hover:text-primary-light-hover hover:border-primary-light-hover"
+              [routerLink]="item.href">
+              {{ item.text }}
+            </a>
+          </ng-container>
+          <ng-container
+            *ngIf="isInventoryStockQuantity(item) && isInventoryCompleted">
+            {{ item.value ? item.value : '未実施' }}
+          </ng-container>
+          <ng-container
+            *ngIf="
+              isInventoryStockQuantity(item) &&
+              !isEditable &&
+              !isInventoryCompleted
+            ">
+            <span
+              class="cursor-pointer text-primary border-b border-b-primary hover:text-primary-hover hover:border-b-primary-hover"
+              (click)="openEditField(item)">
+              {{ item.value ? item.value : '未実施' }}
+            </span>
+          </ng-container>
+          <ng-container
+            *ngIf="
+              isInventoryStockQuantity(item) &&
+              isEditable &&
+              editTargetId === item.id
+            ">
+            <div class="relative">
+              <div class="absolute top-[9px] left-2">
+                <app-icon
+                  icon="close-circle-fill"
+                  class="w-6 cursor-pointer fill-slate-400 hover:fill-slate-600"
+                  (click)="clearValue()">
+                </app-icon>
+              </div>
+              <div class="flex gap-1 items-center">
+                <div>
+                  <app-text
+                    inputType="number"
+                    [formCtrl]="fc.inventory_stock_quantity"
+                    nameAttrValue="inventory_stock_quantity"
+                    idAttrValue="inventory-stock-quantity"
+                    [textRight]="true"
+                    [invalid]="
+                      formControlStateManager(fc.inventory_stock_quantity)
+                    ">
+                  </app-text>
+                </div>
+                <div>
+                  <ng-container
+                    *ngIf="
+                      fc.inventory_stock_quantity.value ===
+                        editTargetInitialValue ||
+                        formControlStateManager(fc.inventory_stock_quantity);
+                      else dataSubmit
+                    ">
+                    <app-icon
+                      icon="close-line"
+                      class="w-6 cursor-pointer fill-danger hover:fill-danger-hover"
+                      (click)="closeEditField()">
+                    </app-icon>
+                  </ng-container>
+                  <ng-template #dataSubmit>
+                    <app-icon
+                      icon="check-line"
+                      class="w-6 cursor-pointer fill-success hover:fill-success-hover"
+                      (click)="submitInventoryStockQuantity()">
+                    </app-icon>
+                  </ng-template>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+          <ng-container
+            *ngIf="
+              isInventoryStockQuantity(item) &&
+              isEditable &&
+              editTargetId !== item.id
+            ">
+            <span
+              class="cursor-pointer text-primary border-b border-b-primary hover:text-primary-hover hover:border-b-primary-hover"
+              (click)="openEditField(item)">
+              {{ item.value ? item.value : '未実施' }}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="isTextToLeftData(item)">
+            {{ item.name }}
+          </ng-container>
+          <ng-container *ngIf="isNormalData(item)">
+            {{ item }}
+          </ng-container>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>

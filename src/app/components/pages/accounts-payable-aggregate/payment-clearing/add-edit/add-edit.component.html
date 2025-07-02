@@ -1,0 +1,157 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="breadcrumbList"></app-breadcrumb-org>
+<main class="mb-8">
+  <!-- ↓ ページタイトル ↓ -->
+  <h1 class="mt-8 text-xl">{{ pageTitle }}</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        {{ authorTitle }}：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="form" (ngSubmit)="handleClickSaveButton()">
+    <div class="mt-8 pt-8 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">支払消込情報入力{{ paymentIdValue }}</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex gap-6 mt-6 mb-6">
+        <div class="w-2/5">
+          <app-select-suggest-container
+            nameAttrValue="supplier_id"
+            idAttrValue="supplier-id"
+            placeholder="選択してくだxxさい"
+            [formCtrl]="ctrls.supplier_id"
+            [suggests]="supplierSuggests"
+            [invalid]="formControlStateManager(ctrls.supplier_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: ctrls.supplier_id }"
+              message></ng-container>
+          </app-select-suggest-container>
+        </div>
+        <div class="w-2/5">
+          <app-select-suggest-container
+            nameAttrValue="created_id"
+            idAttrValue="created-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.created_id"
+            [suggests]="employeeSuggests"
+            [invalid]="formControlStateManager(ctrls.created_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '登録者', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: ctrls.created_id }"
+              message></ng-container>
+          </app-select-suggest-container>
+        </div>
+      </div>
+      <div class="flex gap-6 mt-6 mb-6">
+        <div class="w-1/2">
+          <app-textarea-container
+            nameAttrValue="remarks_1"
+            idAttrValue="remarks-1"
+            [formCtrl]="ctrls.remarks_1"
+            [invalid]="formControlStateManager(ctrls.remarks_1)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label: '備考',
+                  required: false
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: ctrls.remarks_1 }"
+              message></ng-container>
+          </app-textarea-container>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 pt-8 pb-8 px-6 bg-white shadow border border-gray-100">
+      <h2 class="text-lg">入金明細</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <app-payment-clearing-detail
+        class="block mt-6"
+        [itemsId]="id"
+        [formArray]="ctrls.payment_detail"
+        [delArray]="ctrls.payment_detail_del">
+      </app-payment-clearing-detail>
+    </div>
+    <div
+      class="mt-6 mb-24 pt-8 pb-8 px-6 bg-white shadow border border-gray-100">
+      <h2 class="text-lg">支払残高</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex justify-end gap-8 mt-4">
+        <h2 class="text-lg">{{ calc() }}円</h2>
+      </div>
+    </div>
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="form.invalid || form.pristine"
+        >保存</app-button
+      >
+    </div>
+  </form>
+</main>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 日付指定エラーメッセージのテンプレート ↓ -->
+<ng-template #dateErrors let-ctrls="ctrls">
+  <ng-container *ngIf="ctrls.errors?.['endingDateIsSmaller']">
+    <p class="mt-1 pl-1 text-sm text-red">
+      {{ errorConst.FORM_ERROR.DATE_SPECIFICATION_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

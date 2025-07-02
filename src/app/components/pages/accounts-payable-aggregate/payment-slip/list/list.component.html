@@ -1,0 +1,20 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { text: '支払データ一覧' }
+  ]"></app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search (event)="filter = $event"></app-search>
+
+<!-- ↓ テーブル ↓ -->
+<app-table-with-pagination
+  class="block mt-2"
+  [params]="tableParams"
+  (pageChange)="pages = $event">
+  支払データ一覧
+</app-table-with-pagination>

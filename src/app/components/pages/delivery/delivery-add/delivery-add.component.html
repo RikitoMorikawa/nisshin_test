@@ -1,0 +1,590 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/delivery', text: '配送一覧' },
+    { text: '配送新規登録' }
+  ]"></app-breadcrumb-org>
+<app-loading-container
+  [isLoading]="isDuringAcquisition"></app-loading-container>
+<main>
+  <h1 class="mt-8 text-xl">配送新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!isDuringAcquisition; else duringAcquisition">
+    <div
+      class="mt-8 gap-6 mb-24 py-8 px-6 bg-white shadow border border-gray-300">
+      <div class="border border-gray-300 px-2 py-1">
+        <div class="flex gap-6">
+          <div class="w-1/3">
+            <!-- お客様タイプ ID -->
+            <p>
+              お客様タイプ：{{ customer.customer_type_name }}　お客様番号：{{
+                customer.id
+              }}
+            </p>
+            <!-- 売上タイプ名 -->
+            <p class="mt-2">売上タイプ：{{ salesTypeName }}</p>
+            <!-- 姓名 -->
+            <div class="mt-2">
+              <ruby>
+                <span class="text-2xl">{{ customer.name }}</span>
+                <rp>(</rp>
+                <rt>{{ customer.name_kana }}</rt>
+                <rp>)</rp>
+              </ruby>
+              <span class="text-2xl">　様</span>
+            </div>
+          </div>
+          <div class="w-2/3">
+            <p class="mg-2">連絡先電話番号：{{ customer.tel }}</p>
+            <p class="mt-2">配送先：{{ customer.shipping_address }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4">
+        <div>配送希望商品情報（配送日時を指定する商品を選択して下さい。）</div>
+        <!-- 売上タイプに応じてテンプレートを切り替える -->
+        <ng-container *ngIf="!isDuringAcquisition">
+          <ng-container
+            *ngIf="
+              salesTypeName === deliveryConst.RENTAL;
+              then rental
+            "></ng-container>
+          <ng-container
+            *ngIf="
+              salesTypeName === deliveryConst.CUSTOMER_ORDER;
+              then customerOrder
+            "></ng-container>
+        </ng-container>
+      </div>
+      <div class="mt-4" *ngIf="isDelivery">
+        <div>
+          {{
+            specifiedDate
+              ? specifiedDate + ' 配送予定表'
+              : '配送日の指定がありません。配送日を指定することで指定日の配送予定が表示されます。'
+          }}
+        </div>
+        <table class="w-full">
+          <thead class="text-sm">
+            <tr>
+              <th class="border border-slate-300 text-center px-1 w-[80px]">
+                配送区分
+              </th>
+              <th class="border border-slate-300 text-center px-1 w-[160px]">
+                配送日時
+              </th>
+              <th class="border border-slate-300 text-left px-1">配送先</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <ng-container *ngFor="let deliverySlot of deliverySchedule">
+              <tr>
+                <td class="border border-slate-300 text-center px-1">
+                  {{ deliverySlot.division_delivery_type_value }}
+                </td>
+                <td class="border border-slate-300 text-center px-1">
+                  {{ dateTimeFormatter(deliverySlot.delivery_specified_time) }}
+                </td>
+                <td class="border border-slate-300 px-1">
+                  {{ deliverySlot.shipping_address }}
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+        <p
+          *ngIf="
+            specifiedDate && deliverySchedule && deliverySchedule.length === 0
+          "
+          class="mt-2 text-center">
+          配送予定はありません
+        </p>
+        <div class="mt-2" *ngIf="isDeliveryScheduleLoading">
+          <app-spinner
+            appendClassForSpinner="h-4 w-4 opacity-100"></app-spinner>
+        </div>
+      </div>
+      <div class="mt-4" *ngIf="isCollection">
+        <div>
+          {{
+            specifiedDate
+              ? specifiedDate + ' 回収予定表'
+              : '回収日の指定がありません。回収日を指定することで指定日の配送予定が表示されます。'
+          }}
+        </div>
+        <table class="w-full">
+          <thead class="text-sm">
+            <tr>
+              <th class="border border-slate-300 text-center px-1 w-[80px]">
+                配送区分
+              </th>
+              <th class="border border-slate-300 text-center px-1 w-[160px]">
+                配送日時
+              </th>
+              <th class="border border-slate-300 text-left px-1">配送先</th>
+            </tr>
+          </thead>
+          <tbody class="text-sm">
+            <ng-container *ngFor="let deliverySlot of collectionSchedule">
+              <tr>
+                <td class="border border-slate-300 text-center px-1">
+                  {{ deliverySlot.division_delivery_type_value }}
+                </td>
+                <td class="border border-slate-300 text-center px-1">
+                  {{ dateTimeFormatter(deliverySlot.delivery_specified_time) }}
+                </td>
+                <td class="border border-slate-300 px-1">
+                  {{ deliverySlot.shipping_address }}
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+        <p
+          *ngIf="
+            specifiedDate &&
+            collectionSchedule &&
+            collectionSchedule.length === 0
+          "
+          class="mt-2 text-center">
+          配送予定はありません
+        </p>
+        <div class="mt-2" *ngIf="isCollectionScheduleLoading">
+          <app-spinner
+            appendClassForSpinner="h-4 w-4 opacity-100"></app-spinner>
+        </div>
+      </div>
+      <div class="mt-4 px-3 py-4 bg-slate-100">
+        <div>
+          <form [formGroup]="form" (ngSubmit)="handleClickAddButton()">
+            <ng-container *ngIf="isDelivery">
+              <div class="flex gap-4">
+                <div class="w-2/6">
+                  <app-date-term
+                    [formCtrl]="fc.delivery_specified_time"
+                    nameAttrValue="delivery_specified_time"
+                    idAttrValue="delivery-specified-time"
+                    [invalid]="
+                      formControlStateManager(fc.delivery_specified_time)
+                    ">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '配送日', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.delivery_specified_time }
+                      "
+                      message></ng-container>
+                  </app-date-term>
+                </div>
+                <div class="w-1/6">
+                  <app-select-container
+                    [formCtrl]="fc.delivery_hour"
+                    nameAttrValue="delivery_hour"
+                    idAttrValue="delivery-hour"
+                    [options]="hourOptions"
+                    [invalid]="formControlStateManager(fc.delivery_hour)">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '時', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.delivery_hour }
+                      "
+                      message></ng-container>
+                  </app-select-container>
+                </div>
+                <div class="w-1/6">
+                  <app-select-container
+                    [formCtrl]="fc.delivery_minute"
+                    nameAttrValue="delivery_minute"
+                    idAttrValue="delivery-minute"
+                    [options]="minuteOptions"
+                    [invalid]="formControlStateManager(fc.delivery_minute)">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '分', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.delivery_minute }
+                      "
+                      message></ng-container>
+                  </app-select-container>
+                </div>
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="isCollection">
+              <div class="flex gap-4">
+                <div class="w-2/6">
+                  <app-date-term
+                    [formCtrl]="fc.collection_time"
+                    nameAttrValue="collection_time"
+                    idAttrValue="collection-time"
+                    [invalid]="formControlStateManager(fc.collection_time)">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '回収日', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.collection_time }
+                      "
+                      message></ng-container>
+                  </app-date-term>
+                </div>
+                <div class="w-1/6">
+                  <app-select-container
+                    [formCtrl]="fc.collection_hour"
+                    nameAttrValue="collection_hour"
+                    idAttrValue="collection-hour"
+                    [options]="hourOptions"
+                    [invalid]="formControlStateManager(fc.collection_hour)">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '時', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.collection_hour }
+                      "
+                      message></ng-container>
+                  </app-select-container>
+                </div>
+                <div class="w-1/6">
+                  <app-select-container
+                    [formCtrl]="fc.collection_minute"
+                    nameAttrValue="collection_minute"
+                    idAttrValue="collection-minute"
+                    [options]="minuteOptions"
+                    [invalid]="formControlStateManager(fc.collection_minute)">
+                    <ng-container
+                      *ngTemplateOutlet="
+                        labels;
+                        context: { label: '分', required: true }
+                      "></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="
+                        errors;
+                        context: { ctrl: fc.collection_minute }
+                      "
+                      message></ng-container>
+                  </app-select-container>
+                </div>
+              </div>
+            </ng-container>
+            <p class="mt-4 text-rose-400">
+              ※ 連絡先電話番号・配送先に変更がある場合入力してください。
+            </p>
+            <p class="text-rose-400">
+              ※
+              こちらに入力された連絡先電話番号と配送先が最終的な配送情報として登録されます。
+            </p>
+            <div class="flex gap-6 mt-2">
+              <div class="w-1/4">
+                <app-text-container
+                  [formCtrl]="fc.additional_tel"
+                  nameAttrValue="additional_tel"
+                  idAttrValue="additional-tel"
+                  [invalid]="formControlStateManager(fc.additional_tel)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '連絡先電話番号', required: false }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: fc.additional_tel }
+                    "
+                    message></ng-container>
+                </app-text-container>
+              </div>
+              <div class="w-3/4">
+                <app-text-container
+                  [formCtrl]="fc.shipping_address"
+                  nameAttrValue="shipping_address"
+                  idAttrValue="shipping-address"
+                  [invalid]="formControlStateManager(fc.shipping_address)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '配送先', required: true }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: fc.shipping_address }
+                    "
+                    message></ng-container>
+                </app-text-container>
+              </div>
+            </div>
+            <div class="flex gap-6 mt-4">
+              <div class="w-1/2">
+                <app-textarea-container
+                  [formCtrl]="fc.remarks_1"
+                  nameAttrValue="remarks_1"
+                  idAttrValue="remarks-1"
+                  [invalid]="formControlStateManager(fc.remarks_1)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '備考1', required: false }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_1 }"
+                    message></ng-container>
+                </app-textarea-container>
+              </div>
+              <div class="w-1/2">
+                <app-textarea-container
+                  [formCtrl]="fc.remarks_2"
+                  nameAttrValue="remarks_2"
+                  idAttrValue="remarks-2"
+                  [invalid]="formControlStateManager(fc.remarks_2)">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: '備考2', required: false }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_2 }"
+                    message></ng-container>
+                </app-textarea-container>
+              </div>
+            </div>
+            <div class="flex gap-6 mt-4 justify-end">
+              <div>
+                <app-button
+                  btnType="submit"
+                  btnFillColor="bg-success"
+                  btnHoverColor="hover:bg-success-hover"
+                  btnTextColor="text-white"
+                  btnLineColor="border-success"
+                  btnLineHoverColor="hover:border-success-hover"
+                  [buttonDisabled]="form.invalid || form.pristine"
+                  >決定</app-button
+                >
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</main>
+
+<!-- データ取得中に表示するテンプレート -->
+<ng-template #duringAcquisition>
+  <p class="text-3xl text-center text-slate-500 mt-6">データ取得中...</p>
+</ng-template>
+
+<!-- レンタル用配送対象データ表示テンプレート -->
+<ng-template #rental>
+  <ng-container *ngIf="deliveryForm">
+    <form [formGroup]="deliveryForm">
+      <table class="w-full">
+        <thead class="text-sm">
+          <tr>
+            <th class="border border-slate-300 px-1 w-[40px]">ID</th>
+            <th class="border border-slate-300 px-1 w-[80px]">配送日時</th>
+            <th class="border border-slate-300 px-1 w-[80px]">回収日時</th>
+            <th class="border border-slate-300 px-1 text-left">品名</th>
+            <th class="border border-slate-300 px-1 w-[40px]">数量</th>
+            <th class="border border-slate-300 px-1 w-[80px]">貸出予定日</th>
+            <th class="border border-slate-300 px-1 w-[70px]">配送依頼</th>
+            <th class="border border-slate-300 px-1 w-[80px]">
+              配送<br />希望日時
+            </th>
+            <th class="border border-slate-300 px-1 w-[80px]">返却予定日</th>
+            <th class="border border-slate-300 px-1 w-[70px]">回収依頼</th>
+            <th class="border border-slate-300 px-1 w-[80px]">
+              回収<br />希望日時
+            </th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          <ng-container *ngFor="let rentalCtrl of dfc.controls; let i = index">
+            <tr [formGroup]="deliveryFormGroupAt(i)">
+              <td class="border border-slate-300 px-1 text-center">
+                {{ rentals[i].id }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                <ng-container
+                  *ngIf="
+                    rentals[i].division_delivery_value ===
+                      deliveryConst.DELIVERY_AVAILABLE;
+                    else noDelivery
+                  ">
+                  {{
+                    rentals[i].delivery_date_time
+                      ? dateTimeFormatter(rentals[i].delivery_date_time)
+                      : '未設定'
+                  }}
+                </ng-container>
+                <ng-template else #noDelivery> 配送希望なし </ng-template>
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                <ng-container
+                  *ngIf="
+                    rentals[i].division_collection_value ===
+                      deliveryConst.COLLECTION_AVAILABLE;
+                    else noCollection
+                  ">
+                  {{
+                    rentals[i].collection_date_time
+                      ? dateTimeFormatter(rentals[i].collection_date_time)
+                      : '未設定'
+                  }}
+                </ng-container>
+                <ng-template else #noCollection> 回収希望なし </ng-template>
+              </td>
+              <td class="border border-slate-300 px-1">
+                {{ rentals[i].rental_product_name }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ rentals[i].rental_item_count }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ dateFormatter(rentals[i].scheduled_rental_date) }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ rentals[i].division_delivery_value }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ dateFormatter(rentals[i].delivery_date) }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ dateFormatter(rentals[i].scheduled_return_date) }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ rentals[i].division_collection_value }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ dateFormatter(rentals[i].collection_date) }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </form>
+  </ng-container>
+</ng-template>
+
+<!-- 客注用配送対象データ表示テンプレート -->
+<ng-template #customerOrder>
+  <ng-container *ngIf="deliveryForm">
+    <form [formGroup]="deliveryForm">
+      <table class="w-full">
+        <thead class="text-sm">
+          <tr>
+            <th class="border border-slate-300 px-1 w-[40px]">ID</th>
+            <th class="border border-slate-300 px-1 w-[80px]">配送日時</th>
+            <th class="border border-slate-300 px-1 text-left">品名</th>
+            <th class="border border-slate-300 px-1 w-[80px]">数量</th>
+            <th class="border border-slate-300 px-1 w-[80px]">単位</th>
+            <th class="border border-slate-300 px-1 w-[130px]">単価（税込）</th>
+            <th class="border border-slate-300 px-1 w-[130px]">金額（税込）</th>
+            <th class="border border-slate-300 px-1 w-[130px]">配送依頼</th>
+          </tr>
+        </thead>
+        <tbody class="text-sm">
+          <ng-container *ngFor="let rentalCtrl of dfc.controls; let i = index">
+            <tr [formGroup]="deliveryFormGroupAt(i)">
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].id }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                <ng-container
+                  *ngIf="
+                    customerOrders[i].division_delivery_value ===
+                      deliveryConst.DELIVERY_AVAILABLE;
+                    else noDelivery
+                  ">
+                  {{
+                    customerOrders[i].delivery_date_time
+                      ? dateTimeFormatter(customerOrders[i].delivery_date_time)
+                      : '未設定'
+                  }}
+                </ng-container>
+                <ng-template else #noDelivery> 配送希望なし </ng-template>
+              </td>
+              <td class="border border-slate-300 px-1">
+                {{ customerOrders[i].product_name }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].quantity }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].unit }}
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].tax_included_amount.toLocaleString() }} 円
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].tax_included_amount.toLocaleString() }} 円
+              </td>
+              <td class="border border-slate-300 px-1 text-center">
+                {{ customerOrders[i].division_delivery_value }}
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </form>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

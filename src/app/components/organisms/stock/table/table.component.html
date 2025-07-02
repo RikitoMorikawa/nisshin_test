@@ -1,0 +1,6 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="loading"
+  (pageChange)="eventListener.next($event)"
+  >在庫テーブル</app-table-with-pagination
+>

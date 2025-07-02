@@ -1,0 +1,30 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '設定一覧' }]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-16 mb-3 text-xl">設定一覧</h1>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div class="flex flex-row flex-wrap mt-12 gap-7">
+    <ng-container *ngIf="author">
+      <ng-container *ngFor="let settingItem of settingItems">
+        <ng-container *ngIf="!settingItem.lock; else lock">
+          <a routerLink="{{ settingItem.path }}">
+            <app-icon-container
+              class="block group p-6 rounded-md shadow-md w-72 h-30 bg-white hover:bg-sky-500 hover:text-white"
+              appendClassForIcon="group-hover:fill-white group-hover:text-white"
+              icon="lock-unlock-line">
+              <span>{{ settingItem.title }}</span>
+            </app-icon-container>
+          </a>
+        </ng-container>
+        <ng-template #lock>
+          <app-icon-container
+            class="block group p-6 rounded-md shadow-md w-56 h-30 bg-slate-200 text-slate-400"
+            appendClassForIcon="fill-slate-400"
+            icon="lock-line">
+            <span>{{ settingItem.title }}</span>
+          </app-icon-container>
+        </ng-template>
+      </ng-container>
+    </ng-container>
+  </div>
+</main>

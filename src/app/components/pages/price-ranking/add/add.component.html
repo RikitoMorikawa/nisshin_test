@@ -1,0 +1,366 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: settingMenuPath, text: '設定一覧' },
+    { path: listPagePath, text: 'ランク価格一覧' },
+    { text: 'ランク価格新規登録' }
+  ]">
+</app-breadcrumb-org>
+<!-- ↓ タイトル部（更新） ↓ -->
+<h2 class="mt-8 text-xl">ランク価格新規登録</h2>
+<div class="flex items-center justify-between mt-6 mb-2">
+  <app-cancel-link-org (click)="handleClickCancelLink()"></app-cancel-link-org>
+  <app-last-updater-org>
+    登録者：{{ updater ? updater : 'データ取得中...' }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ フォーム ↓ -->
+<div class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ ヘッダ部 ↓ -->
+  <h2 class="text-lg">ランク価格情報入力</h2>
+  <hr class="border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ 入力部 ↓ -->
+  <form
+    [formGroup]="form"
+    (ngSubmit)="handleClickSaveButton()"
+    class="p-6 mt-6 border border-b-0 border-gray-200 shadow"
+    autocomplete="off">
+    <div class="flex gap-4">
+      <div class="w-2/4">
+        <app-real-time-suggest-container
+          [idCtrl]="fc.product_id"
+          [nameCtrl]="fc.product_name"
+          nameAttrValue="product_name"
+          idAttrValue="product-name"
+          [apiInput]="getProductSuggests()"
+          (idValueChanges)="handleProductIdValueChanges($event)"
+          (selectedData)="handleSelectedProductData($event)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '商品名', required: true }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: fc.product_name }"
+            message>
+          </ng-container>
+        </app-real-time-suggest-container>
+      </div>
+      <div class="w-1/4">
+        <app-select-container
+          nameAttrValue="rank_division_id"
+          idAttrValue="rank-division-id"
+          [formCtrl]="fc.rank_division_id"
+          [options]="priceRankingDivisionOptions"
+          [invalid]="formControlStateManager(fc.rank_division_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: 'ランク価格', required: true }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: fc.rank_division_id }"
+            message>
+          </ng-container>
+        </app-select-container>
+      </div>
+      <div class="w-1/4">
+        <app-select-container
+          nameAttrValue="store_id"
+          idAttrValue="store-id"
+          [formCtrl]="fc.store_id"
+          [options]="storeOptions"
+          [invalid]="formControlStateManager(fc.store_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '店舗', required: true }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: fc.store_id }"
+            message>
+          </ng-container>
+        </app-select-container>
+      </div>
+    </div>
+    <ng-container *ngIf="!isProductSelected">
+      <p class="mt-4 text-rose-400">
+        ※ 商品選択後に価格情報入力フォームが表示されます
+      </p>
+    </ng-container>
+    <ng-container *ngIf="isProductSelected">
+      <p class="mt-6 pl-2">価格情報</p>
+      <hr class="border-t-warning-hover border-t-4 mt-1" />
+      <div class="flex gap-4 mt-4">
+        <div class="w-[10%] flex items-center justify-center">
+          <div class="mt-[24px]">
+            <span>バラ</span>
+          </div>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="supplier_cost_price"
+            idAttrValue="supplier-cost-price"
+            [formCtrl]="fc.supplier_cost_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.supplier_cost_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先商品単価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="gross_profit_rate"
+            idAttrValue="gross-profit-rate"
+            [formCtrl]="fc.gross_profit_rate"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.gross_profit_rate)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '荒利率', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="selling_price"
+            idAttrValue="selling-price"
+            [formCtrl]="fc.selling_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.selling_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '売価', required: true }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: fc.selling_price }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+      <hr class="mt-4" />
+      <div class="flex gap-4 mt-4">
+        <div class="w-[10%] flex items-center justify-center">
+          <div>
+            <span>小分け</span>
+          </div>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="b_supplier_cost_price"
+            idAttrValue="b-supplier-cost-price"
+            [formCtrl]="fc.b_supplier_cost_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.b_supplier_cost_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先商品単価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.b_supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="b_gross_profit_rate"
+            idAttrValue="b-gross-profit-rate"
+            [formCtrl]="fc.b_gross_profit_rate"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.b_gross_profit_rate)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '荒利率', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.b_gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="b_selling_price"
+            idAttrValue="b-selling-price"
+            [formCtrl]="fc.b_selling_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.b_selling_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '売価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: fc.b_selling_price }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+      <hr class="mt-4" />
+      <div class="flex gap-4 mt-4">
+        <div class="w-[10%] flex items-center justify-center">
+          <div>
+            <span>ケース</span>
+          </div>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="c_supplier_cost_price"
+            idAttrValue="c-supplier-cost-price"
+            [formCtrl]="fc.c_supplier_cost_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.c_supplier_cost_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '仕入先商品単価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.c_supplier_cost_price }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="c_gross_profit_rate"
+            idAttrValue="c-gross-profit-rate"
+            [formCtrl]="fc.c_gross_profit_rate"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.c_gross_profit_rate)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '荒利率', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.c_gross_profit_rate }
+              "
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+        <div class="w-[30%]">
+          <app-text-container
+            inputType="number"
+            nameAttrValue="c_selling_price"
+            idAttrValue="c-selling-price"
+            [formCtrl]="fc.c_selling_price"
+            [textRight]="true"
+            [invalid]="formControlStateManager(fc.c_selling_price)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '売価', required: false }
+              ">
+            </ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: fc.c_selling_price }"
+              message>
+            </ng-container>
+          </app-text-container>
+        </div>
+      </div>
+    </ng-container>
+    <!-- ↓ ボタン ↓ -->
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] fixed left-0 right-0 p-2 gap-8">
+      <app-button (click)="onClickReset()">クリア</app-button>
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+        btnTextColor="text-white"
+        btnLineColor="border-success hover:border-success-hover"
+        [buttonDisabled]="form.invalid">
+        保存
+      </app-button>
+    </div>
+  </form>
+</div>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+      必須
+    </span>
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.NUMERIC_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

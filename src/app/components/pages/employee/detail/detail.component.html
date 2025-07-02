@@ -1,0 +1,68 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/employee/list', text: '社員一覧' },
+    { text: '社員詳細' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">社員詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/employee/list"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="employee ? employee['role_name'] : 'データ取得中'">
+        最終更新者：{{ lastUpdaterName ? lastUpdaterName : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{
+        employee
+          ? employee['last_name'] + ' ' + employee['first_name']
+          : 'データ取得中...'
+      }}
+    </h2>
+    <h2 class="mt-1 mb-2 text-lg">
+      {{
+        employee
+          ? employee['last_name_kana'] + ' ' + employee['first_name_kana']
+          : 'データ取得中...'
+      }}
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="max-w-[240px] w-[240px]">
+        <img
+          *ngIf="!common.loading"
+          src="{{ profileImagePath }}"
+          alt="社員プロフィール画像"
+          height="240px"
+          width="240px" />
+      </div>
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            *ngFor="let employeeKey of employeeKeys"
+            class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">
+              {{ logicalNames[employeeKey] }}
+            </div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ employee ? employee[employeeKey] : '' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

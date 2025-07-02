@@ -1,0 +1,123 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '支払データ一覧' },
+    { text: '支払締めデータ作成' }
+  ]"></app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<main class="mb-8">
+  <div class="mt-6 mb-2 flex flex-row items-center justify-end">
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        作成者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="inputForm" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="mt-8 mb-24 pt-8 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">支払締めデータ作成</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="flex gap-6 mt-6 mb-6">
+        <div class="w-2/5"></div>
+        <div class="w-2/5"></div>
+      </div>
+      <div class="flex justify-center gap-6">
+        <app-select-suggest-container
+          nameAttrValue="cutoff_date_billing"
+          idAttrValue="cutoff-date-billing"
+          placeholder="締日選択"
+          [formCtrl]="ctrls.cutoff_date_billing"
+          [suggests]="cutoffDateBillingSuggests"
+          [invalid]="formControlStateManager(ctrls.cutoff_date_billing)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '締日', required: 'true' }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: { ctrl: ctrls.cutoff_date_billing }
+            "
+            message></ng-container>
+        </app-select-suggest-container>
+        <app-date-term-clear-container
+          class="w-3/6"
+          [dateFromFormCtrl]="ctrls.order_date.controls.from"
+          [dateToFormCtrl]="ctrls.order_date.controls.to"
+          [cutoffDateBilling]="cutoffDateBilling"
+          [invalid]="!!ctrls.order_date.errors">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '仕入日', required: 'true' }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: { ctrl: ctrls.order_date.controls.from }
+            "
+            message></ng-container>
+          <ng-container
+            *ngIf="ctrls.order_date.errors?.['beforeFromDate'] then  beforeFromDate"
+            message>
+          </ng-container>
+        </app-date-term-clear-container>
+      </div>
+    </div>
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="inputForm.invalid"
+        >支払締めデータ作成</app-button
+      >
+    </div>
+  </form>
+</main>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 日付指定エラーメッセージのテンプレート ↓ -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

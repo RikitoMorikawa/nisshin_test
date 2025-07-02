@@ -1,0 +1,36 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="searchButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ isOpen ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon class="w-6" [class]="rotateAnimation" icon="arrow-down-s-fill">
+    </app-icon>
+  </app-button>
+</div>
+
+<!-- ↓ フォーム部分 ↓ -->
+<div
+  class="search width-limit-break bg-white"
+  [ngClass]="isOpen ? 'is-open shadow' : ''">
+  <form class="w-[1280px] mx-auto px-4">
+    <!-- ↓ コンテンツ投影 ↓ -->
+    <ng-content></ng-content>
+
+    <!-- ↓ 実行ボタン ↓ -->
+    <div class="flex gap-8 mt-10">
+      <app-button (click)="onClickReset()">入力内容クリア</app-button>
+      <app-button
+        btnFillColor="text-white bg-success hover:bg-success-hover"
+        [buttonDisabled]="formCtrl.invalid || formCtrl.pristine"
+        (click)="onClickSubmit()">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>

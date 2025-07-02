@@ -1,0 +1,13 @@
+<app-label
+  [labelSize]="labelSize"
+  [forAttrValue]="idAttrValue"
+  class="block ml-1 mb-1">
+  <ng-content></ng-content>
+</app-label>
+<app-datepicker
+  [nameAttrValue]="nameAttrValue"
+  [idAttrValue]="idAttrValue"
+  [formCtrl]="formCtrl"
+  [placeholder]="placeholder"
+  [invalid]="invalid"></app-datepicker>
+<ng-content select="[message]"></ng-content>

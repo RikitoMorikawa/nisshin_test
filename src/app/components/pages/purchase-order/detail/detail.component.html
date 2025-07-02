@@ -1,0 +1,978 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '発注書一覧' },
+    { text: '発注書詳細' }
+  ]"></app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">発注書詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org [path]="listPagePath"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org
+        [path]="editPagePath"
+        [params]="{ supplierId: supplierId }"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <app-last-updater-org>
+      最終更新者：{{ updaterFullName ? updaterFullName : 'データ取得中...' }}
+    </app-last-updater-org>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <!-- 発注受付票と紐付く発注個票がある場合のみ表示する -->
+  <ng-container *ngIf="purchaseOrder && orders && !common.loading">
+    <!-- 紐付く個票が1つ以上あれば表示する -->
+    <ng-container *ngIf="orders.length > 0">
+      <!-- ステータスが下書きの場合 -->
+      <div class="mt-6" *ngIf="!isSent; else sent">
+        <app-button
+          (click)="changeStatus(purchaseOrderConst.STATUS.SENT)"
+          btnFillColor="bg-primary"
+          btnHoverColor="hover:bg-primary-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-primary"
+          btnLineHoverColor="hover:border-primary-hover">
+          送信済みにする
+        </app-button>
+      </div>
+      <!-- ステータスが下書き以外場合 -->
+      <ng-template #sent>
+        <div class="flex justify-between">
+          <div class="mt-6">
+            <app-button
+              class="bg-warning-dark hover:bg-warning-dark-hover"
+              (click)="changeStatus(purchaseOrderConst.STATUS.DRAFT)"
+              >下書きに戻す</app-button
+            >
+          </div>
+          <div class="mt-6 flex items-center gap-6">
+            <!-- PDF作成とダウンロード -->
+            <ng-container *ngIf="isPOPdfCreated; else notCreated">
+              <div>
+                <app-button (click)="getPdf()"
+                  >発注書PDFダウンロード</app-button
+                >
+              </div>
+            </ng-container>
+            <ng-template #notCreated>
+              <div>
+                <app-button (click)="createPOPdf()">発注書PDF作成</app-button>
+              </div>
+            </ng-template>
+            <!-- 検品ボタン -->
+            <app-button (click)="toInspectionPage()"> 検品 </app-button>
+          </div>
+        </div>
+      </ng-template>
+    </ng-container>
+  </ng-container>
+  <div
+    *ngIf="purchaseOrder && orders && basicInformation && !common.loading"
+    class="border border-slate-300 bg-white p-4 mt-6">
+    <div class="relative">
+      <h1 class="absolute top-0 right-[600px] text-2xl">発注書</h1>
+      <div class="absolute left-0 top-[6px]">
+        <span class="mr-4">発注No：{{ purchaseOrder.id }}</span>
+        <span
+          >発注日：{{ dateFormatter(purchaseOrder.order_date) }}（希望納入日：{{
+            dateFormatter(purchaseOrder.preferred_delivery_date)
+          }}）</span
+        >
+      </div>
+      <div class="absolute right-0 top-[6px]">
+        <span
+          >ステータス：{{
+            isSent
+              ? purchaseOrderConst.STATUS.SENT
+              : purchaseOrderConst.STATUS.DRAFT
+          }}</span
+        >
+      </div>
+    </div>
+    <div class="grid grid-cols-3 gap-2 mt-[32px]">
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <p>
+          <span class="mr-6">注文先</span
+          ><span>{{ purchaseOrder.supplier_id }}</span>
+        </p>
+        <p>{{ purchaseOrder.supplier_name }}</p>
+        <p>〒{{ purchaseOrder.supplier_postal_code }}</p>
+        <p>
+          {{ purchaseOrder.supplier_province
+          }}{{ purchaseOrder.supplier_locality
+          }}{{ purchaseOrder.supplier_street_address }}
+        </p>
+        <p>
+          {{
+            purchaseOrder.supplier_other_address
+              ? purchaseOrder.supplier_other_address
+              : '---'
+          }}
+        </p>
+        <p>
+          <span class="mr-6">TEL：{{ purchaseOrder.supplier_tel }}</span
+          ><span>FAX：{{ purchaseOrder.supplier_fax }}</span>
+        </p>
+      </div>
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <div class="flex flex-row gap-6">
+          <div>
+            <p>発注者</p>
+            <p>{{ basicInformation.name }}</p>
+          </div>
+          <div>
+            <p>担当者</p>
+            <p>
+              {{
+                purchaseOrder.employee_order_last_name +
+                  ' ' +
+                  purchaseOrder.employee_order_first_name
+              }}
+            </p>
+          </div>
+        </div>
+        <p>〒{{ basicInformation.postal_code }}</p>
+        <p>
+          {{
+            basicInformation.province +
+              basicInformation.locality +
+              basicInformation.street_address
+          }}
+        </p>
+        <p>---</p>
+        <p>
+          <span class="mr-6">TEL：{{ basicInformation.tel }}</span
+          ><span>FAX：{{ basicInformation.fax }}</span>
+        </p>
+      </div>
+      <div class="border border-slate-300 py-1 px-2 min-h-[160px]">
+        <div class="flex flex-row gap-6">
+          <div>
+            <p>届け先</p>
+            <p>{{ basicInformation.name }} {{ purchaseOrder.store_name }}</p>
+          </div>
+        </div>
+        <p>〒{{ purchaseOrder.store_postal_code }}</p>
+        <p>
+          {{ purchaseOrder.store_province }}{{ purchaseOrder.store_locality
+          }}{{ purchaseOrder.store_street_address }}
+        </p>
+        <p>
+          {{
+            purchaseOrder.store_other_address
+              ? purchaseOrder.store_other_address
+              : '---'
+          }}
+        </p>
+        <p>
+          <span class="mr-6">TEL：{{ purchaseOrder.store_tel }}</span
+          ><span>FAX：{{ purchaseOrder.store_fax }}</span>
+        </p>
+      </div>
+    </div>
+    <ng-container *ngIf="purchaseOrder.remarks">
+      <div class="border border-slate-300 bg-white p-2 mt-2 text-sm">
+        <p class="font-bold">発注書全体備考</p>
+        <p class="mt-1">{{ purchaseOrder.remarks }}</p>
+      </div>
+    </ng-container>
+    <div class="flex justify-between">
+      <div class="flex w-5/6">
+        <div class="mt-1 mb-1">
+          <app-button
+            btnType="button"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            (click)="allSelectItems()"
+            >全選択</app-button
+          >
+        </div>
+        &nbsp;&nbsp;
+        <div class="mt-1 mb-1">
+          <form [formGroup]="deleteList" (ngSubmit)="handleClickAllDelete()">
+            <input type="text" style="display: none" formControlName="idlist" />
+            <app-button
+              btnType="submit"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              [buttonDisabled]="button_status"
+              >選択削除</app-button
+            >
+          </form>
+        </div>
+        &nbsp;&nbsp;
+        <div class="mt-1 mb-1">
+          <app-button
+            (click)="reset()"
+            btnType="button"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="button_status"
+            >選択解除</app-button
+          >
+        </div>
+      </div>
+    </div>
+    <table
+      class="mt-2 w-[100%] table-fixed border-collapse border border-slate-400">
+      <thead class="text-sm">
+        <tr>
+          <th class="border border-slate-300 w-[80px]">ID</th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>自コード</p>
+              <p>相コード</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[108px]">
+            <div>
+              <p>JAN</p>
+              <p>棚番</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[400px]">
+            <div>
+              <p>商品名</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>前日の販売数</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[54px]">
+            <div>
+              <p>数量</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[54px]">
+            <div>
+              <p>単位</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>規定在庫</p>
+              <p>最小発注数</p>
+            </div>
+          </th>
+          <th class="border border-slate-300 w-[80px]">
+            <div>
+              <p>ケース入数</p>
+              <p>バラ総数</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>単価</p>
+            </div>
+          </th>
+          <th class="border border-slate-300">
+            <div>
+              <p>金額</p>
+            </div>
+          </th>
+          <ng-container *ngIf="!isSent">
+            <th class="border border-slate-300 w-[100px]">
+              <div>
+                <p>操作</p>
+              </div>
+            </th>
+          </ng-container>
+        </tr>
+      </thead>
+      <tbody class="text-xs">
+        <ng-container *ngIf="orders.length > 0">
+          <ng-container *ngFor="let order of orders; let i = index">
+            <tr
+              [ngClass]="{
+                'bg-slate-100': editTarget && editTarget.id === order.id
+              }">
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <input
+                    type="checkbox"
+                    name="orderForm_id"
+                    [value]="order.id"
+                    (click)="getId($event)"
+                    style="transform: scale(1.5); margin-left: 0.5em"
+                    #checkboxes />
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.product_id }}</p>
+                  <p>
+                    {{
+                      order.supplier_product_cd
+                        ? order.supplier_product_cd
+                        : '-'
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.ordering_target_barcode }}</p>
+                  <p>
+                    {{ order.division_shelf_value }}-{{
+                      order.division_shelf_col_value
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div>
+                  <ng-container
+                    *ngIf="order.product_name && !order.product_name_alias">
+                    <p>
+                      {{ order.product_name }}
+                      <!-- input
+                        style="width: 95%"
+                        type="text"
+                        name="product_name_alias"
+                        [id]="order.id"
+                        [value]="order.product_name"
+                        (change)="
+                          order.product_name_alias = getValue($event)
+                        " /-->
+                    </p>
+                  </ng-container>
+                  <ng-container
+                    *ngIf="order.product_name && order.product_name_alias">
+                    <p>
+                      {{ order.product_name_alias }}
+                      <!--input
+                        style="width: 95%"
+                        type="text"
+                        name="product_name_alias"
+                        [id]="order.id"
+                        [value]="order.product_name_alias"
+                        (change)="
+                          order.product_name_alias = getValue($event)
+                        " /-->
+                    </p>
+                  </ng-container>
+                  <ng-container
+                    *ngIf="!order.product_name && order.product_name_alias">
+                    <p>
+                      {{ order.product_name_alias }}
+                      <!--input
+                        style="width: 95%"
+                        type="text"
+                        name="product_name_alias"
+                        [id]="order.id"
+                        [value]="order.product_name_alias"
+                        (change)="
+                          order.product_name_alias = getValue($event)
+                        " /-->
+                    </p>
+                  </ng-container>
+                  <div class="flex justify-between">
+                    <div>
+                      <p>
+                        {{ order.division_price_tag_value }}
+                      </p>
+                    </div>
+                    <div>
+                      <p class="text-right">
+                        {{ order.division_seal_print_value }}
+                      </p>
+                    </div>
+                  </div>
+                  <p>{{ order.remarks }}</p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{
+                      sales_detail_lists[i]
+                        ? sales_detail_lists[i].delivery_real_number
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{ order.order_quantity }}
+                    <!-- input
+                      style="width: 95%"
+                      type="text"
+                      name="order_quantity"
+                      [id]="order.id"
+                      [value]="order.order_quantity"
+                      (change)="order.order_quantity = getValue($event)" /-->
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_unit_name
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>{{ order.regulated_stock_num }}</p>
+                  <p>{{ order.minimum_order_quantity }}</p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-center">
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_quantity
+                        : 0
+                    }}
+                  </p>
+                  <p>
+                    {{
+                      product_order_status_list[i]
+                        ? product_order_status_list[i].ordering_order_all_num
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-right">
+                  <p>
+                    {{
+                      order.cost_price ? order.cost_price.toLocaleString() : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <td class="border border-slate-300 px-1">
+                <div class="text-right">
+                  <p>
+                    {{
+                      order.cost_price
+                        ? (
+                            order.cost_price * order.order_quantity
+                          ).toLocaleString()
+                        : ''
+                    }}
+                  </p>
+                </div>
+              </td>
+              <ng-container *ngIf="!isSent">
+                <td class="border border-slate-300 px-1">
+                  <div class="flex justify-around">
+                    <ng-container
+                      *ngIf="!addFormIsOpen; else inoperableEditIcon">
+                      <div class="cursor-pointer">
+                        <app-icon-container
+                          (click)="editOrder(order)"
+                          appendClassForIcon="fill-warning group-hover:fill-warning-hover"
+                          icon="edit-2-line">
+                        </app-icon-container>
+                      </div>
+                    </ng-container>
+
+                    <ng-container
+                      *ngIf="!addFormIsOpen; else inoperableDeleteIcon">
+                      <div class="cursor-pointer">
+                        <app-icon-container
+                          (click)="deleteOrder(order.id)"
+                          icon="delete-bin-line"
+                          appendClassForIcon="cursor-pointer fill-danger group-hover:fill-danger-hover"></app-icon-container>
+                      </div>
+                    </ng-container>
+                  </div>
+                </td>
+              </ng-container>
+            </tr>
+            <ng-container
+              *ngIf="
+                !isSent &&
+                !addFormIsOpen &&
+                editFormIsOpen &&
+                editTarget.id === order.id
+              ">
+              <tr>
+                <td colspan="11">
+                  <ng-container *ngIf="editFormIsOpen; then edit">
+                  </ng-container>
+                </td>
+              </tr>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+        <tr class="font-bold">
+          <td class="border border-slate-300 px-1" colspan="9">
+            <div class="text-right">
+              <p>合計</p>
+            </div>
+          </td>
+          <td class="border border-slate-300 px-1">
+            <!-- 単価の列は空白に -->
+            <div class="text-right">
+              <p></p>
+            </div>
+          </td>
+          <td class="border border-slate-300 px-1">
+            <div class="text-right">
+              <p>{{ calculateTotalAmount().toLocaleString() }}</p>
+            </div>
+          </td>
+          <ng-container *ngIf="!isSent">
+            <td class="border border-slate-300 px-1">
+              <!-- 残りの列 -->
+            </td>
+          </ng-container>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-container *ngIf="!isSent && addFormIsOpen; then add"></ng-container>
+    <div class="py-4" [class.hidden]="!isUpdatingOrder">
+      <app-spinner class="text-xs"></app-spinner>
+    </div>
+    <div
+      *ngIf="!isSent && !addFormIsOpen && !editFormIsOpen"
+      class="mt-4 text-right">
+      <app-button (click)="addOrder()">商品追加</app-button>
+    </div>
+  </div>
+  <div *ngIf="common.loading" class="mt-12 text-center">
+    <p class="text-2xl text-slate-600">データ取得中...</p>
+  </div>
+</main>
+
+<ng-template #edit>
+  <div class="mt-6 mx-8 px-4 py-4 bg-slate-100">
+    <form [formGroup]="editForm" (ngSubmit)="handleClickOrderEditButton()">
+      <div class="mx-4 flex gap-6">
+        <div class="grow">
+          <app-text-container
+            nameAttrValue="order_quantity"
+            idAttrValue="order-quantity"
+            [formCtrl]="editFormCtrls.order_quantity"
+            [textRight]="true"
+            inputType="number"
+            [invalid]="formControlStateManager(editFormCtrls.order_quantity)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '数量', required: 'true' }
+              "></ng-container>
+          </app-text-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: {
+                ctrl: getFormControlTypeValue(editForm, 'order_quantity')
+              }
+            "
+            message></ng-container>
+        </div>
+        <div class="grow">
+          <ng-container *ngIf="isCustomProduct(editForm); else product">
+            <app-text-container
+              nameAttrValue="cost_price"
+              idAttrValue="cost-price"
+              [formCtrl]="editFormCtrls.cost_price"
+              [textRight]="true"
+              inputType="number"
+              [invalid]="formControlStateManager(editFormCtrls.cost_price)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '単価', required: 'true' }
+                "></ng-container>
+            </app-text-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: {
+                  ctrl: getFormControlTypeValue(editForm, 'cost_price')
+                }
+              "
+              message></ng-container>
+          </ng-container>
+          <ng-template #product>
+            <!--
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '単価' }
+              "></ng-container>
+              <input type="text" readonly [value]="editFormCtrls.cost_price.value">
+            -->
+          </ng-template>
+        </div>
+      </div>
+      <div class="flex mx-4 gap-6">
+        <div class="grow">
+          <app-text-container
+            nameAttrValue="product_name_alias"
+            idAttrValue="product-name-alias"
+            [formCtrl]="editFormCtrls.product_name_alias"
+            inputType="text"
+            [invalid]="
+              formControlStateManager(editFormCtrls.product_name_alias)
+            ">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '商品名(別称)' }
+              "></ng-container>
+          </app-text-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: {
+                ctrl: getFormControlTypeValue(editForm, 'product_name_alias')
+              }
+            "
+            message></ng-container>
+        </div>
+      </div>
+      <hr class="mt-4" />
+      <div class="mt-4 px-4">
+        <p>入力中商品情報</p>
+      </div>
+      <div class="mt-4 pb-2">
+        <p>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            商品名(別称)：{{
+              editForm.controls['product_name_alias'].value
+                ? editForm.controls['product_name_alias'].value
+                : ''
+            }}
+          </span>
+        </p>
+      </div>
+      <div class="mt-4 pb-2">
+        <p>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            数量：{{ getFormValue(editForm, 'order_quantity') }}
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            単価：{{
+              getFormValue(editForm, 'cost_price')
+                ? getFormValue(editForm, 'cost_price').toLocaleString()
+                : 0
+            }}円
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            金額：{{
+              getFormValue(editForm, 'order_quantity') *
+                getFormValue(editForm, 'cost_price')
+            }}円
+          </span>
+        </p>
+      </div>
+
+      <div class="flex gap-6 justify-end">
+        <div class="pt-7">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="editForm.invalid || editForm.pristine"
+            >更新</app-button
+          >
+        </div>
+        <div class="pt-7">
+          <app-button (click)="editOrderCancel()">キャンセル</app-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<ng-template #add>
+  <div class="mt-6 mx-8 px-4 py-4 bg-slate-100">
+    <div class="ml-4">
+      <app-button (click)="setSelectionType()">
+        {{
+          selectionTypeIsProductId ? '商品名で指定する' : '商品番号で指定する'
+        }}
+      </app-button>
+    </div>
+    <hr class="mt-4" />
+
+    <form [formGroup]="addForm" (ngSubmit)="handleClickOrderSaveButton()">
+      <div class="flex mx-4 gap-6">
+        <app-text-container
+          nameAttrValue="order_status_division_id"
+          idAttrValue="order-status-division-id"
+          [formCtrl]="addFormCtrls.order_status_division_id"
+          [invalid]="formControlStateManager(addFormCtrls.order_quantity)"
+          [hidden]="true">
+        </app-text-container>
+        <ng-container
+          *ngIf="selectionTypeIsProductId; else selectionTypeIsProductName">
+          <div class="grow">
+            <app-real-time-suggest-container
+              [idCtrl]="addFormCtrls.product_id"
+              [nameCtrl]="addFormCtrls.product_id"
+              nameAttrValue="product_id"
+              idAttrValue="product-id"
+              [apiInput]="getProductSuggestsId(addFormCtrls)"
+              [invalid]="formControlStateManager(addFormCtrls.product_id)"
+              (selectedData)="handleSelectedProductData(addForm, $event)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '商品番号',
+                    required: true
+                  }
+                "></ng-container>
+            </app-real-time-suggest-container>
+          </div>
+        </ng-container>
+        <ng-template #selectionTypeIsProductName>
+          <div class="w-2/5">
+            <app-real-time-suggest-container
+              [idCtrl]="addFormCtrls.product_id"
+              [nameCtrl]="addFormCtrls.product_name"
+              nameAttrValue="product_name"
+              idAttrValue="product-name"
+              [apiInput]="getProductSuggestsName(addFormCtrls)"
+              [invalid]="formControlStateManager(addFormCtrls.product_id)"
+              (selectedData)="handleSelectedProductData(addForm, $event)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '品名を商品マスタから選択',
+                    required: true
+                  }
+                "></ng-container>
+            </app-real-time-suggest-container>
+            <ng-container
+              *ngIf="addFormCtrls.product_name.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredViolation">
+            </ng-container>
+          </div>
+        </ng-template>
+        <div class="grow">
+          <app-text-container
+            nameAttrValue="order_quantity"
+            idAttrValue="order-quantity"
+            [formCtrl]="addFormCtrls.order_quantity"
+            [textRight]="true"
+            inputType="number"
+            [invalid]="formControlStateManager(addFormCtrls.order_quantity)"
+            (change)="handleCahgeQuantityCostPrice(addForm)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '数量', required: 'true' }
+              "></ng-container>
+          </app-text-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: {
+                ctrl: getFormControlTypeValue(addForm, 'order_quantity')
+              }
+            "
+            message></ng-container>
+        </div>
+      </div>
+      <div class="mx-4 flex gap-6">
+        <div class="w-3/5">
+          <app-text-container
+            nameAttrValue="product_name_alias"
+            idAttrValue="product_name_alias"
+            inputType="text"
+            [formCtrl]="getFormControlTypeValue(addForm, 'product_name_alias')"
+            [invalid]="
+              formControlStateManager(
+                getFormControlTypeValue(addForm, 'product_name_alias')
+              )
+            ">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label: '商品名を変更する場合下記へ入力してください',
+                  required: false
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: {
+                  ctrl: getFormControlTypeValue(addForm, 'product_name_alias')
+                }
+              "
+              message></ng-container>
+          </app-text-container>
+        </div>
+        <ng-container *ngIf="isDivisionCustom">
+          <div class="w-2/5">
+            <app-text-container
+              nameAttrValue="cost_price"
+              idAttrValue="cost-price"
+              inputType="number"
+              [formCtrl]="getFormControlTypeValue(addForm, 'cost_price')"
+              [textRight]="true"
+              [invalid]="
+                formControlStateManager(
+                  getFormControlTypeValue(addForm, 'cost_price')
+                )
+              "
+              (change)="handleCahgeQuantityCostPrice(addForm)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '単価',
+                    required: false
+                  }
+                "></ng-container>
+            </app-text-container>
+          </div>
+        </ng-container>
+      </div>
+      <hr class="mt-4" />
+      <div class="mt-4 px-4">
+        <p>入力中商品情報</p>
+      </div>
+      <div class="mt-4 pb-2">
+        <p>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            仕入先：{{ getFormValue(addForm, 'supplier_name') }}
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            商品名：{{ getFormValue(addForm, 'product_name') }}
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            商品名(別称)：{{
+              addForm.controls['product_name_alias'].value
+                ? addForm.controls['product_name_alias'].value
+                : ''
+            }}
+          </span>
+        </p>
+      </div>
+      <div class="mt-4 pb-2">
+        <p>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            数量：{{ getFormValue(addForm, 'order_quantity') }}
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            原価：{{
+              getFormValue(addForm, 'cost_price')
+                ? getFormValue(addForm, 'cost_price').toLocaleString()
+                : 0
+            }}円
+          </span>
+          <span
+            class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+            金額：{{
+              getFormValue(addForm, 'total_cost_price').toLocaleString()
+            }}円
+          </span>
+        </p>
+      </div>
+
+      <div class="flex gap-6 justify-end">
+        <div class="pt-7">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="addForm.invalid || addForm.pristine"
+            >追加</app-button
+          >
+        </div>
+        <div class="pt-7">
+          <app-button (click)="addOrderCancel()">キャンセル</app-button>
+        </div>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- 編集アイコンのテンプレート（操作不可） -->
+<ng-template #inoperableEditIcon>
+  <div>
+    <app-icon-container
+      appendClassForIcon="fill-slate-200"
+      icon="edit-2-line"></app-icon-container>
+  </div>
+</ng-template>
+
+<!-- 削除アイコンのテンプレート（操作不可） -->
+<ng-template #inoperableDeleteIcon>
+  <div>
+    <app-icon-container
+      icon="delete-bin-line"
+      appendClassForIcon="fill-slate-200"></app-icon-container>
+  </div>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #errorMessage let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- || formGroup.pristine -->

@@ -1,0 +1,119 @@
+<div class="mt-8 mb-4">
+  <app-button (click)="handleClickSearchButton()" btnType="button">
+    <span class="w-6">
+      <app-icon icon="filter-2-line"></app-icon>
+    </span>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <span [class]="rotateAnimation" class="inline-block w-6">
+      <app-icon icon="arrow-down-s-fill"></app-icon>
+    </span>
+  </app-button>
+  <div
+    [class.is-open]="hasPanelOpened"
+    [class.shadow]="hasPanelOpened"
+    id="product-search-panel"
+    class="search-org-panel bg-white border border-slate-100">
+    <form [formGroup]="form" (ngSubmit)="handleClickSubmitButton()">
+      <div class="flex flex-row gap-4">
+        <div class="w-1/4">
+          <app-select-suggest-container
+            [formCtrl]="fc.client_id"
+            idAttrValue="client-id"
+            nameAttrValue="client_id"
+            [suggests]="clients"
+            labelSize="sm">
+            <span forAttrValue="client-id">得意先名</span>
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/4">
+          <app-select-suggest-container
+            [formCtrl]="fc.member_id"
+            idAttrValue="member-id"
+            nameAttrValue="member_id"
+            [suggests]="members"
+            labelSize="sm">
+            <span forAttrValue="member-id">会員名</span>
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            [formCtrl]="fc.tel"
+            idAttrValue="tel"
+            nameAttrValue="tel"
+            labelSize="sm">
+            <span forAttrValue="tel">連絡先電話番号</span>
+          </app-text-container>
+        </div>
+        <div class="w-1/4">
+          <app-text-container
+            [formCtrl]="fc.additional_tel"
+            idAttrValue="additional_tel"
+            nameAttrValue="additional_tel"
+            labelSize="sm">
+            <span forAttrValue="additional_tel">追加電話番号</span>
+          </app-text-container>
+        </div>
+      </div>
+      <div class="flex flex-row gap-4 mt-6">
+        <div class="w-1/3">
+          <app-text-container
+            [formCtrl]="fc.name"
+            idAttrValue="name"
+            nameAttrValue="name"
+            labelSize="sm">
+            <span forAttrValue="name">お名前</span>
+          </app-text-container>
+        </div>
+        <div class="w-2/3">
+          <app-text-container
+            [formCtrl]="fc.shipping_address"
+            idAttrValue="shipping-address"
+            nameAttrValue="shipping_address"
+            labelSize="sm">
+            <span forAttrValue="shipping_address">配送先</span>
+          </app-text-container>
+        </div>
+      </div>
+      <div class="mt-6 [&>*]:w-1/2">
+        <app-date-term-clear-container
+          [dateFromFormCtrl]="fc.delivery_specified_time.controls.from"
+          [dateToFormCtrl]="fc.delivery_specified_time.controls.to"
+          [invalid]="!!fc.delivery_specified_time.errors">
+          配送または回収日時
+          <ng-container
+            *ngIf="fc.delivery_specified_time.errors?.['beforeFromDate'] then beforeFromDate"
+            message>
+          </ng-container>
+        </app-date-term-clear-container>
+        <div></div>
+      </div>
+      <div class="mt-10">
+        <app-button class="mr-4" (click)="handleClickClearButton()">
+          入力内容クリア
+        </app-button>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="form.invalid || form.pristine">
+          絞り込み実行
+        </app-button>
+      </div>
+      <p class="mt-2 text-sm text-red">
+        ※
+        入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+      </p>
+    </form>
+  </div>
+</div>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}a
+  </p>
+</ng-template>

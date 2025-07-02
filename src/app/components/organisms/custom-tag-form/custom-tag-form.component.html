@@ -1,0 +1,10 @@
+<app-title level="h4" class="block mb-4"
+  ><span class="font-normal">カスタムタグ</span></app-title
+>
+<app-input-pair
+  *ngFor="let group of formArray.controls; let i = index"
+  [formGroup]="group"
+  [customTags]="customTags"
+  [index]="i"
+  (add)="addTagForm()"
+  (remove)="removeTagForm(i)"></app-input-pair>

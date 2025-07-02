@@ -1,0 +1,198 @@
+<form formGroup="formGroup">
+  <div class="border border-black bg-white px-8 py-4">
+    <app-title level="h3" class="block mb-4">
+      <span class="font-normal">精算項目情報入力</span>
+    </app-title>
+    <div class="flex gap-6">
+      <app-text-container
+        class="w-1/3"
+        [formCtrl]="ctrls.name"
+        [invalid]="invalid(ctrls.name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '精算項目名（10文字以内）', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.name }"
+          message></ng-container>
+      </app-text-container>
+
+      <app-text-container
+        class="w-1/3"
+        [formCtrl]="ctrls.abbreviation_name"
+        [invalid]="invalid(ctrls.abbreviation_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: {
+              label: '略称（2文字以内）'
+            }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.abbreviation_name }"
+          message></ng-container>
+      </app-text-container>
+
+      <app-text-container
+        class="w-1/3"
+        [formCtrl]="ctrls.field_name"
+        [invalid]="invalid(ctrls.field_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: {
+              label: 'フィールド名（10文字以内）'
+            }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.field_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+
+  <!-- ↓ 区分周り ↓ -->
+  <div class="border border-black border-t-0 bg-iron-blue-300 px-8 py-4 mb-6">
+    <div class="flex gap-6 w-2/3">
+      <app-select-container
+        class="w-1/4"
+        [formCtrl]="ctrls.display_division_id"
+        [options]="options.display_division"
+        >表示区分
+      </app-select-container>
+      <app-select-container
+        class="w-1/4"
+        [formCtrl]="ctrls.liquidation_division_id"
+        [options]="options.liquidation_division"
+        >精算区分
+      </app-select-container>
+    </div>
+    <div class="flex gap-6 w-2/3">
+      <!--
+      <app-select-container
+        class="w-1/4 flex items-center"
+        [invalid]="invalid(ctrls.sales_tax_division_id)"
+        [formCtrl]="ctrls.sales_tax_division_id"
+        [options]="options.sales_tax_division">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '消費税区分', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: ctrls.sales_tax_division_id }
+          "
+          message></ng-container>
+      </app-select-container>
+
+      <app-select-container
+        class="w-1/4"
+        [formCtrl]="ctrls.sales_tax_calc_division_id"
+        [invalid]="invalid(ctrls.sales_tax_calc_division_id)"
+        [options]="options.sales_tax_calc_division">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '消費税計算区分', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: ctrls.sales_tax_calc_division_id }
+          "
+          message>
+        </ng-container>
+      </app-select-container>
+
+      <app-select-container
+        class="w-1/4 flex items-center"
+        [invalid]="invalid(ctrls.sales_fraction_division_id)"
+        [formCtrl]="ctrls.sales_fraction_division_id"
+        [options]="options.sales_fraction_division">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '消費税端数区分', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: ctrls.sales_fraction_division_id }
+          "
+          message>
+        </ng-container>
+      </app-select-container>
+      -->
+
+      <!-- ↓ スペース合わせのための空の要素 -->
+      <div class="w-1/4"></div>
+    </div>
+  </div>
+
+  <!-- ↓ その他情報 ↓ -->
+  <!-- div class="border border-black bg-white px-8 py-4">
+    <app-title level="h3" class="block mb-4">
+      <span class="font-normal">その他属性情報</span>
+    </app-title>
+
+    <app-textarea-container [formCtrl]="ctrls.remarks_1" [rows]="5">
+      備考1
+    </app-textarea-container>
+    <app-textarea-container [formCtrl]="ctrls.remarks_2" [rows]="5">
+      備考2
+    </app-textarea-container>
+
+  </div -->
+</form>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['minlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['email']">
+      {{ errorConst.FORM_ERROR.EMAIL_FORMAT_VIOLATION }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxFileSize']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_FILE_SIZE_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.FULL_WIDTH_KATAKANA_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === '/^\\d{7}$/'">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

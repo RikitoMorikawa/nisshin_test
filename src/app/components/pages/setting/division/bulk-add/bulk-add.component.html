@@ -1,0 +1,98 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/division', text: '区分一覧' },
+    { text: '区分一括登録' }
+  ]"></app-breadcrumb-org>
+<!-- ローディング表示 -->
+<main>
+  <!-- ヘッダー部 -->
+  <h1 class="mt-8 text-xl">区分一括登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-icon-container
+        icon="close-line"
+        appendClassForIcon="fill-danger group-hover:fill-danger-hover">
+        <p class="text-gray-900 group-hover:text-danger-hover">キャンセル</p>
+      </app-icon-container>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <!-- ↓ テンプレートダウンロードボタン ↓ -->
+  <div class="flex justify-end">
+    <!-- ↓ テンプレートダウンロードボタン ↓ -->
+    <app-template-download-link-org
+      class="flex justify-end mt-8"
+      [api$]="template$"
+      [fileNamePrefix]="fileNamePrefix"
+      (statusChange)="onExportStatusChange($event)">
+    </app-template-download-link-org>
+  </div>
+  <!-- ↓ ボディ部 ↓ -->
+  <div class="mt-2 mb-28 py-8 px-6 bg-white shadow border border-gray-300">
+    <p class="text-lg mb-4">CSVファイルのヘッダーと値</p>
+
+    <!-- ↓ CSVファイルの説明 ↓ -->
+    <ul class="mb-8">
+      <li
+        *ngFor="let item of descriptions"
+        class="flex border border-b-0 last:border-b border-slate-400">
+        <div class="flex items-center w-[400px] bg-slate-100 p-4">
+          {{ item.title }}
+          <span
+            *ngIf="item.required"
+            class="px-3 py-0.5 ml-2 text-xs text-white bg-warning-dark rounded-full">
+            必須
+          </span>
+        </div>
+        <div class="grow p-4">{{ item.description }}</div>
+      </li>
+    </ul>
+    <!-- ↓ 各種ボタン ↓ -->
+    <form
+      [formGroup]="divisionBulkAddForm"
+      (ngSubmit)="handleClickUploadButton()">
+      <div class="flex justify-between mb-2">
+        <div class="flex items-center">
+          <app-file
+            [formCtrl]="divisionBulkAddForm.controls.file"
+            text="ファイル選択"
+            accept="text/csv">
+          </app-file>
+          <ng-container *ngIf="fileName">
+            <div class="flex flex-row items-center">
+              <p>{{ fileName }}</p>
+              <app-icon
+                class="w-6 cursor-pointer ml-2 fill-red-500"
+                icon="delete-bin-line"
+                (click)="handleClickDeleteIcon()">
+              </app-icon>
+            </div>
+          </ng-container>
+        </div>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="divisionBulkAddForm.invalid || !isUploadable">
+          アップロード実行
+        </app-button>
+      </div>
+    </form>
+  </div>
+</main>

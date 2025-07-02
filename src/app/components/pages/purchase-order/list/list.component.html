@@ -1,0 +1,43 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '発注書一覧' }]"></app-breadcrumb-org>
+<div class="mt-6 mb-12">
+  <button
+    routerLink="/purchase-order/order-data-creation"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    発注データ作成
+  </button>
+  <button
+    routerLink="/purchase-order"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    発注書一覧
+  </button>
+  <button
+    routerLink="/purchase-order/specification"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    発注個票一覧
+  </button>
+</div>
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)"></app-search>
+<main>
+  <!-- ↓ ボタン類 ↓ -->
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/purchase-order/add"></app-new-registration-link-org>
+    </div>
+  </div>
+
+  <!-- ↓ テーブル ↓ -->
+  <div>
+    <app-table
+      [eventListener]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

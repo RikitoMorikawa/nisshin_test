@@ -1,0 +1,52 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '棚卸一覧' },
+    { text: '棚卸' }
+  ]">
+</app-breadcrumb-org>
+
+<!-- ↓ トグル切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-inventory-search class="block mb-4" (searchEvent)="changeTerms($event)">
+</app-inventory-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-between">
+  <div class="flex gap-6 items-center">
+    <div>
+      <app-back-to-link-org path="{{ listPagePath }}">
+        棚卸一覧へ戻る
+      </app-back-to-link-org>
+    </div>
+  </div>
+  <div
+    *ngIf="!isInventoryCompleted && !common.loading; else isCompleted"
+    class="flex justify-end gap-8 mb-4 items-center">
+    <div>
+      <app-bulk-registration-link-org
+        text="CSV一括登録"
+        [routerLink]="bulkRegistrationPagePath">
+      </app-bulk-registration-link-org>
+    </div>
+    <div>
+      <app-button
+        btnType="button"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        (click)="handleClickCompleteButton()">
+        棚卸完了
+      </app-button>
+    </div>
+  </div>
+  <ng-template #isCompleted> 棚卸は完了しています </ng-template>
+</div>
+<!-- ↓ テーブル ↓ -->
+<app-inventory-table
+  [tableEvent]="subject"
+  (errorEvent)="handleError($event)"></app-inventory-table>

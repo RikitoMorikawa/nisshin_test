@@ -1,0 +1,77 @@
+<app-breadcrumb-org [breadcrumbList]="[]"></app-breadcrumb-org>
+<app-loading-container
+  [isLoading]="isDuringAcquisition"></app-loading-container>
+<main>
+  <h1 class="mt-8 text-xl">ホーム：会社情報</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-edit-link-org
+        path="/setting/basic-information/edit/1"></app-edit-link-org>
+    </div>
+    <div>
+      <ng-container *ngIf="!isDuringAcquisition">
+        <app-last-updater-org>
+          最終更新者：{{
+            basicInformation['updated_id']
+              ? basicInformation['updated_id']
+              : 'データ取得中...'
+          }}
+        </app-last-updater-org>
+      </ng-container>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!isDuringAcquisition"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">設定中の会社情報</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="max-w-[240px] w-[240px]">
+        <div>
+          <p class="pl-1">会社ロゴ</p>
+          <div class="mt-1 rounded-md border-slate-100 shadow-md">
+            <img
+              src="{{
+                basicInformation['logo_image_path']
+                  ? basicInformation['logo_image_path']
+                  : 'assets/images/no-image.png'
+              }}"
+              alt="会社ロゴ画像"
+              height="240px"
+              width="240px" />
+          </div>
+        </div>
+        <div class="mt-8">
+          <p class="pl-1">代表イメージ</p>
+          <div class="mt-1 rounded-md border-slate-100 shadow-md">
+            <img
+              src="{{
+                basicInformation['representative_image_path']
+                  ? basicInformation['representative_image_path']
+                  : 'assets/images/no-image.png'
+              }}"
+              alt="社長画像"
+              height="240px"
+              width="240px" />
+          </div>
+        </div>
+      </div>
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            *ngFor="let displayKey of displayKeys"
+            class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">
+              {{ logicalNames[displayKey] }}
+            </div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ basicInformation[displayKey] }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

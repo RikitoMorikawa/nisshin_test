@@ -1,0 +1,118 @@
+<div class="mt-8 mb-4">
+  <app-button (click)="handleClickSearchButton()" btnType="button">
+    <span class="w-6">
+      <app-icon icon="filter-2-line"></app-icon>
+    </span>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <span [class]="rotateAnimation" class="inline-block w-6">
+      <app-icon icon="arrow-down-s-fill"></app-icon>
+    </span>
+  </app-button>
+</div>
+<div
+  [class.is-open]="hasPanelOpened"
+  [class.shadow]="hasPanelOpened"
+  id="employee-search-panel"
+  class="search-org-panel bg-white border border-slate-100">
+  <form
+    [formGroup]="employeeSearchFormGroup"
+    (ngSubmit)="handleClickSubmitButton()">
+    <div class="flex items-start gap-12">
+      <div class="flex flex-row gap-4 grow">
+        <app-select-clear-container
+          class="grow"
+          [formCtrl]="employeeSearchFormGroup.controls.status_division_id"
+          idAttrValue="status-division-id"
+          nameAttrValue="status_division_id"
+          [options]="statusDivisionOptions"
+          labelSize="sm">
+          <span forAttrValue="status-division-id">社員表示区分</span>
+        </app-select-clear-container>
+        <app-select-clear-container
+          class="grow"
+          [formCtrl]="employeeSearchFormGroup.controls.store_id"
+          idAttrValue="store-id"
+          nameAttrValue="store_id"
+          [options]="storeOptions"
+          labelSize="sm">
+          <span forAttrValue="store-id">所属店舗</span>
+        </app-select-clear-container>
+      </div>
+      <div class="flex flex-row gap-4 grow">
+        <app-text-clear-container
+          class="grow"
+          [formCtrl]="employeeSearchFormGroup.controls.code"
+          idAttrValue="code"
+          nameAttrValue="code"
+          labelSize="sm">
+          <span forAttrValue="code">社員コード</span>
+        </app-text-clear-container>
+        <app-text-clear-container
+          class="grow"
+          [formCtrl]="employeeSearchFormGroup.controls.mail"
+          inputType="mail"
+          idAttrValue="mail"
+          nameAttrValue="mail"
+          labelSize="sm">
+          <span forAttrValue="mail">メールアドレス</span>
+        </app-text-clear-container>
+      </div>
+    </div>
+    <div class="flex flex-row items-center gap-12 mt-5">
+      <div class="flex flex-row gap-4">
+        <app-text-clear-container
+          [formCtrl]="employeeSearchFormGroup.controls.last_name"
+          idAttrValue="last-name"
+          nameAttrValue="last_name"
+          labelSize="sm">
+          <span forAttrValue="last-name">姓</span>
+        </app-text-clear-container>
+        <app-text-clear-container
+          [formCtrl]="employeeSearchFormGroup.controls.first_name"
+          idAttrValue="first-name"
+          nameAttrValue="first_name"
+          labelSize="sm">
+          <span forAttrValue="first-name">名</span>
+        </app-text-clear-container>
+      </div>
+      <div class="flex flex-row gap-4">
+        <app-text-clear-container
+          [formCtrl]="employeeSearchFormGroup.controls.last_name_kana"
+          idAttrValue="last-name-kana"
+          nameAttrValue="last_name_kana"
+          labelSize="sm">
+          <span forAttrValue="last-name-kana">セイ</span>
+        </app-text-clear-container>
+        <app-text-clear-container
+          [formCtrl]="employeeSearchFormGroup.controls.first_name_kana"
+          idAttrValue="first-name-kana"
+          nameAttrValue="first_name_kana"
+          labelSize="sm">
+          <span forAttrValue="first-name-kana">メイ</span>
+        </app-text-clear-container>
+      </div>
+    </div>
+    <div class="mt-10">
+      <app-button class="mr-4" (click)="handleClickClearButton()">
+        入力内容クリア
+      </app-button>
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        [buttonDisabled]="
+          employeeSearchFormGroup.invalid || employeeSearchFormGroup.pristine
+        ">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>

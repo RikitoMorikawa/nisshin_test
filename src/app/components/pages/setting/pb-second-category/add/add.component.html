@@ -1,0 +1,251 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    {
+      path: '/setting/product-book-second-category',
+      text: '商品ブック第2分類一覧'
+    },
+    { text: '商品ブック第2分類編集' }
+  ]"></app-breadcrumb-org>
+<main class="mb-20">
+  <h1 class="mt-8 text-xl">商品ブック第2分類新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="scAddForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">商品ブック第2分類名称入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <!-- 画像プレビュー -->
+                <div class="max-w-[300px] w-[300px]">
+                  <div class="px-2 pb-2">
+                    <p class="text-sm">
+                      ※ 画像のファイルサイズは最大{{
+                        maxFileSizeForDisplay
+                      }}Mバイト
+                    </p>
+                    <app-file
+                      [formCtrl]="scAddForm.controls.image"
+                      text="ロゴ画像選択"
+                      accept="image/png, image/jpeg">
+                    </app-file>
+                    <div
+                      class="mt-2 text-sm text-danger"
+                      *ngIf="
+                        scAddForm.controls.image.invalid;
+                        else correctImage
+                      ">
+                      <ng-container
+                        *ngIf="scAddForm.controls.image.errors?.['limitFileSize']"
+                        [ngTemplateOutlet]="em"
+                        [ngTemplateOutletContext]="exceededFileSizeLimit">
+                      </ng-container>
+                    </div>
+                    <ng-template #correctImage>
+                      <div class="mt-4" *ngIf="imageUrl">
+                        <img
+                          class="border border-gray-200 shadow rounded-md"
+                          [src]="imageUrl"
+                          alt="アップロード画像" />
+                        <div class="flex flex-row items-center mt-2">
+                          <p>{{ imageFileName }}</p>
+                          <app-icon
+                            class="w-6 cursor-pointer ml-2 fill-red-500"
+                            icon="delete-bin-line"
+                            (click)="handleClickDeleteIcon()">
+                          </app-icon>
+                        </div>
+                      </div>
+                    </ng-template>
+                  </div>
+                </div>
+                <div class="flex flex-col w-2/3">
+                  <div class="flex flex-row gap-4">
+                    <!-- 第一分類 -->
+                    <app-select-container
+                      class="w-1/2"
+                      [formCtrl]="
+                        scAddForm.controls.product_book_first_category_id
+                      "
+                      [options]="fcOptions"
+                      nameAttrValue="product_book_first_category_id"
+                      idAttrValue="product-book-first-category-id"
+                      [invalid]="
+                        formControlStateManager(
+                          scAddForm.controls.product_book_first_category_id
+                        )
+                      ">
+                      <div class="flex flex-row items-center">
+                        <span class="inline-block mr-2">第1分類選択</span>
+                        <span
+                          class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                          >必須</span
+                        >
+                      </div>
+                      <div
+                        class="mt-1 pl-1 text-sm"
+                        *ngIf="
+                          formControlStateManager(
+                            scAddForm.controls.product_book_first_category_id
+                          )
+                        "
+                        message>
+                        <ng-container
+                          *ngIf="scAddForm.controls.product_book_first_category_id.errors?.['required']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="requiredItem">
+                        </ng-container>
+                      </div>
+                    </app-select-container>
+                    <!-- 店舗選択 -->
+                    <app-select-container
+                      class="w-1/2"
+                      [formCtrl]="scAddForm.controls.store_id"
+                      [options]="storeOptions"
+                      nameAttrValue="store_id"
+                      idAttrValue="store-id"
+                      [invalid]="
+                        formControlStateManager(scAddForm.controls.store_id)
+                      ">
+                      <div class="flex flex-row items-center">
+                        <span class="inline-block mr-2">店舗選択</span>
+                        <span
+                          class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                          >必須</span
+                        >
+                      </div>
+                      <div
+                        class="mt-1 pl-1 text-sm"
+                        *ngIf="
+                          formControlStateManager(scAddForm.controls.store_id)
+                        "
+                        message>
+                        <ng-container
+                          *ngIf="scAddForm.controls.store_id.errors?.['required']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="requiredItem">
+                        </ng-container>
+                      </div>
+                    </app-select-container>
+                  </div>
+
+                  <div class="flex flex-row mt-6 gap-4">
+                    <!-- 第二分類 -->
+                    <app-text-container
+                      class="w-1/2"
+                      inputType="text"
+                      nameAttrValue="name"
+                      idAttrValue="name"
+                      [formCtrl]="scAddForm.controls.name"
+                      [invalid]="
+                        formControlStateManager(scAddForm.controls.name)
+                      ">
+                      <div class="flex flex-row items-center">
+                        <span class="inline-block mr-2"
+                          >第2分類名（20文字以内）</span
+                        >
+                        <span
+                          class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                          >必須</span
+                        >
+                      </div>
+                      <div
+                        class="mt-1 pl-1 text-sm"
+                        *ngIf="formControlStateManager(scAddForm.controls.name)"
+                        message>
+                        <ng-container
+                          *ngIf="scAddForm.controls.name.errors?.['required']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="requiredItem">
+                        </ng-container>
+                        <ng-container
+                          *ngIf="scAddForm.controls.name.errors?.['maxlength']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                        </ng-container>
+                      </div>
+                    </app-text-container>
+                    <!-- 第二分類カナ -->
+                    <app-text-container
+                      class="w-1/2"
+                      inputType="text"
+                      nameAttrValue="furi"
+                      idAttrValue="furi"
+                      [formCtrl]="scAddForm.controls.furi"
+                      [invalid]="
+                        formControlStateManager(scAddForm.controls.furi)
+                      ">
+                      <div class="flex flex-row items-center">
+                        <span class="inline-block mr-2"
+                          >第2分類名カナ（全角カナ20文字以内）</span
+                        >
+                      </div>
+                      <div
+                        class="mt-1 pl-1 text-sm"
+                        *ngIf="formControlStateManager(scAddForm.controls.furi)"
+                        message>
+                        <ng-container
+                          *ngIf="scAddForm.controls.furi.errors?.['maxlength']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                        </ng-container>
+                        <ng-container
+                          *ngIf="scAddForm.controls.furi.errors?.['pattern']"
+                          [ngTemplateOutlet]="em"
+                          [ngTemplateOutletContext]="
+                            fullWidthKatakanaRestrictionViolation
+                          ">
+                        </ng-container>
+                      </div>
+                    </app-text-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button (click)="onClickReset()">クリア</app-button>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="scAddForm.invalid || scAddForm.pristine">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

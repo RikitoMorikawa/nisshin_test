@@ -1,0 +1,52 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="eventListener.next($event)"
+  (checkItem)="selectItemList($event)">
+  発注書一覧
+
+  <div class="flex">
+    <div class="mt-1 mb-1">
+      <app-button
+        (click)="allSelectItems()"
+        btnType="button"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        >全選択</app-button
+      >
+    </div>
+    &nbsp;&nbsp;
+    <div class="mt-1 mb-1">
+      <form [formGroup]="deleteList" (ngSubmit)="handleClickDelete()">
+        <input type="text" style="display: none" formControlName="idlist" />
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          btnLineHoverColor="hover:border-success-hover"
+          [buttonDisabled]="button_status"
+          >選択削除</app-button
+        >
+      </form>
+    </div>
+    &nbsp;&nbsp;
+    <div class="mt-1 mb-1">
+      <app-button
+        (click)="reset()"
+        btnType="button"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        [buttonDisabled]="button_status"
+        >選択解除</app-button
+      >
+    </div>
+  </div>
+</app-table-with-pagination>

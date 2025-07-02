@@ -1,0 +1,591 @@
+<!-- パン屑 -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/member', text: '会員一覧' },
+    { text: '会員新規登録' }
+  ]">
+</app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">会員新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <!-- フォーム（基本情報） -->
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="formGroup" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="my-8 pt-8 pb-14 px-6 mb-40 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">会員情報入力</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="mt-6 flex flex-row gap-4 [&>*]:w-1/4">
+        <!-- 会員番号 -->
+        <app-text-container
+          inputType="text"
+          nameAttrValue="member_cd"
+          idAttrValue="member-cd"
+          [formCtrl]="ctrls.member_cd"
+          [invalid]="isFormInvalid(ctrls.member_cd)">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['member_cd'] }}（10文字以内）
+            </span>
+            <span
+              class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.member_cd)"
+            message>
+            <ng-container
+              *ngIf="ctrls.member_cd.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.member_cd.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 会員ステータス区分 -->
+        <app-select-container
+          [options]="statusOptions"
+          nameAttrValue="status_division_id"
+          idAttrValue="status-division-id"
+          [formCtrl]="ctrls.status_division_id"
+          [invalid]="isFormInvalid(ctrls.status_division_id)">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['status_division_id'] }}
+            </span>
+            <span
+              class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.status_division_id)"
+            message>
+            <ng-container
+              *ngIf="ctrls.status_division_id.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.status_division_id.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-select-container>
+        <!-- ポイント保有数 -->
+        <app-text-container
+          inputType="text"
+          nameAttrValue="point"
+          idAttrValue="point"
+          [formCtrl]="ctrls.point"
+          [invalid]="isFormInvalid(ctrls.point)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['point'] }}（半角数字256桁以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.point)"
+            message>
+            <ng-container
+              *ngIf="ctrls.point.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="numericLimitViolation">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.point.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 本人確認書類確認年月日 -->
+        <app-date-term
+          [formCtrl]="ctrls.identification_document_confirmation_date"
+          nameAttrValue="identification_document_confirmation_date"
+          idAttrValue="identification-document-confirmation-date">
+          本人確認書類確認年月日
+        </app-date-term>
+      </div>
+      <div class="mt-6 flex flex-row gap-4">
+        <!-- 会員 姓 -->
+        <app-text-container
+          class="w-1/2"
+          inputType="text"
+          nameAttrValue="last_name"
+          idAttrValue="last-name"
+          [formCtrl]="ctrls.last_name"
+          [invalid]="isFormInvalid(ctrls.last_name)">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['last_name'] }}（255文字以内）
+            </span>
+            <span
+              class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.last_name)"
+            message>
+            <ng-container
+              *ngIf="ctrls.last_name.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.last_name.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 会員 名 -->
+        <app-text-container
+          class="w-1/2"
+          inputType="text"
+          nameAttrValue="first_name"
+          idAttrValue="first-name"
+          [formCtrl]="ctrls.first_name"
+          [invalid]="isFormInvalid(ctrls.first_name)">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['first_name'] }}（255文字以内）
+            </span>
+            <span
+              class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.first_name)"
+            message>
+            <ng-container
+              *ngIf="ctrls.first_name.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.first_name.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+      </div>
+      <div class="mt-6 flex flex-row gap-4">
+        <!-- 会員 姓カナ -->
+        <app-text-container
+          class="w-1/2"
+          inputType="text"
+          nameAttrValue="last_name_kana"
+          idAttrValue="last-name-kana"
+          [formCtrl]="ctrls.last_name_kana"
+          [invalid]="isFormInvalid(ctrls.last_name_kana)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['last_name_kana'] }}（全角カナ255文字以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.last_name_kana)"
+            message>
+            <ng-container
+              *ngIf="ctrls.last_name_kana.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.last_name_kana.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="fullWidthKatakanaRestrictionViolation">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 会員 名カナ -->
+        <app-text-container
+          class="w-1/2"
+          inputType="text"
+          nameAttrValue="first_name_kana"
+          idAttrValue="first-name-kana"
+          [formCtrl]="ctrls.first_name_kana"
+          [invalid]="isFormInvalid(ctrls.first_name_kana)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['first_name_kana'] }}（全角カナ255文字以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.first_name_kana)"
+            message>
+            <ng-container
+              *ngIf="ctrls.first_name_kana.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.first_name_kana.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="fullWidthKatakanaRestrictionViolation">
+            </ng-container>
+          </div>
+        </app-text-container>
+      </div>
+      <div class="mt-6 flex flex-row gap-4">
+        <!-- 郵便番号 -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="postal_code"
+          idAttrValue="postal-code"
+          [formCtrl]="ctrls.postal_code"
+          [invalid]="isFormInvalid(ctrls.postal_code)">
+          <span class="inline-block">
+            {{ logicalNames['postal_code'] }}（半角数字7桁 ハイフンなし）
+          </span>
+          <div
+            class="mt-1 pl-1"
+            *ngIf="isFormInvalid(ctrls.postal_code)"
+            message>
+            <ng-container
+              *ngIf="ctrls.postal_code.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.postal_code.errors?.['minlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMinLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.postal_code.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="numericLimitViolation">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 都道府県 -->
+        <app-select-container
+          class="w-1/3"
+          [formCtrl]="ctrls.province"
+          [options]="provinceOptions"
+          nameAttrValue="province"
+          idAttrValue="province"
+          [invalid]="isFormInvalid(ctrls.province)">
+          <span class="inline-block">
+            {{ logicalNames['province'] }}
+          </span>
+        </app-select-container>
+        <!-- スペーサー -->
+        <div class="w-1/3"></div>
+      </div>
+      <div class="mt-6 flex flex-row gap-4">
+        <!-- 市区町村 -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="locality"
+          idAttrValue="locality"
+          [formCtrl]="ctrls.locality"
+          [invalid]="isFormInvalid(ctrls.locality)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['locality'] }}（20文字以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.locality)"
+            message>
+            <ng-container
+              *ngIf="ctrls.locality.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 町名番地 -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="street_address"
+          idAttrValue="street-address"
+          [formCtrl]="ctrls.street_address"
+          [invalid]="isFormInvalid(ctrls.street_address)">
+          <span class="inline-block">
+            {{ logicalNames['street_address'] }}（20文字以内）
+          </span>
+          <div
+            class="mt-1 pl-1"
+            *ngIf="isFormInvalid(ctrls.street_address)"
+            message>
+            <ng-container
+              *ngIf="ctrls.street_address.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- 建物名など -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="other_address"
+          idAttrValue="other-address"
+          [formCtrl]="ctrls.other_address"
+          [invalid]="isFormInvalid(ctrls.other_address)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['other_address'] }}（20文字以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.other_address)"
+            message>
+            <ng-container
+              *ngIf="ctrls.other_address.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+      </div>
+      <!-- B2C除外対応 -->
+      <div class="mt-8 flex flex-row gap-4">
+        <!-- 電話番号 -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="tel"
+          idAttrValue="tel"
+          [formCtrl]="ctrls.tel"
+          [invalid]="isFormInvalid(ctrls.tel)">
+          <span class="inline-block mr-2">
+            {{ logicalNames['tel'] }}（半角数字16桁以内）
+          </span>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.tel)"
+            message>
+            <ng-container
+              *ngIf="ctrls.tel.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="numericLimitViolation">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.tel.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-text-container>
+
+        <!-- メールアドレス -->
+        <app-text-container
+          class="w-1/3"
+          inputType="text"
+          nameAttrValue="mail"
+          idAttrValue="mail"
+          [formCtrl]="ctrls.mail"
+          [invalid]="isFormInvalid(ctrls.mail)">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['mail'] }}（255文字以内）
+            </span>
+            <!--<span class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>-->
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.mail)"
+            message>
+            <!--<ng-container
+              *ngIf="ctrls.mail.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>-->
+            <ng-container
+              *ngIf="ctrls.mail.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.mail.errors?.['email']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="emailFormatViolation">
+            </ng-container>
+          </div>
+        </app-text-container>
+        <!-- スペーサー -->
+        <div class="w-1/3"></div>
+      </div>
+      <!-- パスワード入力フォームをB2C除外対応でコメントアウト
+      <div class="mt-6 flex flex-row gap-4">
+        <app-text-container
+          class="w-1/3"
+          inputType="password"
+          [formCtrl]="ctrls.password.controls.password"
+          [invalid]="isFormInvalid(ctrls.password.controls.password)"
+          nameAttrValue="password"
+          idAttrValue="password">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['password'] }}<span class="text-xs">（8文字以上24文字以内）</span>
+            </span>
+            <span class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.password.controls.password)"
+            message>
+            <ng-container
+              *ngIf="ctrls.password.controls.password.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.password.controls.password.errors?.['minlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMinLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.password.controls.password.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+            <ng-container
+              *ngIf="ctrls.password.controls.password.errors?.['pattern']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="passwordFormatViolation">
+            </ng-container>
+          </div>
+          <p class="text-sm text-primary" message>
+            ※
+            半角英数8~24文字（大文字・小文字・数字をそれぞれ1文字ずつ含む必要があります）
+          </p>
+        </app-text-container>
+        -->
+      <!-- パスワード確認 -->
+      <!--
+        <app-text-container
+          class="w-1/3"
+          inputType="password"
+          [formCtrl]="ctrls.password.controls.confirm_password"
+          [invalid]="isFormInvalid(ctrls.password.controls.confirm_password)"
+          nameAttrValue="confirm_password"
+          idAttrValue="confirm-password">
+          <div class="flex flex-row items-center">
+            <span class="inline-block mr-2">
+              {{ logicalNames['confirm_password'] }}
+            </span>
+            <span class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+              必須
+            </span>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="isFormInvalid(ctrls.password.controls.confirm_password)"
+            message>
+            <ng-container
+              *ngIf="ctrls.password.controls.confirm_password.errors?.['required']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="requiredItem">
+            </ng-container>
+          </div>
+          <div
+            class="mt-1 pl-1 text-sm"
+            *ngIf="ctrls.password.errors?.['isPasswordSame']"
+            message>
+            <ng-container
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="passwordMatchViolation">
+            </ng-container>
+          </div>
+        </app-text-container>
+      </div>
+      -->
+      <!-- 備考1 -->
+      <div class="mt-8">
+        <app-textarea-container
+          [formCtrl]="ctrls.remarks_1"
+          [rows]="3"
+          nameAttrValue="remarks_1"
+          idAttrValue="remarks-1"
+          [invalid]="isFormInvalid(ctrls.remarks_1)">
+          備考1（255文字以内）
+          <div class="mt-1 pl-1" *ngIf="isFormInvalid(ctrls.remarks_1)" message>
+            <ng-container
+              *ngIf="ctrls.remarks_1.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-textarea-container>
+      </div>
+      <!-- 備考2 -->
+      <div class="mt-8">
+        <app-textarea-container
+          [formCtrl]="ctrls.remarks_2"
+          [rows]="3"
+          nameAttrValue="remarks_2"
+          idAttrValue="remarks-2"
+          [invalid]="isFormInvalid(ctrls.remarks_2)">
+          備考2（255文字以内）
+          <div class="mt-1 pl-1" *ngIf="isFormInvalid(ctrls.remarks_2)" message>
+            <ng-container
+              *ngIf="ctrls.remarks_2.errors?.['maxlength']"
+              [ngTemplateOutlet]="errorMessage"
+              [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+            </ng-container>
+          </div>
+        </app-textarea-container>
+      </div>
+    </div>
+    <!-- 保存ボタン -->
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button (click)="onClickReset()">クリア</app-button>
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        [buttonDisabled]="formGroup.invalid">
+        保存
+      </app-button>
+    </div>
+  </form>
+</main>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #errorMessage let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>
+
+<!-- || formGroup.pristine -->

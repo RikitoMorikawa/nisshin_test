@@ -1,0 +1,85 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/division', text: '区分一覧' },
+    { text: '区分詳細' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">区分詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/setting/division"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{
+          last_update_user ? last_update_user : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{ division ? division.name : 'データ取得中...' }}
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">区分名</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? division.name : ' ' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">区分値</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? division.value : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">区分コード</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? division.division_code : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">登録日時</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? division.created_at : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">登録者</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? add_user : ' ' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">更新日時</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ division ? division.updated_at : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">更新者</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ last_update_user ? last_update_user : '' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

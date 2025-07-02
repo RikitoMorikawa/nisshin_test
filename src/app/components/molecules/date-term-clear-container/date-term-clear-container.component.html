@@ -1,0 +1,44 @@
+<div class="flex flex-col">
+  <app-label
+    [labelSize]="labelSize"
+    [forAttrValue]="idAttrValue"
+    class="ml-1 mb-1">
+    <ng-content></ng-content>
+  </app-label>
+  <div class="flex flex-row items-center">
+    <div class="grow">
+      <app-datepicker
+        [nameAttrValue]="nameAttrValue"
+        [idAttrValue]="idAttrValue"
+        [formCtrl]="dateFromFormCtrl"
+        class=""
+        [placeholder]="placeholder"
+        [cutoffDateBilling]="cutoffDateBilling"
+        [fromTo]="'from'"
+        [invalid]="invalid">
+      </app-datepicker>
+      <ng-content select="[message-from]"></ng-content>
+    </div>
+    <span class="mx-1">~</span>
+    <div class="flex items-center grow">
+      <div class="grow">
+        <app-datepicker
+          [nameAttrValue]="toNameAttrValue"
+          [idAttrValue]="toIdAttrValue"
+          [formCtrl]="dateToFormCtrl"
+          class=""
+          [placeholder]="placeholder"
+          [cutoffDateBilling]="cutoffDateBilling"
+          [fromTo]="'to'"
+          [invalid]="invalid">
+        </app-datepicker>
+        <ng-content select="[message-to]"></ng-content>
+      </div>
+      <app-icon
+        (click)="onClear()"
+        icon="close-circle-fill"
+        class="w-6 ml-1 fill-slate-500 cursor-pointer"></app-icon>
+    </div>
+  </div>
+  <ng-content select="[message]"></ng-content>
+</div>

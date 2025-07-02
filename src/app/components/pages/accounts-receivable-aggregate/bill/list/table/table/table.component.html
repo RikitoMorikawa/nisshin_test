@@ -1,0 +1,113 @@
+<table class="whitespace-nowrap border-separate border-spacing-0 w-full">
+  <thead>
+    <tr>
+      <th
+        *ngFor="let item of header"
+        (click)="changeSort(item)"
+        class="font-normal border border-x-0 border-slate-300 px-3 py-4 hover:transition-all duration-300"
+        [ngClass]="
+          item ? 'hover:bg-iron-blue-200 cursor-pointer' : 'cursor-auto'
+        ">
+        <div class="flex gap-1 pl-2 justify-center">
+          <span>{{ item }}</span>
+          <app-icon
+            *ngIf="item"
+            class="w-6"
+            [icon]="
+              sort.column === item && sort.order === 'desc'
+                ? 'sort-desc'
+                : 'sort-asc'
+            "
+            [ngClass]="
+              sort.column === item ? 'fill-primary' : 'fill-slate-300'
+            ">
+          </app-icon>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let row of data; first as isFirst">
+      <tr
+        (click)="editPanelOpen(isLinkData(row[0]) ? row[0].text : '')"
+        class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+        <td
+          *ngFor="let item of row"
+          class="px-3 py-4"
+          [ngClass]="[
+            !isFirst ? 'border-t border-t-iron-blue-300' : '',
+            getPositionClass(item)
+          ]">
+          <ng-container *ngIf="isLinkData(item); else noLinkData">
+            <ng-container *ngIf="isIconLinkData(item); else normalLinkData">
+              <div class="flex justify-center">
+                <a
+                  (click)="getPdfItem(item.href)"
+                  target="_blank"
+                  download="example.pdf">
+                  <app-icon
+                    class="w-6"
+                    [icon]="item.icon"
+                    [ngClass]="
+                      'inline fill-primary-light hover:fill-primary-light-hover'
+                    "></app-icon>
+                </a>
+              </div>
+            </ng-container>
+            <ng-template #normalLinkData>
+              <a
+                class="text-primary-light border-b border-primary-light hover:text-primary-light-hover hover:border-primary-light-hover"
+                [routerLink]="item.href">
+                {{ item.text }}
+              </a>
+            </ng-template>
+          </ng-container>
+          <ng-template #noLinkData>
+            {{ isNormalData(item) ? item.text : '' }}
+          </ng-template>
+          <ng-container *ngIf="isInputNumber(item)">
+            <input
+              type="text"
+              name="item.name"
+              [id]="item.id"
+              [value]="item.value"
+              (change)="item.value = getValue($event)" />
+          </ng-container>
+          <ng-container *ngIf="isCheckBox(item)">
+            <input
+              type="checkbox"
+              name="item.name"
+              [value]="item.value"
+              (click)="addNewItem(item.value)"
+              [checked]="item.selected"
+              style="transform: scale(1.5); margin-left: 0.5em" />
+          </ng-container>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

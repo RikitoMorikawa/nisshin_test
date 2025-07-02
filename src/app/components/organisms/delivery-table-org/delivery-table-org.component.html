@@ -1,0 +1,73 @@
+<ng-container *ngIf="deliveries">
+  <table
+    class="mt-6 w-[100%] table-fixed border-collapse border border-slate-500">
+    <thead class="text-sm">
+      <th class="border border-slate-300 w-[64px]">
+        <div><p>ID</p></div>
+      </th>
+      <th class="border border-slate-300 w-[64px]">
+        <div><p>配送区分</p></div>
+      </th>
+      <th class="border border-slate-300 w-[180px]">
+        <div><p>配送または回収日時</p></div>
+      </th>
+      <th class="border border-slate-300 w-[120px]">
+        <div><p>お客様名</p></div>
+      </th>
+      <th class="border border-slate-300 w-[180px]">
+        <div><p>連絡先電話番号</p></div>
+      </th>
+      <th class="border border-slate-300">
+        <div><p>配送先</p></div>
+      </th>
+    </thead>
+    <tbody class="text-sm">
+      <ng-container *ngIf="deliveries.length > 0">
+        <ng-container *ngFor="let delivery of deliveries">
+          <tr>
+            <td class="border border-slate-300 px-1">
+              <div class="text-center">
+                <p>
+                  <a
+                    [routerLink]="['/delivery/detail', delivery.id]"
+                    class="text-blue underline">
+                    {{ delivery.id }}
+                  </a>
+                </p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div class="text-center">
+                <p>{{ delivery.division_delivery_type_value }}</p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div class="text-center">
+                <p>
+                  {{
+                    delivery.delivery_specified_time | date : 'yyyy/MM/dd HH:mm'
+                  }}
+                </p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div class="text-center">
+                <p>{{ delivery.name }}</p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div>
+                <p>{{ delivery.additional_tel }}</p>
+              </div>
+            </td>
+            <td class="border border-slate-300 px-1">
+              <div>
+                <p>{{ delivery.shipping_address }}</p>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+</ng-container>

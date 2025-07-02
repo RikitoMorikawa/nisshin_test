@@ -1,0 +1,12 @@
+<div class="flex flex-row items-center gap-4">
+  <app-icon-container
+    icon="account-box-line"
+    appendClassForIcon="fill-secondary">
+    <ng-content></ng-content>
+  </app-icon-container>
+  <div
+    *ngIf="roleTypeName"
+    class="px-4 py-1 text-sm bg-emerald-400 rounded-full">
+    {{ roleTypeName }}
+  </div>
+</div>

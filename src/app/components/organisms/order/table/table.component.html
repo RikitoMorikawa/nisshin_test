@@ -1,0 +1,7 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="eventListener.next($event)"
+  (changeItem)="changeItemData($event)"
+  >発注個票一覧</app-table-with-pagination
+>

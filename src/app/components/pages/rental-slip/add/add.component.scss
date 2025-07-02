@@ -1,0 +1,46 @@
+.search-panel-height {
+  max-height: 88px;
+}
+
+.rental-reservation-table {
+  height: 500px;
+  min-height: 500px;
+  max-height: 500px;
+  position: relative;
+
+  .rental-reservation-table-header {
+    display: inline-flex;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 20;
+
+    span {
+      border-top: 1px solid #d1d5db;
+      border-bottom: 1px solid #d1d5db;
+      border-right: 1px solid #d1d5db;
+      background-color: white;
+    }
+
+    span:first-child {
+      border-left: 1px solid #d1d5db !important;
+    }
+  }
+
+  .rental-reservation-table-body {
+    display: inline-flex;
+
+    span {
+      border-bottom: 1px solid #d1d5db;
+      border-right: 1px solid #d1d5db;
+    }
+
+    span:first-child {
+      border-left: 1px solid #d1d5db !important;
+    }
+
+    &:hover * {
+      background-color: #f1f5f9;
+    }
+  }
+}

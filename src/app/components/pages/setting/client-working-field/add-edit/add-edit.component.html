@@ -1,0 +1,45 @@
+<app-template-add-edit
+  [service]="apiService"
+  [formCtrl]="form"
+  (statusChange)="listenStateChange($event)">
+  <!-- ページタイトル -->
+  <ng-container pageTitle>
+    {{ id ? '得意先現場編集' : '得意先現場新規登録' }}
+  </ng-container>
+  <!-- 最終更新者 -->
+  <ng-container updater>{{ updater }}</ng-container>
+  <ng-container authorname>{{ authorname }}</ng-container>
+  <!-- 得意先現場フォーム -->
+  <app-form-block form>
+    <ng-container formTitle>得意先現場情報入力</ng-container>
+    <div formContent class="flex flex-col gap-4">
+      <div>
+        <app-input
+          [formCtrl]="fc.name"
+          class="w-full"
+          nameAttrValue="field_name"
+          idAttrValue="field-name">
+          現場名（255文字以内）
+        </app-input>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.client_id"
+          class="w-3/12"
+          nameAttrValue="client_id"
+          idAttrValue="client-id">
+          得意先ID（半角数字）
+        </app-input>
+        <app-real-time-suggest-container
+          class="w-9/12"
+          [idCtrl]="fc.client_id"
+          [nameCtrl]="fc.client_name"
+          nameAttrValue="client_name"
+          idAttrValue="client-name"
+          [apiInput]="getSuggests()">
+          得意先名
+        </app-real-time-suggest-container>
+      </div>
+    </div>
+  </app-form-block>
+</app-template-add-edit>

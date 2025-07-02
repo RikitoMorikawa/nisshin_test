@@ -1,0 +1,781 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/basic-information', text: '基本情報詳細' },
+    { text: '基本情報編集' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">基本情報編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ isDuringAcquisition ? 'データ取得中...' : lastUpdater }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!isDuringAcquisition">
+    <form [formGroup]="biEditForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">基本情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="max-w-[300px] w-[300px]">
+            <div class="px-2 pb-2">
+              <p class="text-sm">
+                ※ 画像のファイルサイズは最大{{ maxFileSizeForDisplay }}Mバイト
+              </p>
+              <app-file
+                [formCtrl]="biEditForm.controls.logo_image"
+                text="ロゴ画像選択"
+                accept="image/png, image/jpeg">
+              </app-file>
+              <div
+                class="mt-4"
+                *ngIf="
+                  bi.logo_image_path !== undefined &&
+                    bi.logo_image_path !== '' &&
+                    logoImageUrl === undefined;
+                  else selectedLogoImage
+                ">
+                <ng-container *ngIf="!isDuringAcquisition">
+                  <img
+                    class="border border-gray-200 shadow rounded-md"
+                    [src]="bi.logo_image_path" />
+                  <div class="mt-2 text-center">
+                    <p>設定中の画像</p>
+                  </div>
+                </ng-container>
+              </div>
+              <ng-template #selectedLogoImage>
+                <div
+                  class="mt-2 text-sm text-danger"
+                  *ngIf="
+                    biEditForm.controls.logo_image.invalid;
+                    else correctImage
+                  ">
+                  <ng-container
+                    *ngIf="biEditForm.controls.logo_image.errors?.['limitFileSize']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededFileSizeLimit">
+                  </ng-container>
+                </div>
+                <ng-template #correctImage>
+                  <div class="mt-4" *ngIf="logoImageUrl">
+                    <img
+                      class="border border-gray-200 shadow rounded-md"
+                      [src]="logoImageUrl"
+                      alt="アップロードロゴ画像" />
+                    <div class="flex flex-row items-center mt-2">
+                      <p>{{ logoImageFileName }}</p>
+                      <app-icon
+                        class="w-6 cursor-pointer ml-2 fill-red-500"
+                        icon="delete-bin-line"
+                        (click)="handleClickDeleteIcon(LOGO_IMAGE)">
+                      </app-icon>
+                    </div>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+            <div class="px-2 pb-2 mt-8">
+              <p class="text-sm">
+                ※ 画像のファイルサイズは最大{{ maxFileSizeForDisplay }}Mバイト
+              </p>
+              <app-file
+                [formCtrl]="biEditForm.controls.representative_image"
+                text="代表画像選択"
+                accept="image/png, image/jpeg">
+              </app-file>
+              <div
+                class="mt-4"
+                *ngIf="
+                  bi.representative_image_path !== undefined &&
+                    bi.representative_image_path !== '' &&
+                    representativeImageUrl === undefined;
+                  else selectedRepresentativeImage
+                ">
+                <ng-container *ngIf="!isDuringAcquisition">
+                  <img
+                    class="border border-gray-200 shadow rounded-md"
+                    [src]="bi.representative_image_path" />
+                  <div class="mt-2 text-center">
+                    <p>設定中の画像</p>
+                  </div>
+                </ng-container>
+              </div>
+              <ng-template #selectedRepresentativeImage>
+                <div
+                  class="mt-2 text-sm text-danger"
+                  *ngIf="
+                    biEditForm.controls.representative_image.invalid;
+                    else correctImage
+                  ">
+                  <ng-container
+                    *ngIf="biEditForm.controls.representative_image.errors?.['limitFileSize']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededFileSizeLimit">
+                  </ng-container>
+                </div>
+                <ng-template #correctImage>
+                  <div class="mt-4" *ngIf="representativeImageUrl">
+                    <img
+                      class="border border-gray-200 shadow rounded-md"
+                      [src]="representativeImageUrl"
+                      alt="アップロードロゴ画像" />
+                    <div class="flex flex-row items-center mt-2">
+                      <p>{{ representativeImageFileName }}</p>
+                      <app-icon
+                        class="w-6 cursor-pointer ml-2 fill-red-500"
+                        icon="delete-bin-line"
+                        (click)="handleClickDeleteIcon(REPRESENTATIVE_IMAGE)">
+                      </app-icon>
+                    </div>
+                  </div>
+                </ng-template>
+              </ng-template>
+            </div>
+          </div>
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="representative_name"
+                  idAttrValue="representative-name"
+                  [maxLength]="25"
+                  [formCtrl]="biEditForm.controls.representative_name"
+                  [invalid]="
+                    formControlStateManager(
+                      biEditForm.controls.representative_name
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{
+                        logicalNames['representative_name']
+                      }}（25文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        biEditForm.controls.representative_name
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.representative_name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-select-container
+                  class="w-1/3"
+                  [formCtrl]="biEditForm.controls.sales_fraction_division_id"
+                  [options]="salesFractionDivisionOptions"
+                  nameAttrValue="sales_fraction_division_id"
+                  idAttrValue="sales-fraction-division-id"
+                  [invalid]="
+                    formControlStateManager(
+                      biEditForm.controls.sales_fraction_division_id
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">{{
+                      logicalNames['sales_fraction_division_id']
+                    }}</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1"
+                    *ngIf="
+                      formControlStateManager(
+                        biEditForm.controls.sales_fraction_division_id
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.sales_fraction_division_id.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+                <app-select-container
+                  class="w-1/3"
+                  [formCtrl]="
+                    biEditForm.controls.sales_tax_fraction_division_id
+                  "
+                  [options]="salesTaxFractionDivisionOptions"
+                  nameAttrValue="sales_tax_fraction_division_id"
+                  idAttrValue="sales-tax-fraction-division-id"
+                  [invalid]="
+                    formControlStateManager(
+                      biEditForm.controls.sales_tax_fraction_division_id
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">{{
+                      logicalNames['sales_tax_fraction_division_id']
+                    }}</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1"
+                    *ngIf="
+                      formControlStateManager(
+                        biEditForm.controls.sales_tax_fraction_division_id
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.sales_tax_fraction_division_id.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [maxLength]="15"
+                  [formCtrl]="biEditForm.controls.name"
+                  [invalid]="formControlStateManager(biEditForm.controls.name)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['name'] }}（15文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.name)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name_kana"
+                  idAttrValue="name-kana"
+                  [maxLength]="255"
+                  [formCtrl]="biEditForm.controls.name_kana"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.name_kana)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{
+                        logicalNames['name_kana']
+                      }}（全角カナ255文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.name_kana)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.name_kana.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="
+                        fullWidthKatakanaRestrictionViolation
+                      ">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="corporate_num"
+                  idAttrValue="corporate-num"
+                  [maxLength]="13"
+                  [formCtrl]="biEditForm.controls.corporate_num"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.corporate_num)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['corporate_num'] }}（13文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.corporate_num)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.corporate_num.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.corporate_num.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.corporate_num.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.corporate_num.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="invoice_number"
+                  [maxLength]="14"
+                  idAttrValue="invoice-number"
+                  [formCtrl]="biEditForm.controls.invoice_number"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.invoice_number)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['invoice_number'] }}（14文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        biEditForm.controls.invoice_number
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.invoice_number.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.invoice_number.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.invoice_number.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="postal_code"
+                  [maxLength]="7"
+                  idAttrValue="postal-code"
+                  [formCtrl]="biEditForm.controls.postal_code"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.postal_code)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['postal_code'] }}（7文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.postal_code)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.postal_code.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.postal_code.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.postal_code.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.postal_code.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-select-container
+                  class="w-1/3"
+                  [formCtrl]="biEditForm.controls.province"
+                  [options]="provincesOptions"
+                  nameAttrValue="province_id"
+                  idAttrValue="province-id"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.province)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">{{
+                      logicalNames['province']
+                    }}</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.province)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.province.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                  </div>
+                </app-select-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="locality"
+                  idAttrValue="locality"
+                  [maxLength]="9"
+                  [formCtrl]="biEditForm.controls.locality"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.locality)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['locality'] }}（9文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.locality)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.locality.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.locality.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-2/3"
+                  inputType="text"
+                  nameAttrValue="street_address"
+                  idAttrValue="street-address"
+                  [maxLength]="25"
+                  [formCtrl]="biEditForm.controls.street_address"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.street_address)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['street_address'] }}（25文字以内）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        biEditForm.controls.street_address
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.street_address.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.street_address.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="grow"
+                  inputType="text"
+                  nameAttrValue="other_address"
+                  idAttrValue="other-address"
+                  [maxLength]="6"
+                  [formCtrl]="biEditForm.controls.other_address"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.other_address)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['other_address'] }}（6文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(biEditForm.controls.other_address)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.other_address.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="tel"
+                  idAttrValue="tel"
+                  [maxLength]="16"
+                  [formCtrl]="biEditForm.controls.tel"
+                  [invalid]="formControlStateManager(biEditForm.controls.tel)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['tel'] }}（10~16文字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.tel)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.tel.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.fax.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.tel.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="fax"
+                  idAttrValue="fax"
+                  [maxLength]="16"
+                  [formCtrl]="biEditForm.controls.fax"
+                  [invalid]="formControlStateManager(biEditForm.controls.fax)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['fax'] }}（10~16文字）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.fax)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.fax.errors?.['minlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="biEditForm.controls.fax.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="email"
+                  nameAttrValue="mail"
+                  idAttrValue="mail"
+                  [maxLength]="255"
+                  [formCtrl]="biEditForm.controls.mail"
+                  [invalid]="formControlStateManager(biEditForm.controls.mail)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['mail'] }}（255文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.mail)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.mail.errors?.['mail']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <div class="mt-6 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="payee_1"
+                  [maxLength]="25"
+                  idAttrValue="payee-1"
+                  [formCtrl]="biEditForm.controls.payee_1"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.payee_1)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['payee_1'] }}（25文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.payee_1)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.payee_1.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="payee_2"
+                  idAttrValue="payee-2"
+                  [maxLength]="25"
+                  [formCtrl]="biEditForm.controls.payee_2"
+                  [invalid]="
+                    formControlStateManager(biEditForm.controls.payee_2)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >{{ logicalNames['payee_2'] }}（25文字以内）</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="formControlStateManager(biEditForm.controls.payee_2)"
+                    message>
+                    <ng-container
+                      *ngIf="biEditForm.controls.payee_2.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button btnType="button" (click)="handleClickClearButton()"
+          >クリア</app-button
+        >
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="biEditForm.invalid || formInvalid">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

@@ -1,0 +1,6 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="tableEvent.next($event)">
+  客層一覧
+</app-table-with-pagination>

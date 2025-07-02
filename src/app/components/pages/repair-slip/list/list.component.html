@@ -1,0 +1,23 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '修理受付票一覧' }]"></app-breadcrumb-org>
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)"></app-search>
+<main>
+  <!-- ↓ ボタン類 ↓ -->
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/repair-slip/add"></app-new-registration-link-org>
+    </div>
+  </div>
+
+  <!-- ↓ テーブル ↓ -->
+  <div>
+    <app-table
+      [eventListener]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

@@ -1,0 +1,18 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '店舗一覧' }
+  ]"></app-breadcrumb-org>
+<main class="mt-16">
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/setting/store/add"></app-new-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <app-store-table-org
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-store-table-org>
+  </div>
+</main>

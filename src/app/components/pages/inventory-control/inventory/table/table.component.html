@@ -1,0 +1,21 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="tableEvent.next($event)">
+  <div class="flex gap-6">
+    <div>
+      <app-title>
+        {{ selectedId ? '棚卸管理コード：' + selectedId : '' }}
+      </app-title>
+    </div>
+    <div>
+      <input
+        type="checkbox"
+        id="not-input-only"
+        name="not_input_only"
+        (change)="notInputOnlyChanged($event)" /><span class="pl-2"
+        >棚卸未実施のデータのみ表示</span
+      >
+    </div>
+  </div>
+</app-table-with-pagination>

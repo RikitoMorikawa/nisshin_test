@@ -1,0 +1,9 @@
+::ng-deep {
+  app-table tfoot tr td:first-child {
+    text-align: left !important;
+  }
+
+  app-table tfoot tr td {
+    text-align: right !important;
+  }
+}

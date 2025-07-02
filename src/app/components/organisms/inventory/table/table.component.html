@@ -1,0 +1,20 @@
+<app-table-inventory-with-pagination
+  [params]="tableParams"
+  [loading]="loading"
+  (pageChange)="eventListener.next($event)"
+  >棚卸データ</app-table-inventory-with-pagination
+>
+
+<div
+  class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+  <!--app-button
+    btnFillColor="bg-warning hover:bg-warning-hover text-white border-warning">
+    仮保存
+  </app-button-->
+  <app-button
+    btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+    [buttonDisabled]="inventoryForm.invalid"
+    (click)="onClickSave()">
+    保存
+  </app-button>
+</div>

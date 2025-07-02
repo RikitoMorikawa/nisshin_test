@@ -1,0 +1,37 @@
+<nav class="flex" aria-label="Breadcrumb">
+  <ol class="inline-flex items-center space-x-1">
+    <li class="inline-flex items-center">
+      <a
+        routerLink="/home"
+        class="cursor-pointer inline-flex items-center text-sm text-gray-700">
+        <app-icon-container
+          icon="home-3-fill"
+          appendClassForIcon="w-4 fill-gray-700 group-hover:fill-gray-400">
+          <span class="group-hover:text-gray-400">ホーム</span>
+        </app-icon-container>
+      </a>
+    </li>
+    <li
+      class="inline-flex items-center"
+      *ngFor="let listItem of breadcrumbList">
+      <a
+        *ngIf="listItem.path; else lastItem"
+        [routerLink]="listItem.path"
+        [queryParams]="
+          listItem.queryParams !== undefined ? listItem.queryParams : undefined
+        "
+        class="cursor-pointer inline-flex items-center text-sm text-gray-700 hover:text-gray-400">
+        <span class="w-4">
+          <app-icon icon="arrow-right-s-line"></app-icon>
+        </span>
+        <span>{{ listItem.text }}</span>
+      </a>
+      <ng-template #lastItem>
+        <span class="w-4 text-gray-700">
+          <app-icon icon="arrow-right-s-line"></app-icon>
+        </span>
+        <span class="text-sm text-gray-700">{{ listItem.text }}</span>
+      </ng-template>
+    </li>
+  </ol>
+</nav>

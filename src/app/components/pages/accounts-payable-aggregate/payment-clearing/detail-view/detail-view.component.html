@@ -1,0 +1,89 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '支払消込一覧' },
+    { text: '支払消込閲覧' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">支払消込閲覧</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ listPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath">編集</app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="payment"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">支払消込ヘッダー</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <table class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[100px]">支払ID</td>
+            <td class="border bg-slate-100 p-4 min-w-[410px]">支払先</td>
+            <td class="border bg-slate-100 p-4 min-w-[220px]">登録者</td>
+            <td class="border bg-slate-100 p-4 min-w-[470px]">備考</td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border p-4">{{ payment.id }}</td>
+            <td class="border p-4">{{ payment.supplier_name }}</td>
+            <td class="border p-4">
+              {{
+                payment.employee_created_last_name &&
+                  ' ' &&
+                  payment.employee_created_first_name
+              }}
+            </td>
+            <td class="border p-4">{{ payment.remarks_1 }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="mt-6 pt-8 pb-8 px-6 bg-white shadow border border-gray-100">
+    <h2 class="text-lg">支払消込明細</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <table class="mt-6 w-full shadow">
+      <tr class="border border-slate-200">
+        <td class="border bg-slate-100 p-4">支払区分</td>
+        <td class="border bg-slate-100 p-4">支払金額</td>
+        <td class="border bg-slate-100 p-4">支払予定金額</td>
+        <td class="border bg-slate-100 p-4">支払日</td>
+        <td class="border bg-slate-100 p-4">備考</td>
+      </tr>
+      <tr
+        *ngFor="let paymentDt of paymentDetail"
+        class="border border-slate-200">
+        <td class="border p-4">
+          {{ getPaymentClass(paymentDt.payment_type_division_code) }}
+        </td>
+        <td class="border p-4 text-right">
+          {{
+            paymentDt.payment_amount
+              ? paymentDt.payment_amount.toLocaleString()
+              : ''
+          }}
+        </td>
+        <td class="border p-4 text-right">
+          {{
+            paymentDt.scheduled_payment_amount
+              ? paymentDt.scheduled_payment_amount.toLocaleString()
+              : ''
+          }}
+        </td>
+        <td class="border p-4">{{ getDateFormat(paymentDt.payment_date) }}</td>
+        <td class="border p-4">{{ paymentDt.remarks_1 }}</td>
+      </tr>
+    </table>
+  </div>
+</main>

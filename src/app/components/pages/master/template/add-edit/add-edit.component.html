@@ -1,0 +1,36 @@
+<!-- ↓ タイトル ↓ -->
+<h2 class="mt-8 text-xl">
+  <!-- ↓ コンテンツ投影 ↓ -->
+  <ng-content select="[pageTitle]"></ng-content>
+</h2>
+
+<!-- ↓ 各種ボタンと更新者 ↓ -->
+<div class="flex items-center justify-between mt-6 mb-2">
+  <app-cancel-link-org (click)="handleClickCancel()"></app-cancel-link-org>
+
+  <app-last-updater-org *ngIf="id; else editView">
+    <!-- ↓ コンテンツ投影 ↓ -->
+    最終更新者：<ng-content select="[updater]"></ng-content>
+  </app-last-updater-org>
+  <ng-template #editView>
+    <!-- ↓ コンテンツ投影 ↓ -->
+    登録者：<ng-content select="[authorname]"></ng-content>
+  </ng-template>
+</div>
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ フォーム ↓ -->
+<ng-content select="[form]"></ng-content>
+<div class="block mt-24"></div>
+
+<!-- ↓ 登録ボタン ↓ -->
+<div
+  class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] fixed left-0 right-0 p-2 gap-8">
+  <app-button (click)="onClickReset()">クリア</app-button>
+  <app-button
+    btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+    [buttonDisabled]="formCtrl.invalid"
+    (click)="onClickSave()">
+    保存
+  </app-button>
+</div>

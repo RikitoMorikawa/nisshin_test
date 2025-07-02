@@ -1,0 +1,23 @@
+#suggest {
+  @apply block border border-iron-blue-400 rounded p-2 w-full;
+  @apply focus:placeholder-transparent focus:outline-none focus:border focus:border-primary focus:ring-1;
+}
+
+.invalid {
+  @apply outline-none ring-1 ring-warning;
+}
+
+.accounts-receivable-aggregate-search {
+  max-height: 0;
+  padding: 0 2.5rem;
+  margin: 0;
+  transition: max-height 0.8s, padding 0.8s, margin 0.8s ease-in;
+  overflow: hidden;
+
+  &.is-open {
+    max-height: 100vh;
+    padding: 2.5rem;
+    margin: 2rem 0;
+    overflow: visible;
+  }
+}

@@ -1,0 +1,85 @@
+<!-- ↓ タイトル部（更新） ↓ -->
+<h2 class="mt-8 text-xl">{{ title }}</h2>
+<div class="flex items-center justify-between mt-6 mb-2">
+  <div (click)="handleClickCancel()" class="cursor-pointer">
+    <app-cancel-link-org></app-cancel-link-org>
+  </div>
+  <app-last-updater-org>
+    {{ (id ? '最終更新者：' : '登録者：') + (editor ?? 'データ取得中...') }}
+  </app-last-updater-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ フォーム ↓ -->
+<div class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ ヘッダ部 ↓ -->
+  <h2 class="text-lg">カスタムタグ情報入力</h2>
+  <hr class="border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ 入力部 ↓ -->
+  <form class="p-6 mt-6 border border-b-0 border-gray-200 shadow">
+    <div class="flex gap-4">
+      <app-text-container class="w-1/2" [formCtrl]="ctrls.name">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'タグ名（255文字以内）', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.name }"
+          message>
+        </ng-container>
+      </app-text-container>
+      <app-text-container class="w-1/2" [formCtrl]="ctrls.value">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '値（255文字以内）', required: 'true' }
+          ">
+        </ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: ctrls.value }"
+          message>
+        </ng-container>
+      </app-text-container>
+    </div>
+  </form>
+</div>
+
+<!-- ↓ ボタン ↓ -->
+<div
+  class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] fixed left-0 right-0 p-2 gap-8">
+  <app-button (click)="form.reset()"> クリア </app-button>
+  <app-button
+    btnFillColor="bg-success hover:bg-success-hover text-white border-success"
+    [buttonDisabled]="form.invalid"
+    (click)="onClickSave()">
+    保存
+  </app-button>
+</div>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+      必須
+    </span>
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+  </ng-container>
+</ng-template>

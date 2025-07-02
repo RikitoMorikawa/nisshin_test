@@ -1,0 +1,23 @@
+<div class="flex flex-col">
+  <app-label
+    [labelSize]="labelSize"
+    [forAttrValue]="idAttrValue"
+    class="ml-1 mb-1">
+    <ng-content></ng-content>
+  </app-label>
+  <div class="flex flex-row items-center">
+    <app-text
+      class="grow"
+      [inputType]="inputType"
+      [nameAttrValue]="nameAttrValue"
+      [idAttrValue]="idAttrValue"
+      [formCtrl]="formCtrl"
+      [placeholder]="placeholder"
+      [invalid]="invalid"></app-text>
+    <app-icon
+      (click)="onClear()"
+      icon="close-circle-fill"
+      class="w-6 ml-1 fill-slate-500 cursor-pointer"></app-icon>
+  </div>
+  <ng-content select="[message]"></ng-content>
+</div>

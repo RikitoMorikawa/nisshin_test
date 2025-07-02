@@ -1,0 +1,1095 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '修理受付票一覧' },
+    { text: '修理受付票詳細' }
+  ]">
+</app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">修理受付票詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org [path]="listPagePath"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPagePath"> </app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <app-last-updater-org>
+      最終更新者：{{ updaterFullName ? updaterFullName : 'データ取得中...' }}
+    </app-last-updater-org>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="rs; else duringAcquisition">
+    <div class="mt-8">
+      <div class="flex justify-between">
+        <div>
+          <form
+            class="text-base"
+            [formGroup]="statusForm"
+            (submit)="statusUpdate()">
+            <div class="flex gap-4 items-end">
+              <div>
+                <app-select-container
+                  nameAttrValue="status_division_id"
+                  idAttrValue="status_division_id"
+                  [formCtrl]="statusFc.status_division_id"
+                  [options]="slipStatusDivisionOptions"
+                  [invalid]="
+                    formControlStateManager(statusFc.status_division_id)
+                  ">
+                  <ng-container
+                    *ngTemplateOutlet="
+                      labels;
+                      context: { label: 'ステータス', required: false }
+                    "></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="
+                      errors;
+                      context: { ctrl: statusFc.status_division_id }
+                    "
+                    message></ng-container>
+                </app-select-container>
+              </div>
+              <div>
+                <app-button
+                  btnType="submit"
+                  btnFillColor="bg-success"
+                  btnHoverColor="hover:bg-success-hover"
+                  btnTextColor="text-white"
+                  btnLineColor="border-success"
+                  btnLineHoverColor="hover:border-success-hover"
+                  [buttonDisabled]="statusForm.invalid || statusForm.pristine">
+                  更新
+                </app-button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4 mb-24 py-8 px-6 bg-white shadow border border-gray-300">
+      <div class="relative">
+        <div
+          class="absolute left-[-20px] top-[-28px] bg-primary-hover px-4 py-1 rounded-full text-white">
+          {{ rs.division_status_value }}
+        </div>
+        <div class="absolute right-0">
+          <p>受付票番号：{{ rs.id }}</p>
+        </div>
+      </div>
+      <!-- タイトル -->
+      <div class="flex justify-center">
+        <h2 class="text-center text-2xl border-b border-slate-500">
+          修理受付票
+        </h2>
+      </div>
+      <!-- お客様情報・会社情報 -->
+      <div class="flex justify-between mt-2">
+        <div class="w-1/3">
+          <p>お客様タイプ：{{ rs.division_customer_type_value }}</p>
+          <!-- お客様タイプ：得意先の場合 -->
+          <ng-container
+            *ngIf="
+              rs.division_customer_type_value ===
+                rsConst.CUSTOMER_TYPE_DIVISION.VALUE.CLIENT;
+              then client
+            "></ng-container>
+          <!-- お客様タイプ：会員の場合 -->
+          <ng-container
+            *ngIf="
+              rs.division_customer_type_value ===
+                rsConst.CUSTOMER_TYPE_DIVISION.VALUE.MEMBER;
+              then member
+            "></ng-container>
+          <!-- お客様タイプ：一般の場合 -->
+          <ng-container
+            *ngIf="
+              rs.division_customer_type_value ===
+                rsConst.CUSTOMER_TYPE_DIVISION.VALUE.GENERAL;
+              then general
+            "></ng-container>
+        </div>
+        <div>
+          <app-barcode elementId="barcode" [value]="barcodeValue"></app-barcode>
+        </div>
+        <div class="w-1/3">
+          <p>受付日時：{{ receptionDate }}</p>
+          <ng-container *ngIf="basicInformation && rs">
+            <p class="text-2xl text-center mt-2">{{ basicInformation.name }}</p>
+            <p class="text-center mb-2">金物・建設・農園資材の専門店</p>
+            <p>TEL : {{ companyTel }}　FAX : {{ companyFax }}</p>
+            <p>〒{{ companyPostalCode }} {{ companyAddress }}</p>
+            <p class="mt-2">
+              代表取締役　{{ basicInformation.representative_name }}
+            </p>
+            <p>担当：{{ receptionEmployeeFullName }}</p>
+          </ng-container>
+        </div>
+      </div>
+      <div>
+        <!-- 受付票に紐付く修理商品情報 -->
+        <ng-container *ngIf="repairs">
+          <p>
+            ※
+            修理完了またはお見積のご連絡は7日〜10日前後かかる場合がございます。
+          </p>
+          <table
+            class="mt-2 w-[100%] table-fixed border-collapse border border-slate-500">
+            <thead class="text-sm">
+              <th class="border border-slate-500">適用</th>
+              <ng-container
+                *ngIf="rs.division_status_value === rsConst.STATUS.ACCEPTED">
+                <th class="border border-slate-500 w-[100px]">
+                  <div>
+                    <p>操作</p>
+                  </div>
+                </th>
+              </ng-container>
+            </thead>
+            <tbody class="text-sm">
+              <ng-container *ngIf="repairs.length > 0">
+                <ng-container
+                  #tempTop
+                  *ngFor="let repair of repairs; let i = index">
+                  <tr
+                    [ngClass]="{
+                      'bg-slate-100': editTarget && editTarget.id === repair.id
+                    }">
+                    <td class="border border-slate-500 p-2">
+                      <div>
+                        <p>
+                          修理個票番号：{{ repair.id }}　お客様ご予算：{{
+                            repair.customer_budget?.toLocaleString()
+                          }}
+                          円　登録日：{{
+                            repair.created_at | date : 'YYYY/MM/dd HH:mm'
+                          }}
+                          　　登録者：{{ repair.employee_created_last_name }}
+                          {{ repair.employee_created_first_name }}
+                          　　更新日：{{
+                            repair.updated_at | date : 'YYYY/MM/dd HH:mm'
+                          }}
+                          　　更新者：{{ repair.employee_updated_last_name }}
+                          {{ repair.employee_updated_first_name }}
+                        </p>
+                        <hr class="my-2 border-slate-200" />
+                        <ng-container
+                          *ngIf="
+                            repair.division_repair_type_code ===
+                            repairConst.REPAIR_TYPE_CODE.REPAIR
+                          ">
+                          <p>故障状況</p>
+                          <p>{{ repair.failure_status }}</p>
+                          <p class="mt-2">機種</p>
+                          <p class="mt-1">{{ repair.product_name }}</p>
+                          <p class="mt-2">メーカー名</p>
+                          <p class="mt-1">{{ repair.maker_name }}</p>
+                        </ng-container>
+                        <ng-container
+                          *ngIf="
+                            repair.division_repair_type_code ===
+                            repairConst.REPAIR_TYPE_CODE.POLISHING
+                          ">
+                          <p>
+                            研磨：{{ repair.polishing_number }} 枚（{{
+                              repair.product_name
+                            }}）
+                          </p>
+                        </ng-container>
+                        <div class="mt-2 px-3 py-2 bg-slate-100 rounded-md">
+                          <p class="text-xs">備考及びアドバイス</p>
+                          <hr />
+                          <p class="mt-1">
+                            {{ repair.remarks ? repair.remarks : 'なし' }}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <ng-container
+                      *ngIf="
+                        rs.division_status_value === rsConst.STATUS.ACCEPTED
+                      ">
+                      <td class="border border-slate-500 px-1">
+                        <div class="flex justify-around">
+                          <ng-container
+                            *ngIf="!addFormIsOpen; else inoperableEditIcon">
+                            <div class="cursor-pointer">
+                              <app-icon-container
+                                (click)="editFormOpen(repair, i)"
+                                appendClassForIcon="fill-warning group-hover:fill-warning-hover"
+                                icon="edit-2-line">
+                              </app-icon-container>
+                            </div>
+                          </ng-container>
+                          <ng-container
+                            *ngIf="
+                              !addFormIsOpen && !editFormIsOpen;
+                              else inoperableDeleteIcon
+                            ">
+                            <div class="cursor-pointer">
+                              <app-icon-container
+                                (click)="deleteRepair(repair.id)"
+                                icon="delete-bin-line"
+                                appendClassForIcon="cursor-pointer fill-danger group-hover:fill-danger-hover">
+                              </app-icon-container>
+                            </div>
+                          </ng-container>
+                        </div>
+                      </td>
+                    </ng-container>
+                  </tr>
+                  <ng-container
+                    *ngIf="
+                      rs.division_status_value === rsConst.STATUS.ACCEPTED
+                    ">
+                    <tr
+                      *ngIf="
+                        !addFormIsOpen &&
+                        editFormIsOpen &&
+                        editTarget.id === repair.id
+                      ">
+                      <td colspan="2" class="border border-slate-500">
+                        <div class="bg-slate-100">
+                          <ng-container
+                            *ngIf="
+                              !addFormIsOpen &&
+                                editFormIsOpen &&
+                                editTarget.id === repair.id;
+                              then edit
+                            "></ng-container>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </table>
+          <p>
+            ※
+            ご連絡後、30日経過又はご返事がいただけない場合は当方で処分させていただきます。
+          </p>
+          <ng-container
+            *ngIf="
+              rs.division_status_value === rsConst.STATUS.ACCEPTED &&
+                addFormIsOpen;
+              then add
+            "></ng-container>
+          <!-- 商品の追加・編集中のローディング表示機能 -->
+          <div class="py-4" [class.hidden]="!isUpdatingRepairList">
+            <app-spinner class="text-xs"></app-spinner>
+          </div>
+          <ng-container
+            *ngIf="rs.division_status_value === rsConst.STATUS.ACCEPTED">
+            <div
+              *ngIf="!addFormIsOpen && !editFormIsOpen"
+              class="mt-4 text-right">
+              <app-button (click)="addFormOpen()">商品追加</app-button>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </ng-container>
+</main>
+
+<!-- データ取得中に表示するテンプレート -->
+<ng-template #duringAcquisition>
+  <p class="text-3xl text-center text-slate-500 mt-6">データ取得中...</p>
+</ng-template>
+
+<!-- お客様タイプが得意先の場合のテンプレート -->
+<ng-template #client>
+  <!-- 得意先ID -->
+  <div>
+    <p>{{ rs.client_id }}</p>
+    <p class="mt-1">
+      <span class="text-lg border-b border-slate-500">
+        {{ rs.client_name }}
+        {{
+          rs.client_division_title_value
+            ? rs.client_division_title_value
+            : rs.client_custom_title
+        }}
+      </span>
+    </p>
+  </div>
+</ng-template>
+
+<!-- お客様タイプが会員の場合のテンプレート -->
+<ng-template #member>
+  <!-- 会員姓名 -->
+  <div class="mt-2">
+    <ruby>
+      <span class="text-2xl">{{ rs.member_last_name }}</span>
+      <rp>(</rp>
+      <rt>{{ rs.member_last_name_kana }}</rt>
+      <rp>)</rp>
+    </ruby>
+    <span>&nbsp;</span>
+    <ruby>
+      <span class="text-2xl">{{ rs.member_first_name }}</span>
+      <rp>(</rp>
+      <rt>{{ rs.member_first_name_kana }}</rt>
+      <rp>)</rp>
+    </ruby>
+    <span class="text-2xl">　様</span>
+  </div>
+</ng-template>
+
+<!-- お客様タイプが一般の場合のテンプレート -->
+<ng-template #general>
+  <!-- 一般お客様姓名 -->
+  <div class="mt-2">
+    <ruby>
+      <span class="text-2xl">{{ rs.last_name }}</span>
+      <rp>(</rp>
+      <rt>{{ rs.last_name_kana }}</rt>
+      <rp>)</rp>
+    </ruby>
+    <span>&nbsp;</span>
+    <ruby>
+      <span class="text-2xl">{{ rs.first_name }}</span>
+      <rp>(</rp>
+      <rt>{{ rs.first_name_kana }}</rt>
+      <rp>)</rp>
+    </ruby>
+    <span class="text-2xl">　様</span>
+  </div>
+</ng-template>
+
+<!-- 編集アイコンのテンプレート（操作不可） -->
+<ng-template #inoperableEditIcon>
+  <div>
+    <app-icon-container
+      appendClassForIcon="fill-slate-200"
+      icon="edit-2-line"></app-icon-container>
+  </div>
+</ng-template>
+
+<!-- 削除アイコンのテンプレート（操作不可） -->
+<ng-template #inoperableDeleteIcon>
+  <div>
+    <app-icon-container
+      icon="delete-bin-line"
+      appendClassForIcon="fill-slate-200"></app-icon-container>
+  </div>
+</ng-template>
+
+<!-- 追加フォームのテンプレート -->
+<ng-template #add>
+  <div class="mt-6 py-4 bg-slate-100 text-base">
+    <div class="mx-4">
+      <form
+        class="mt-4"
+        [formGroup]="addForm"
+        (ngSubmit)="handleClickRepairAddExecutionButton()">
+        <!--
+        <ng-container
+          *ngIf="
+            repairTypeName === repairConst.REPAIR_TYPE.POLISHING;
+            then addPolishing
+          "></ng-container>
+        -->
+        <ng-container
+          *ngTemplateOutlet="
+            repairForm;
+            context: { $implicit: addFc, formType: 'new' }
+          "></ng-container>
+        <hr class="mt-4" />
+        <div class="flex gap-6 justify-end mx-4 pb-2">
+          <div class="pt-7">
+            <app-button
+              btnType="submit"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              [buttonDisabled]="addForm.invalid || addForm.pristine">
+              追加
+            </app-button>
+          </div>
+          <div class="pt-7">
+            <app-button (click)="addFormCancel()">キャンセル</app-button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 編集フォームのテンプレート -->
+<ng-template #edit let-i>
+  <div class="py-4 bg-slate-50 text-base">
+    <div class="mx-4">
+      <form
+        class="mt-4"
+        [formGroup]="editForm"
+        (ngSubmit)="handleClickRepairEditExecutionButton()">
+        <!--
+        <ng-container
+          *ngIf="
+            repairTypeName === repairConst.REPAIR_TYPE.POLISHING;
+            then editPolishing
+          "></ng-container>
+        -->
+        <!--ng-container
+          *ngIf="
+            repairTypeName === repairConst.REPAIR_TYPE.REPAIR;
+            then editRepair
+          "></ng-container-->
+        <ng-container
+          *ngTemplateOutlet="
+            repairForm;
+            context: { $implicit: editFc, formType: 'edit' }
+          "></ng-container>
+        <hr class="mt-4" />
+        <div class="flex gap-6 justify-end mx-4 pb-2">
+          <div class="pt-7">
+            <app-button
+              btnType="submit"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              [buttonDisabled]="editForm.invalid || editForm.pristine">
+              保存
+            </app-button>
+          </div>
+          <div class="pt-7">
+            <app-button (click)="editFormCancel()">キャンセル</app-button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 研磨フォーム（新規登録）のテンプレート -->
+<!--
+<ng-template #addPolishing>
+  <div class="flex gap-6 mt-6">
+    <div class="w-3/6">
+      <app-text-container
+        nameAttrValue="product_name"
+        idAttrValue="product-name"
+        [formCtrl]="addFc.product_name"
+        [invalid]="formControlStateManager(addFc.product_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '品名', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: addFc.product_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="polishing_number"
+        idAttrValue="polishing-number"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="addFc.polishing_number"
+        [invalid]="formControlStateManager(addFc.polishing_number)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '研磨枚数', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: addFc.polishing_number }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="customer_budget"
+        idAttrValue="customer-budget"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="addFc.customer_budget"
+        [invalid]="formControlStateManager(addFc.customer_budget)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'ご予算', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: addFc.customer_budget }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="mt-6">
+    <app-textarea-container
+      nameAttrValue="remarks"
+      idAttrValue="remarks"
+      [formCtrl]="addFc.remarks"
+      [rows]=4
+      [invalid]="formControlStateManager(addFc.remarks)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '備考及びアドバイス', required: false }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: addFc.remarks }"
+        message></ng-container>
+    </app-textarea-container>
+  </div>
+</ng-template>
+-->
+
+<!-- 研磨フォーム（編集）のテンプレート -->
+<!--
+<ng-template #editPolishing>
+  <div class="flex gap-6 mt-6">
+    <div class="w-3/6">
+      <app-text-container
+        nameAttrValue="product_name"
+        idAttrValue="product-name"
+        [formCtrl]="editFc.product_name"
+        [invalid]="formControlStateManager(editFc.product_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '品名', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.product_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="polishing_number"
+        idAttrValue="polishing-number"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="editFc.polishing_number"
+        [invalid]="formControlStateManager(editFc.polishing_number)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '研磨枚数', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.polishing_number }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="customer_budget"
+        idAttrValue="customer-budget"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="editFc.customer_budget"
+        [invalid]="formControlStateManager(editFc.customer_budget)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'ご予算', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.customer_budget }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="mt-6">
+    <app-textarea-container
+      nameAttrValue="remarks"
+      idAttrValue="remarks"
+      [formCtrl]="editFc.remarks"
+      [rows]=4
+      [invalid]="formControlStateManager(editFc.remarks)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '備考及びアドバイス', required: false }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: editFc.remarks }"
+        message></ng-container>
+    </app-textarea-container>
+  </div>
+  <div class="flex gap-6 mt-6">
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="quote_cost"
+        idAttrValue="quote-cost"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="editFc.quote_cost"
+        [invalid]="formControlStateManager(editFc.quote_cost)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '見積原価', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.quote_cost }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="quote_selling_price"
+        idAttrValue="quote-selling-price"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="editFc.quote_selling_price"
+        [invalid]="formControlStateManager(editFc.quote_selling_price)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '見積売価', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: editFc.quote_selling_price }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="flex gap-6 mt-6">
+    <div class="w-1/3">
+      <app-date-term
+        nameAttrValue="taking_out_date"
+        idAttrValue="taking-out-date"
+        [formCtrl]="editFc.taking_out_date"
+        [invalid]="formControlStateManager(editFc.taking_out_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '持出日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.taking_out_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+    <div class="w-1/3">
+      <app-date-term
+        nameAttrValue="arrival_date"
+        idAttrValue="arrival-date"
+        [formCtrl]="editFc.arrival_date"
+        [invalid]="formControlStateManager(editFc.arrival_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '入荷日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.arrival_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+    <div class="w-1/3">
+      <app-date-term
+        nameAttrValue="passing_date"
+        idAttrValue="passing-date"
+        [formCtrl]="editFc.passing_date"
+        [invalid]="formControlStateManager(editFc.passing_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '引き渡し日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: editFc.passing_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+  </div>
+  <div class="mt-6">
+    <span class="text-rose-400">
+      *
+      精算ステータスはPOSから連携されるデータのため、通常は操作しないでください。</span
+    >
+    <div class="flex gap-6 mt-3">
+      <div class="w-1/3">
+        <app-select-container
+          nameAttrValue="settle_status_division_id"
+          idAttrValue="settle-status-division-id"
+          [formCtrl]="editFc.settle_status_division_id"
+          [options]="settleStatusDivisionOptions"
+          [invalid]="formControlStateManager(editFc.settle_status_division_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '精算ステータス区分', required: true }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: { ctrl: editFc.settle_status_division_id }
+            "
+            message></ng-container>
+        </app-select-container>
+      </div>
+    </div>
+  </div>
+</ng-template>
+-->
+
+<!-- 修理フォームのテンプレート -->
+<ng-template #repairForm let-form let-formType="formType">
+  <div class="flex gap-6 mt-6">
+    <div class="w-2/6">
+      <app-text-container
+        nameAttrValue="maker_name"
+        idAttrValue="maker-name"
+        [formCtrl]="form.maker_name"
+        [invalid]="formControlStateManager(form.maker_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'メーカー名', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.maker_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-3/6">
+      <app-text-container
+        nameAttrValue="product_name"
+        idAttrValue="product-name"
+        [formCtrl]="form.product_name"
+        [invalid]="formControlStateManager(form.product_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '品名', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.product_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="mt-6">
+    <app-textarea-container
+      nameAttrValue="failure_status"
+      idAttrValue="failure-status"
+      [formCtrl]="form.failure_status"
+      [invalid]="formControlStateManager(form.failure_status)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '故障状況', required: true }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: form.failure_status }"
+        message></ng-container>
+    </app-textarea-container>
+  </div>
+  <div class="flex gap-6 mt-6">
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="customer_budget"
+        idAttrValue="customer-budget"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="form.customer_budget"
+        [invalid]="formControlStateManager(form.customer_budget)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'ご予算', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.customer_budget }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-3/6">
+      <app-select-suggest-container
+        nameAttrValue="supplier_id"
+        idAttrValue="supplier-id"
+        placeholder="選択してください"
+        [formCtrl]="form.supplier_id"
+        [suggests]="supplierSuggests">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '修理依頼先選択' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: {
+              ctrl: form.supplier_id
+            }
+          "
+          message></ng-container>
+      </app-select-suggest-container>
+    </div>
+    <ng-container>
+      <div class="w-1/6">
+        <div class="mt-3">
+          <label
+            class="mt-8 block relative pl-6 cursor-pointer transform:scale(1.4);">
+            自社修理
+            <input
+              *ngIf="formType === 'new'"
+              type="checkbox"
+              nameAttrValue="in_house_repairs"
+              idAttrValue="in-house-repairs"
+              (change)="selectRepairLocation($event, form)"
+              [checked]="addFc.is_in_house_repairs.value"
+              class="w-4 h-4 cursor-pointer absolute top-0 bottom-0 left-0 m-auto" />
+            <input
+              *ngIf="formType === 'edit'"
+              type="checkbox"
+              nameAttrValue="in_house_repairs"
+              idAttrValue="in-house-repairs"
+              (change)="selectRepairLocation($event, form)"
+              [checked]="editFc.is_in_house_repairs.value"
+              class="w-4 h-4 cursor-pointer absolute top-0 bottom-0 left-0 m-auto" />
+          </label>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+  <div class="mt-6">
+    <app-textarea-container
+      nameAttrValue="remarks"
+      idAttrValue="remarks"
+      [formCtrl]="form.remarks"
+      [rows]="4"
+      [invalid]="formControlStateManager(form.remarks)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '備考及びアドバイス', required: false }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: form.remarks }"
+        message></ng-container>
+    </app-textarea-container>
+  </div>
+  <div class="flex gap-6 mt-6">
+    <ng-container *ngIf="editFc.in_house_repairs.value === '0'">
+      <div class="w-1/6">
+        <app-text-container
+          nameAttrValue="quote_cost"
+          idAttrValue="quote-cost"
+          inputType="number"
+          [textRight]="true"
+          [formCtrl]="form.quote_cost"
+          [invalid]="formControlStateManager(form.quote_cost)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '作業工賃原価', required: false }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: form.quote_cost }"
+            message></ng-container>
+        </app-text-container>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="editFc.in_house_repairs.value === '1'">
+      <div class="w-1/6">
+        <app-text-container
+          nameAttrValue="cost_of_parts"
+          idAttrValue="cost-of-parts"
+          inputType="number"
+          [textRight]="true"
+          [formCtrl]="form.cost_of_parts"
+          [invalid]="formControlStateManager(form.cost_of_parts)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '部品原価', required: false }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: form.cost_of_parts }"
+            message></ng-container>
+        </app-text-container>
+      </div>
+    </ng-container>
+    <div class="w-1/6">
+      <app-text-container
+        nameAttrValue="quote_selling_price"
+        idAttrValue="quote-selling-price"
+        inputType="number"
+        [textRight]="true"
+        [formCtrl]="form.quote_selling_price"
+        [invalid]="formControlStateManager(form.quote_selling_price)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '作業工賃売価格', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: form.quote_selling_price }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <!-- 計算・クリアボタン -->
+    <div class="w-2/5 mt-7 flex flex-row gap-6 justify-end">
+      <app-button btnType="button"> 値をクリア </app-button>
+      <app-button
+        btnType="button"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        btnLineHoverColor="hover:border-success-hover"
+        (click)="handleClickCalcButton()"
+        [buttonDisabled]="">
+        見積売価を計算
+      </app-button>
+    </div>
+  </div>
+  <div class="flex gap-6 mt-6">
+    <div class="w-1/4">
+      <app-date-term
+        nameAttrValue="taking_out_date"
+        idAttrValue="taking-out-date"
+        [formCtrl]="form.taking_out_date"
+        [invalid]="formControlStateManager(form.taking_out_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '持出日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.taking_out_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+    <div class="w-1/4">
+      <app-date-term
+        nameAttrValue="arrival_expected_date"
+        idAttrValue="taking-out-date"
+        [formCtrl]="form.arrival_expected_date"
+        [invalid]="formControlStateManager(form.arrival_expected_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '入荷予定日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: form.arrival_expected_date }
+          "
+          message></ng-container>
+      </app-date-term>
+    </div>
+    <div class="w-1/4">
+      <app-date-term
+        nameAttrValue="arrival_date"
+        idAttrValue="arrival-date"
+        [formCtrl]="form.arrival_date"
+        [invalid]="formControlStateManager(form.arrival_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '入荷日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.arrival_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+    <div class="w-1/4">
+      <app-date-term
+        nameAttrValue="passing_date"
+        idAttrValue="passing-date"
+        [formCtrl]="form.passing_date"
+        [invalid]="formControlStateManager(form.passing_date)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '引き渡し日', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: form.passing_date }"
+          message></ng-container>
+      </app-date-term>
+    </div>
+  </div>
+  <div *ngIf="formType === 'edit'" class="flex gap-6 mt-6">
+    <div class="w-1/4">
+      登録日 {{ editTarget.created_at | date : 'YYYY/MM/dd HH:mm' }}
+    </div>
+    <div class="w-1/4">
+      登録者：{{ editTarget.employee_created_last_name }}
+      {{ editTarget.employee_created_first_name }}
+    </div>
+    <div class="w-1/4">
+      更新日 {{ editTarget.updated_at | date : 'YYYY/MM/dd HH:mm' }}
+    </div>
+    <div class="w-1/4">
+      更新者：{{ editTarget.employee_updated_last_name }}
+      {{ editTarget.employee_updated_first_name }}
+    </div>
+  </div>
+  <div *ngIf="formType === 'edit'" class="mt-6">
+    <span class="text-rose-400">
+      *
+      精算ステータスはPOSから連携されるデータのため、通常は操作しないでください。</span
+    >
+    <div class="flex gap-6 mt-3">
+      <div class="w-1/3">
+        <app-select-container
+          nameAttrValue="settle_status_division_id"
+          idAttrValue="settle-status-division-id"
+          [formCtrl]="form.settle_status_division_id"
+          [options]="settleStatusDivisionOptions"
+          [invalid]="formControlStateManager(form.settle_status_division_id)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '精算ステータス区分', required: true }
+            "></ng-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: { ctrl: form.settle_status_division_id }
+            "
+            message></ng-container>
+        </app-select-container>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span class="text-sm">{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ 必須エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>

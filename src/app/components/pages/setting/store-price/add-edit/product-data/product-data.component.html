@@ -1,0 +1,42 @@
+<div *ngIf="product" class="flex gap-4">
+  <img
+    [src]="
+      product.image_path ? product.image_path : '/assets/images/no_image.png'
+    "
+    class="w-[150px] h-[150px] rounded" />
+  <div class="grow">
+    <p class="text-lg">{{ product.name }}</p>
+    <table width="100%" class="table-fixed text-sm mt-1">
+      <thead>
+        <th width="75px" class="text-left">ID: {{ product.id }}</th>
+        <th>Aデータ</th>
+        <th>Bデータ</th>
+        <th>Cデータ</th>
+      </thead>
+      <tr>
+        <td>バーコード</td>
+        <td>{{ product.barcode }}</td>
+        <td>{{ product.barcode }}</td>
+        <td>{{ product.barcode }}</td>
+      </tr>
+      <tr>
+        <td>通常価格</td>
+        <td>{{ product.selling_price | currency : 'JPY' }}</td>
+        <td>{{ product.b_selling_price | currency : 'JPY' }}</td>
+        <td>{{ product.c_selling_price | currency : 'JPY' }}</td>
+      </tr>
+      <tr>
+        <td>通常原価</td>
+        <td>{{ product.supplier_cost_price | currency : 'JPY' }}</td>
+        <td>{{ product.b_supplier_cost_price | currency : 'JPY' }}</td>
+        <td>{{ product.c_supplier_cost_price | currency : 'JPY' }}</td>
+      </tr>
+    </table>
+    <a
+      target="_blank"
+      class="inline-block text-blue underline mt-2"
+      routerLink="/master/product/detail/{{ product.id }}">
+      商品詳細ページへ
+    </a>
+  </div>
+</div>

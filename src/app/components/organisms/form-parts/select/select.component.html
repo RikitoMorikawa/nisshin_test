@@ -1,0 +1,24 @@
+<!-- ↓ ラベル ↓ -->
+<app-label [for]="timestamp" [required]="required">
+  <ng-content></ng-content>
+</app-label>
+
+<div class="flex items-center">
+  <!-- ↓ 選択フォーム ↓ -->
+  <select [id]="timestamp" [formControl]="formCtrl" [class.invalid]="invalid()">
+    <option *ngFor="let option of options" [value]="option.value">
+      {{ option.text }}
+    </option>
+  </select>
+  <!-- ↓ クリアボタン ↓ -->
+  <app-icon
+    *ngIf="useClear"
+    icon="close-circle-fill"
+    class="w-6 ml-1 fill-slate-500 cursor-pointer"
+    (click)="clear()">
+  </app-icon>
+</div>
+
+<!-- ↓ エラーメッセージ ↓ -->
+<app-error-messages *ngIf="invalid()" [errors]="formCtrl.errors">
+</app-error-messages>

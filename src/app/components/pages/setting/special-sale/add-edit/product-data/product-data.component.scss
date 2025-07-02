@@ -1,0 +1,8 @@
+thead {
+  @apply border-b border-slate-400;
+}
+
+th,
+td {
+  @apply even:bg-slate-100;
+}

@@ -1,0 +1,16 @@
+<div class="mt-8">
+  <button
+    routerLink="/inventory-control"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }">
+    在庫
+  </button>
+  <button routerLink="/inventory-control/inventory" routerLinkActive="active">
+    棚卸
+  </button>
+  <button
+    routerLink="/inventory-control/stock-transfer"
+    routerLinkActive="active">
+    在庫移動
+  </button>
+</div>

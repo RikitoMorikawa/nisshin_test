@@ -1,0 +1,116 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '請求一覧' },
+    { path: slipListPagePath, text: '請求伝票一覧' },
+    { text: '請求伝票詳細' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">請求伝票詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ slipListPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">伝票ヘッダー</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <table *ngIf="bill" class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[150px]">伝票番号</td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">売上日</td>
+            <td class="border bg-slate-100 p-4 min-w-[360px]">得意先名</td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">営業日</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">合計数量</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">伝票金額</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">
+              伝票金額(外税)
+            </td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border p-4">{{ bill.sales_slip_cd }}</td>
+            <td class="border p-4">{{ getDateFormat(bill.sale_date) }}</td>
+            <td class="border p-4">{{ bill.client_name_1 }}</td>
+            <td class="border p-4">{{ getDateFormat(bill.business_date) }}</td>
+            <td class="border p-4">{{ bill.total_quantity }}</td>
+            <td class="border p-4 text-right">
+              {{ total_amount.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ subtotal.toLocaleString() }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <div class="flex justify-end mt-6">
+      <div></div>
+      <div>
+        <table *ngIf="bill" class="w-1/3">
+          <tr class="">
+            <td class="p-4 min-w-[150px]">　</td>
+            <td class="p-4 min-w-[150px]">　</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">8%対象</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">10%対象</td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[150px]">小計</td>
+            <td class="border p-4 text-right">
+              {{ subtotal.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ tax8_without_tax.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ tax10_without_tax.toLocaleString() }}
+            </td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[150px]">消費税</td>
+            <td class="border p-4 text-right">
+              {{ total_amount_tax.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ tax_8.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ tax_10.toLocaleString() }}
+            </td>
+          </tr>
+          <tr class="">
+            <td class="border bg-slate-100 p-4 min-w-[150px]">合計</td>
+            <td class="border p-4 min-w-[150px] text-right">
+              {{ total_amount.toLocaleString() }}
+            </td>
+            <td class="p-4 min-w-[150px]">　</td>
+            <td class="p-4 min-w-[150px]">　</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ↓ 絞り込みフォーム ↓ -->
+  <app-slipdetail-search (event)="filter = $event"></app-slipdetail-search>
+
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-end gap-8 mt-4">
+    <!-- ↓ スペース調整用の空 div ↓ -->
+    <div></div>
+  </div>
+
+  <!-- ↓ テーブル ↓ -->
+  <app-table-with-pagination
+    class="block mt-2"
+    [params]="tableParams"
+    (pageChange)="pages = $event">
+    請求伝票詳細一覧
+  </app-table-with-pagination>
+</main>

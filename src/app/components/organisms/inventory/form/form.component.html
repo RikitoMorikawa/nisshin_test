@@ -1,0 +1,150 @@
+<form [formGroup]="formGroup">
+  <div class="border border-black bg-white px-8 py-4">
+    <app-title level="h3" class="block mb-4">
+      <span class="font-normal">発注情報入力</span>
+    </app-title>
+    <div class="flex">
+      <!-- ↓ 発注名など ↓ -->
+      <div class="w-2/3 mr-20">
+        <app-text-container
+          class="flex items-center"
+          [formCtrl]="ctrls.inventory_code"
+          [invalid]="invalid(ctrls.inventory_code)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '発注書コード（20文字以内）', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.inventory_code }"
+            message></ng-container>
+        </app-text-container>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex gap-6">
+        <!--
+        <app-select-clear-container
+          [formCtrl]="ctrls.product_id"
+          [options]="options.product">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '商品', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.product_id }"
+            message></ng-container>
+        </app-select-clear-container>
+        <app-text-container
+          [formCtrl]="ctrls.inventory_quantity"
+          [invalid]="invalid(ctrls.inventory_quantity)">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '発注数量', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.inventory_quantity }"
+            message></ng-container>
+        </app-text-container>
+
+        <app-date-clear-container
+          [formCtrl]="ctrls.inventory_date"
+          [invalid]="!!ctrls.inventory_date.errors">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '発注日時', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.inventory_date }"
+            message></ng-container>
+        </app-date-clear-container>
+
+        <app-date-clear-container
+          [formCtrl]="ctrls.receiving_date"
+          [invalid]="!!ctrls.receiving_date.errors">
+          受入日時
+        </app-date-clear-container>
+        -->
+      </div>
+
+      <div class="flex gap-6">
+        <!--
+        <app-select-clear-container
+          [formCtrl]="ctrls.inventory_rep_id"
+          [options]="options.inventory_rep">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '発注担当者', required: 'true' }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="errors; context: { ctrl: ctrls.inventory_rep_id }"
+            message></ng-container>
+        </app-select-clear-container>
+        <app-select-clear-container
+          [formCtrl]="ctrls.receiving_rep_id"
+          [options]="options.receiving_rep">
+          受入担当者</app-select-clear-container
+        >
+        <app-select-clear-container
+          [formCtrl]="ctrls.cancel_rep_id"
+          [options]="options.cancel_rep">
+          取消担当者</app-select-clear-container
+        >
+        -->
+      </div>
+    </div>
+  </div>
+</form>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="invalid(ctrl)">
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['minlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['email']">
+      {{ errorConst.FORM_ERROR.EMAIL_FORMAT_VIOLATION }}
+    </p>
+    <p class="text-sm text-red" *ngIf="ctrl.errors?.['maxFileSize']">
+      {{ errorConst.FORM_ERROR.EXCEEDED_FILE_SIZE_LIMIT }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === regExConst.FULL_WIDTH_KATAKANA_REG_EX + ''">
+      {{ errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION }}
+    </p>
+    <p
+      class="text-sm text-red"
+      *ngIf="ctrl.errors?.['pattern']?.requiredPattern === '/^\\d{7}$/'">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

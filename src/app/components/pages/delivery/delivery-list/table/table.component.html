@@ -1,0 +1,7 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="tableEvent.next($event)"
+  sort="desc">
+  配送受付一覧
+</app-table-with-pagination>

@@ -1,0 +1,34 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/sales', text: '売上伝票一覧' },
+    { path: '../../', text: '売上伝票詳細' },
+    { path: '../', text: '売上明細一覧' },
+    { text: '売上明細詳細' }
+  ]">
+</app-breadcrumb-org>
+
+<!-- ↓ ヘッダ・メニュー部 ↓ -->
+<h2 class="mt-8 text-xl">売上明細 登録情報</h2>
+<div class="flex gap-6 mt-6 mb-2">
+  <app-back-to-link-org path="../">一覧へ戻る</app-back-to-link-org>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ 商品情報 ↓ -->
+<div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ タイトル部 ↓ -->
+  <p class="text-lg">伝票番号：{{ sales_slip_cd }}　行番号：{{ gyo_cd }}</p>
+  <hr class="mt-2 border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ リスト部 ↓ -->
+  <ul class="mt-6">
+    <li
+      *ngFor="let item of listItems"
+      class="flex items-center border border-t-0 first:border-t border-slate-200">
+      <p class="p-4 w-1/5 bg-slate-100 border-r">{{ item.name }}</p>
+      <p class="p-4 grow">{{ item.value }}</p>
+    </li>
+  </ul>
+</div>

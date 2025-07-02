@@ -1,0 +1,11 @@
+<!-- ↓ ラベル ↓ -->
+<app-label [for]="idAttrValue" [required]="required">
+  <ng-content></ng-content>
+</app-label>
+<app-datepicker
+  [nameAttrValue]="nameAttrValue"
+  [idAttrValue]="idAttrValue"
+  [formCtrl]="formCtrl"></app-datepicker>
+<!-- ↓ エラーメッセージ ↓ -->
+<app-error-messages *ngIf="invalid()" [errors]="formCtrl.errors">
+</app-error-messages>

@@ -1,0 +1,17 @@
+<button
+  [type]="btnType"
+  class="inline-flex flex-row items-center shadow border
+  {{ btnSize }}
+  {{ btnRounded }}
+  {{ buttonDisabled ? 'border-gray-200' : btnLineColor }}
+  {{ buttonDisabled ? 'border-gray-200' : btnLineHoverColor }}
+  {{ buttonDisabled ? 'bg-gray-200' : btnFillColor }}
+  {{ buttonDisabled ? '' : btnHoverColor }}
+  {{ buttonDisabled ? 'text-gray-500' : btnTextColor }}
+  {{ buttonDisabled ? '' : btnTextHoverColor }}
+  {{ buttonDisabled ? 'cursor-not-allowed' : '' }}"
+  [disabled]="buttonDisabled ? 'disabled' : ''">
+  <ng-content></ng-content>
+  <ng-content></ng-content>
+  <ng-content></ng-content>
+</button>

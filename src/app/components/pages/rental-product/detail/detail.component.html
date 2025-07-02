@@ -1,0 +1,57 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: 'レンタル商品一覧' },
+    { text: 'レンタル商品詳細' }
+  ]"></app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">レンタル商品詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org [path]="listPagePath"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPagePath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ lastUpdater ? lastUpdater : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <div class="mt-6 flex gap-10">
+      <div class="max-w-[240px] w-[240px]">
+        <img
+          src="{{ productImagePath }}"
+          alt="社員プロフィール画像"
+          height="240px"
+          width="240px" />
+      </div>
+      <div class="grow">
+        <ul
+          class="bg-white border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            *ngFor="let tags of details"
+            class="flex flex-row items-center bg-slate-100 border-b border-b-gray-200">
+            <div class="px-2 py-3 min-w-[200px]">
+              {{ tags.name }}
+            </div>
+            <div
+              class="min-h-[48px] px-2 py-3 bg-white border-l border-l-gray-200 grow">
+              {{ tags.value }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </ng-container>
+</main>
+<!-- データ取得中に表示するテンプレート -->
+<ng-template #initializing>
+  <p class="text-3xl text-center text-slate-500 mt-6">データ取得中...</p>
+</ng-template>

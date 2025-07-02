@@ -1,0 +1,76 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/purchase-order/specification', text: '発注個票一覧' },
+    { text: '発注個票詳細' }
+  ]">
+</app-breadcrumb-org>
+
+<main>
+  <!-- ↓ ヘッダ・メニュー部 ↓ -->
+  <h1 class="mt-8 text-xl">発注個票詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/purchase-order/specification"
+        >一覧へ戻る</app-back-to-link-org
+      >
+    </div>
+    <app-last-updater-org> 最終更新者：{{ updater }} </app-last-updater-org>
+  </div>
+
+  <hr class="width-limit-break border-t border-gray-400" />
+
+  <!-- ↓ 発注情報 ↓ -->
+  <ng-container *ngIf="!common.loading">
+    <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+      <!-- ↓ 発注情報ヘッダ ↓ -->
+      <p class="mt-1 mb-2 text-lg">
+        {{ order.product_name ? order.product_name : 'データ取得中...' }}
+      </p>
+      <hr class="border-t-primary-light-hover border-t-4 mb-2" />
+      <div class="flex gap-6 text-sm mb-2">
+        <p>仕入先Webシステムでの状態：</p>
+        <app-icon-container icon="eye-line" appendClassForIcon="fill-success"
+          >見える</app-icon-container
+        >
+        <app-icon-container icon="eye-off-line" appendClassForIcon="fill-danger"
+          >見えない</app-icon-container
+        >
+      </div>
+      <ul class="border-t border-y border-gray-200 shadow">
+        <li
+          class="flex flex-row items-center border-b border-b-gray-200"
+          *ngFor="let item of listItems">
+          <div
+            class="px-4 py-3 bg-slate-100 min-w-[200px] min-h-[48px]"
+            [ngSwitch]="item.display">
+            <app-icon-container
+              icon="eye-line"
+              appendClassForIcon="fill-success"
+              *ngSwitchCase="'visible'">
+              {{ item.name }}
+            </app-icon-container>
+            <app-icon-container
+              icon="eye-off-line"
+              appendClassForIcon="fill-danger"
+              *ngSwitchCase="'hidden'">
+              {{ item.name }}
+            </app-icon-container>
+            <app-icon-container
+              icon="edit-2-line"
+              appendClassForIcon="fill-danger"
+              *ngSwitchDefault>
+              {{ item.name }}
+            </app-icon-container>
+          </div>
+          <div class="px-4 py-3 border-l border-l-gray-200 min-h-[48px] grow">
+            {{ item.value }}
+          </div>
+        </li>
+      </ul>
+    </div>
+  </ng-container>
+  <div *ngIf="common.loading" class="mt-12 text-center">
+    <p class="text-2xl text-slate-600">データ取得中...</p>
+  </div>
+</main>

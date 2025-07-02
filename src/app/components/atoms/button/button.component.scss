@@ -1,0 +1,25 @@
+button {
+  &.sm {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+
+  &.md {
+    padding: 8px 24px;
+    font-size: 1rem;
+  }
+
+  &.lg {
+    padding: 16px 40px;
+    font-size: 1.5rem;
+  }
+
+  &.xl {
+    padding: 16px 40px;
+    font-size: 2rem;
+  }
+
+  &.rounded-4 {
+    border-radius: 4px;
+  }
+}

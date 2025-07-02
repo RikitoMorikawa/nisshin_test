@@ -1,0 +1,16 @@
+input {
+  @apply block border border-iron-blue-400 rounded p-2 pl-9 w-full;
+  @apply focus:placeholder-transparent focus:outline-none focus:border focus:border-primary focus:ring-1;
+}
+
+.invalid {
+  @apply outline-none ring-1 ring-warning;
+}
+
+.container {
+  @apply flex items-center relative;
+}
+
+.icon-container {
+  @apply absolute left-2;
+}

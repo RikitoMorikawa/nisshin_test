@@ -1,0 +1,86 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/inventory-control/stock-transfer', text: '在庫移動一覧' },
+    { text: '在庫移動詳細' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">在庫移動詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/inventory-control/stock-transfer"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{
+          last_update_user ? last_update_user : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{ stockTransfer ? stockTransfer.product_name : 'データ取得中...' }}
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">店舗名</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer ? stockTransfer.store_name : ' ' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">商品名</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer ? stockTransfer.product_name : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">商品点数</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer ? stockTransfer.quantity : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">備考</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer ? stockTransfer.remarks : '' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">在庫移動日</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer.stock_transfer_date | date : 'yyyy/MM/dd' }}
+            </div>
+          </li>
+          <!--
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">登録者</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ stockTransfer ? add_user : ' ' }}
+            </div>
+          </li>
+          <li class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">更新者</div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ last_update_user ? last_update_user : '' }}
+            </div>
+          </li>
+          -->
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

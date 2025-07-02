@@ -1,0 +1,28 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '区分一覧' }
+  ]"></app-breadcrumb-org>
+<main class="mt-16">
+  <div>
+    <app-search-org
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+    </app-search-org>
+  </div>
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/setting/division/add"></app-new-registration-link-org>
+    </div>
+    <div>
+      <app-bulk-registration-link-org
+        path="bulk-add"></app-bulk-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <app-table-org
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table-org>
+  </div>
+</main>

@@ -1,0 +1,128 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/sales', text: '売上伝票一覧' },
+    { text: '売上伝票詳細' }
+  ]">
+</app-breadcrumb-org>
+<!-- ↓ ヘッダ・メニュー部 ↓ -->
+<h2 class="mt-8 text-xl">売上伝票詳細</h2>
+<div class="flex gap-6 mt-6 mb-2">
+  <app-back-to-link-org path="/sales">一覧へ戻る</app-back-to-link-org>
+  <app-delete-link-org (click)="handleClickDelete()"></app-delete-link-org>
+  <app-icon-container
+    class="cursor-pointer"
+    icon="list-unordered"
+    appendClassForIcon="fill-emerald-600 group-hover:fill-emerald-400"
+    routerLink="./details">
+    <span class="group-hover:text-emerald-400">売上明細一覧</span>
+  </app-icon-container>
+</div>
+
+<hr class="width-limit-break border-t border-gray-400" />
+<ng-container *ngIf="edit_client_form">
+  <form [formGroup]="clientForm" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="mt-8 py-8 px-6 bg-white shadow border border-gray-300 border-t-primary-light-hover border-t-4">
+      <div><p class="text-lg">得意先変更</p></div>
+      <div class="flex mt-8">
+        <div class="w-1/3">
+          <app-real-time-suggest-container
+            nameAttrValue="name"
+            idAttrValue="name"
+            [idCtrl]="clientFc.client_id"
+            [nameCtrl]="clientFc.name"
+            [apiInput]="getClientSuggests()"
+            [invalid]="formControlStateManager(clientFc.name)"
+            (selectedData)="handleSelectedClientData($event)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '得意先名で検索', required: false }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: clientFc.client_id }"
+              message></ng-container>
+          </app-real-time-suggest-container>
+        </div>
+        <div class="w-1/3 mt-7 px-6">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="clientForm.invalid || clientForm.pristine"
+            >保存</app-button
+          >
+          <app-button
+            class="mx-6"
+            btnFillColor="bg-white"
+            btnHoverColor="hover:border-gray-100"
+            btnTextColor="border-gray-300"
+            btnLineColor="border-gray-300"
+            btnLineHoverColor="hover:border-gray-100"
+            (click)="handleClickClearButton()"
+            >クリア</app-button
+          >
+        </div>
+      </div>
+    </div>
+  </form>
+</ng-container>
+
+<!-- ↓ 商品情報 ↓ -->
+<div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+  <!-- ↓ タイトル部 ↓ -->
+  <div class="flex justify-between">
+    <div class="mt-4">
+      <p class="text-lg">伝票番号：{{ sales_slip_cd }}</p>
+    </div>
+    <div>
+      <ng-container *ngIf="!edit_client_form">
+        <app-button
+          btnFillColor="bg-white"
+          btnHoverColor="hover:border-gray-100"
+          btnTextColor="border-gray-300"
+          btnLineColor="border-gray-300"
+          btnLineHoverColor="hover:border-gray-100"
+          (click)="handleClickOpenFormButton()"
+          >得意先を変更する</app-button
+        >
+      </ng-container>
+    </div>
+  </div>
+  <hr class="mt-2 border-t-primary-light-hover border-t-4" />
+
+  <!-- ↓ リスト部 ↓ -->
+  <ul class="mt-6">
+    <li
+      *ngFor="let item of listItems"
+      class="flex items-center border border-t-0 first:border-t border-slate-200">
+      <p class="p-4 w-1/5 bg-slate-100 border-r">{{ item.name }}</p>
+      <p class="p-4 grow">{{ item.value }}</p>
+    </li>
+  </ul>
+</div>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>

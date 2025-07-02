@@ -1,0 +1,1200 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '客注受付票一覧' },
+    { text: '客注受付票新規作成' }
+  ]">
+</app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">客注受付票新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="authorRole ? authorRole : 'データ取得中...'">
+        登録者：{{ authorName ? authorName : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="form" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="mt-8 mb-24 pt-8 pb-8 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">客注受付票情報入力</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <p class="mt-2">「配送先住所」の入力について</p>
+      <p class="text-sm text-rose-500">
+        ※
+        お客様タイプが得意先・会員の場合、登録住所とは別の配送先を指定する場合のみ入力してください。
+      </p>
+      <p class="text-sm text-rose-500">
+        ※
+        お客様タイプが一般の場合、配送を希望している商品がある場合は必ず入力してください。
+      </p>
+      <div class="flex gap-6 mt-8">
+        <div class="w-1/6">
+          <app-date-term
+            nameAttrValue="reception_date"
+            idAttrValue="reception-date"
+            [formCtrl]="fc.reception_date"
+            [invalid]="formControlStateManager(fc.reception_date)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '受付日', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: fc.reception_date }"
+              message></ng-container>
+          </app-date-term>
+        </div>
+        <div class="w-1/5">
+          <div class="flex">
+            <div class="w-5/6">
+              <app-date-term
+                nameAttrValue="quotation_expiration_date"
+                idAttrValue="quotation-expiration-date"
+                [formCtrl]="fc.quotation_expiration_date"
+                [invalid]="
+                  formControlStateManager(fc.quotation_expiration_date)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '有効期限', required: false }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: fc.quotation_expiration_date }
+                  "
+                  message></ng-container>
+              </app-date-term>
+            </div>
+            <div class="w-1/6">
+              <app-icon
+                (click)="clearQuotationDate()"
+                icon="close-circle-fill"
+                class="w-6 ml-1 mt-9 fill-slate-500 cursor-pointer"></app-icon>
+            </div>
+          </div>
+        </div>
+        <div class="w-4/6">
+          <app-text-container
+            nameAttrValue="shipping_address"
+            idAttrValue="shipping-address"
+            [formCtrl]="fc.shipping_address"
+            [invalid]="formControlStateManager(fc.shipping_address)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '配送先住所（255文字以内）', required: false }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: fc.shipping_address }"
+              message></ng-container>
+          </app-text-container>
+        </div>
+      </div>
+      <ng-container *ngIf="show_remark">
+        <div class="flex gap-6 mt-8">
+          <div class="w-1/2">
+            <app-textarea-container
+              nameAttrValue="remarks_1"
+              idAttrValue="remarks-1"
+              [formCtrl]="fc.remarks_1"
+              [invalid]="formControlStateManager(fc.remarks_1)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '備考1',
+                    required: false
+                  }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_1 }"
+                message></ng-container>
+            </app-textarea-container>
+          </div>
+          <div class="w-1/2">
+            <app-textarea-container
+              nameAttrValue="remarks_2"
+              idAttrValue="remarks-2"
+              [formCtrl]="fc.remarks_2"
+              [invalid]="formControlStateManager(fc.remarks_2)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '備考2',
+                    required: false
+                  }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_2 }"
+                message></ng-container>
+            </app-textarea-container>
+          </div>
+        </div>
+      </ng-container>
+      <div class="flex gap-6 mt-8">
+        <div class="w-1/3">
+          <app-select-container
+            nameAttrValue="customer_type_division_id"
+            idAttrValue="customer-type"
+            [options]="customerTypes"
+            [formCtrl]="fc.customer_type_division_id"
+            [invalid]="formControlStateManager(fc.customer_type_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'お客様タイプ', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc.customer_type_division_id }
+              "
+              message></ng-container>
+          </app-select-container>
+        </div>
+        <ng-container *ngTemplateOutlet="common"></ng-container>
+      </div>
+      <ng-container *ngIf="customerType">
+        <ng-container
+          *ngIf="
+            customerType.text === corsConst.CUSTOMER_TYPE_DIVISION.VALUE.CLIENT;
+            then client
+          "></ng-container>
+        <ng-container
+          *ngIf="
+            customerType.text === corsConst.CUSTOMER_TYPE_DIVISION.VALUE.MEMBER;
+            then member
+          "></ng-container>
+        <ng-container
+          *ngIf="
+            customerType.text ===
+              corsConst.CUSTOMER_TYPE_DIVISION.VALUE.GENERAL;
+            then general
+          "></ng-container>
+        <p class="mt-6 pl-2">商品情報</p>
+        <hr class="border-t-warning-hover border-t-4 mt-1" />
+        <div
+          [formGroup]="customerOrderForms"
+          class="mx-4"
+          *ngIf="customerOrderArrayControls.length > 0">
+          <div formArrayName="forms">
+            <!-- for文を回して、表示 -->
+            <div
+              *ngFor="
+                let customerOrderForm of customerOrderArrayControls;
+                let i = index
+              "
+              [formGroupName]="i"
+              [class.bg-slate-100]="i % 2 === 0"
+              class="mt-6 py-4 text-base">
+              <div class="ml-4">
+                <app-button (click)="setSelectionType(customerOrderForm)">
+                  {{
+                    getFormControlTypeValue(
+                      customerOrderForm,
+                      'selectionTypeIsProductId'
+                    ).value
+                      ? '商品名で指定する'
+                      : '商品番号で指定する'
+                  }}
+                </app-button>
+              </div>
+              <hr class="mt-4" />
+
+              <!-- { 商品情報 -->
+              <div class="mt-4">
+                <div class="mx-4 flex gap-6">
+                  <ng-container
+                    *ngIf="
+                      getFormControlTypeValue(
+                        customerOrderForm,
+                        'selectionTypeIsProductId'
+                      ).value;
+                      else selectionTypeIsProductName
+                    ">
+                    <div class="grow">
+                      <app-real-time-suggest-container
+                        [idCtrl]="
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'product_id'
+                          )
+                        "
+                        [nameCtrl]="
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'product_id'
+                          )
+                        "
+                        nameAttrValue="product_id"
+                        idAttrValue="product-id"
+                        [apiInput]="getProductIdSuggests(customerOrderForm)"
+                        [invalid]="
+                          formControlStateManager(
+                            getFormControlTypeValue(
+                              customerOrderForm,
+                              'product_id'
+                            )
+                          )
+                        "
+                        (selectedData)="
+                          handleSelectedProductData(customerOrderForm, $event)
+                        ">
+                        <ng-container
+                          *ngTemplateOutlet="
+                            labels;
+                            context: {
+                              label: '商品番号',
+                              required: false
+                            }
+                          "></ng-container>
+                      </app-real-time-suggest-container>
+                    </div>
+                  </ng-container>
+                  <app-text-container
+                    style="display: none"
+                    nameAttrValue="supplier_id"
+                    idAttrValue="supplier-id"
+                    inputType="number"
+                    [formCtrl]="
+                      getFormControlTypeValue(customerOrderForm, 'supplier_id')
+                    "
+                    [textRight]="true"
+                    [invalid]="
+                      formControlStateManager(
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'supplier_id'
+                        )
+                      )
+                    ">
+                  </app-text-container>
+                  <ng-template #selectionTypeIsProductName>
+                    <div class="w-2/5">
+                      <app-real-time-suggest-container
+                        [idCtrl]="
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'product_id'
+                          )
+                        "
+                        [nameCtrl]="
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'product_name'
+                          )
+                        "
+                        nameAttrValue="product_name"
+                        idAttrValue="product-name"
+                        [apiInput]="getProductSuggests(customerOrderForm)"
+                        [invalid]="
+                          formControlStateManager(
+                            getFormControlTypeValue(
+                              customerOrderForm,
+                              'product_name'
+                            )
+                          )
+                        "
+                        (selectedData)="
+                          handleSelectedProductData(customerOrderForm, $event)
+                        ">
+                        <ng-container
+                          *ngTemplateOutlet="
+                            labels;
+                            context: {
+                              label: '品名を商品マスタから選択',
+                              required: false
+                            }
+                          "></ng-container>
+                      </app-real-time-suggest-container>
+                    </div>
+                  </ng-template>
+                  <div class="grow w-1/5">
+                    <app-text-container
+                      nameAttrValue="quantity"
+                      idAttrValue="quantity"
+                      inputType="number"
+                      [formCtrl]="
+                        getFormControlTypeValue(customerOrderForm, 'quantity')
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(customerOrderForm, 'quantity')
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '数量', required: 'true' }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'quantity'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+
+                  <div class="grow">
+                    <app-text-container
+                      nameAttrValue="unit"
+                      idAttrValue="unit"
+                      [formCtrl]="
+                        getFormControlTypeValue(customerOrderForm, 'unit')
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(customerOrderForm, 'unit')
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '単位', required: 'true' }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'unit'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+                  <div class="grow">
+                    <app-select-container
+                      nameAttrValue="delivery_division_id"
+                      idAttrValue="delivery-division-id"
+                      [formCtrl]="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'delivery_division_id'
+                        )
+                      "
+                      [options]="deliveryDivisionOptions"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'delivery_division_id'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '配送区分', required: 'true' }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'delivery_division_id'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-select-container>
+                  </div>
+                </div>
+
+                <div class="mt-4 mx-4 flex gap-6">
+                  <div class="w-2/5">
+                    <app-text-container
+                      nameAttrValue="custom_name"
+                      idAttrValue="custom_name"
+                      [formCtrl]="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'custom_name'
+                        )
+                      "
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'custom_name'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: {
+                            label: '商品名を変更する場合下記へ入力してください',
+                            required: false
+                          }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'custom_name'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+                  <div class="grow w-1/5">
+                    <app-text-container
+                      nameAttrValue="tax_included_unit_price"
+                      idAttrValue="tax-included-unit-price"
+                      inputType="number"
+                      [formCtrl]="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'tax_included_unit_price'
+                        )
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'tax_included_unit_price'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '単価', required: true }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'tax_included_unit_price'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+
+                  <ng-container
+                    *ngIf="
+                      getFormControlTypeValue(
+                        customerOrderForm,
+                        'special_order'
+                      ).value
+                    ">
+                    <div class="grow w-2/5">
+                      <app-text-container
+                        nameAttrValue="custom_price"
+                        idAttrValue="custom_price"
+                        inputType="number"
+                        [formCtrl]="
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'custom_unit_price'
+                          )
+                        "
+                        [textRight]="true"
+                        [invalid]="
+                          formControlStateManager(
+                            getFormControlTypeValue(
+                              customerOrderForm,
+                              'custom_unit_price'
+                            )
+                          )
+                        ">
+                        <ng-container
+                          *ngTemplateOutlet="
+                            labels;
+                            context: {
+                              label:
+                                '単価（税込）を変更する場合下記へ入力してください',
+                              required: false
+                            }
+                          "></ng-container>
+                        <ng-container
+                          *ngTemplateOutlet="
+                            errors;
+                            context: {
+                              ctrl: getFormControlTypeValue(
+                                customerOrderForm,
+                                'custom_unit_price'
+                              )
+                            }
+                          "
+                          message></ng-container>
+                      </app-text-container>
+                    </div>
+                  </ng-container>
+
+                  <div class="grow">
+                    <app-text-container
+                      nameAttrValue="tax_included_amount"
+                      idAttrValue="tax-included-amount"
+                      [formCtrl]="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'tax_included_amount'
+                        )
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'tax_included_amount'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '価格', required: true }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'tax_included_amount'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+                </div>
+                <div class="mt-4 mx-4 flex gap-6">
+                  <div class="grow w-3/5">　</div>
+                  <!-- Start 原価 -->
+                  <div class="grow w-1/5">
+                    <app-text-container
+                      nameAttrValue="cost_price"
+                      idAttrValue="cost-price"
+                      inputType="number"
+                      [formCtrl]="
+                        getFormControlTypeValue(customerOrderForm, 'cost_price')
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'cost_price'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '原価', required: false }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'cost_price'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+                  <!-- End 原価 -->
+                  <!-- Start 原価合計 -->
+                  <div class="grow w-1/5">
+                    <app-text-container
+                      nameAttrValue="total_cost_price"
+                      idAttrValue="total-cost-price"
+                      inputType="number"
+                      [formCtrl]="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'total_cost_price'
+                        )
+                      "
+                      [textRight]="true"
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(
+                            customerOrderForm,
+                            'total_cost_price'
+                          )
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: { label: '原価合計', required: false }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'total_cost_price'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-text-container>
+                  </div>
+                  <!-- End 原価合計 -->
+                </div>
+
+                <div class="mt-4 mx-4 flex gap-6">
+                  <div class="flex-auto">
+                    <app-textarea-container
+                      nameAttrValue="remarks"
+                      idAttrValue="remarks"
+                      [rows]="4"
+                      [formCtrl]="
+                        getFormControlTypeValue(customerOrderForm, 'remarks')
+                      "
+                      [invalid]="
+                        formControlStateManager(
+                          getFormControlTypeValue(customerOrderForm, 'remarks')
+                        )
+                      ">
+                      <ng-container
+                        *ngTemplateOutlet="
+                          labels;
+                          context: {
+                            label: '備考',
+                            required: false
+                          }
+                        "></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="
+                          errors;
+                          context: {
+                            ctrl: getFormControlTypeValue(
+                              customerOrderForm,
+                              'remarks'
+                            )
+                          }
+                        "
+                        message></ng-container>
+                    </app-textarea-container>
+                  </div>
+                </div>
+                <hr class="mt-4" />
+                <div class="mt-4 px-4">
+                  <p>入力中商品情報</p>
+                </div>
+                <div class="mt-4 pb-2">
+                  <p>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      仕入先：{{
+                        getFormValue(customerOrderForm, 'supplier_name')
+                      }}
+                    </span>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      商品名：{{
+                        getFormValue(customerOrderForm, 'product_name')
+                      }}
+                    </span>
+                  </p>
+                </div>
+                <div class="mt-4 pb-2">
+                  <p>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      単価（税込）：{{
+                        getFormValue(
+                          customerOrderForm,
+                          'tax_included_unit_price'
+                        ).toLocaleString()
+                      }}円
+                    </span>
+                    <ng-container
+                      *ngIf="
+                        getFormControlTypeValue(
+                          customerOrderForm,
+                          'special_order'
+                        ).value
+                      ">
+                      <span
+                        class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                        カスタム単価（税込）：{{
+                          getFormValue(
+                            customerOrderForm,
+                            'custom_unit_price'
+                          ).toLocaleString()
+                        }}円
+                      </span>
+                    </ng-container>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      金額（税込）：{{
+                        getFormValue(
+                          customerOrderForm,
+                          'tax_included_amount'
+                        ).toLocaleString()
+                      }}円
+                    </span>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      原価：{{
+                        getFormValue(
+                          customerOrderForm,
+                          'cost_price'
+                        ).toLocaleString()
+                      }}円
+                    </span>
+                    <span
+                      class="mx-4 px-4 py-[11px] bg-slate-50 border border-slate-300 rounded">
+                      原価合計：{{
+                        getFormValue(
+                          customerOrderForm,
+                          'total_cost_price'
+                        ).toLocaleString()
+                      }}円
+                    </span>
+                  </p>
+                </div>
+                <hr class="mt-4" />
+                <div class="flex gap-6 justify-end mx-4 pb-2">
+                  <div class="pt-7">
+                    <app-button (click)="removeCustomerOrderForm(i)"
+                      >削除</app-button
+                    >
+                  </div>
+                </div>
+              </div>
+              <!-- } 商品情報 -->
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 pl-2">
+          <app-button (click)="addCustomerOrderForm()">商品追加</app-button>
+        </div>
+      </ng-container>
+    </div>
+    <!-- 保存ボタン -->
+    <ng-container *ngIf="customerType">
+      <ng-container
+        *ngIf="
+          customerType.text === corsConst.CUSTOMER_TYPE_DIVISION.VALUE.CLIENT
+        ">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              form.invalid ||
+              form.pristine ||
+              clientForm.invalid ||
+              clientForm.pristine
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          customerType.text === corsConst.CUSTOMER_TYPE_DIVISION.VALUE.MEMBER
+        ">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              form.invalid ||
+              form.pristine ||
+              memberForm.invalid ||
+              memberForm.pristine
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          customerType.text === corsConst.CUSTOMER_TYPE_DIVISION.VALUE.GENERAL
+        ">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              form.invalid ||
+              form.pristine ||
+              generalForm.invalid ||
+              generalForm.pristine
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+    </ng-container>
+  </form>
+</main>
+
+<!-- 一般選択時テンプレート -->
+<ng-template #general>
+  <div class="flex gap-6 mt-8">
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="last_name"
+        idAttrValue="last-name"
+        [formCtrl]="generalFc.last_name"
+        [invalid]="formControlStateManager(generalFc.last_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '姓 名', required: 'true' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: generalFc.last_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="first_name"
+        idAttrValue="first-name"
+        [formCtrl]="generalFc.first_name"
+        [invalid]="formControlStateManager(generalFc.first_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '　', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: generalFc.first_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="tel"
+        idAttrValue="tel"
+        [formCtrl]="fc.tel"
+        [invalid]="formControlStateManager(fc.tel)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '電話番号（半角数字16桁以内）', required: 'true' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: fc.tel }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="flex gap-6 mt-8">
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="last_name_kana"
+        idAttrValue="last-name-kana"
+        [formCtrl]="generalFc.last_name_kana"
+        [invalid]="formControlStateManager(generalFc.last_name_kana)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'セイ メイ', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: generalFc.last_name_kana }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="first_name_kana"
+        idAttrValue="first-name-kana"
+        [formCtrl]="generalFc.first_name_kana"
+        [invalid]="formControlStateManager(generalFc.first_name_kana)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '　', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: generalFc.first_name_kana }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3"></div>
+  </div>
+  <div class="flex gap-6 mt-8"></div>
+</ng-template>
+<!-- 得意先選択時テンプレート -->
+<ng-template #client>
+  <div class="flex gap-6 mt-8">
+    <div class="w-1/3">
+      <app-real-time-suggest-container
+        nameAttrValue="name"
+        idAttrValue="name"
+        [idCtrl]="clientFc.client_id"
+        [nameCtrl]="clientFc.name"
+        [apiInput]="getClientNameSuggests()"
+        [invalid]="formControlStateManager(clientFc.name)"
+        (selectedData)="handleSelectedClientNameData($event)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '得意先名で検索', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: clientFc.client_id }"
+          message></ng-container>
+      </app-real-time-suggest-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="tel"
+        idAttrValue="tel"
+        [formCtrl]="fc.tel"
+        [invalid]="formControlStateManager(fc.tel)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '電話番号（半角数字14桁以内）', required: 'true' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: fc.tel }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <ng-container *ngIf="selectedClient">
+    <div class="mt-8 border border-slate-300 p-6">
+      <p>選択中会員情報</p>
+      <hr class="my-2" />
+      <div class="flex gap-6">
+        <div class="w-[20%]">
+          <p>ID: {{ selectedClient.id }}</p>
+          <p>得意先コード：{{ selectedClient.client_cd }}</p>
+          <p>得意先名：{{ selectedClient.name }}</p>
+          <p>請求先コード：{{ selectedClient.billing_cd }}</p>
+        </div>
+        <div class="w-[40%]">
+          <p>電話番号：{{ selectedClient.tel }}</p>
+          <p>メールアドレス：{{ selectedClient.mail }}</p>
+          <p>
+            住所：{{ selectedClient.province }}{{ selectedClient.locality
+            }}{{ selectedClient.street_address
+            }}{{ selectedClient.other_address }}
+          </p>
+        </div>
+        <div class="w-[40%]">
+          <p>備考1：{{ selectedClient.remarks_1 }}</p>
+          <p>備考2：{{ selectedClient.remarks_2 }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+<!-- 会員選択時テンプレート -->
+<ng-template #member>
+  <div class="flex gap-6 mt-8">
+    <div class="w-1/3">
+      <app-real-time-suggest-container
+        nameAttrValue="member_cd"
+        idAttrValue="member-cd"
+        [idCtrl]="memberFc.member_id"
+        [nameCtrl]="memberFc.member_cd"
+        [apiInput]="getMemberCdSuggests()"
+        [invalid]="formControlStateManager(memberFc.member_cd)"
+        (selectedData)="handleSelectedMemberCdData($event)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '会員番号で会員情報を検索', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: memberFc.member_id }"
+          message></ng-container>
+      </app-real-time-suggest-container>
+    </div>
+    <div class="w-1/3">
+      <app-real-time-suggest-container
+        nameAttrValue="member_tel"
+        idAttrValue="member_tel"
+        [idCtrl]="memberFc.member_tel"
+        [nameCtrl]="memberFc.member_tel"
+        [apiInput]="getMemberTelSuggests()"
+        (selectedData)="handleSelectedMemberTelData($event)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '電話番号で会員情報を検索', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: memberFc.member_id }"
+          message></ng-container>
+      </app-real-time-suggest-container>
+    </div>
+  </div>
+  <ng-container *ngIf="selectedMember">
+    <div class="mt-8 border border-slate-300 p-6">
+      <p>選択中会員情報</p>
+      <hr class="my-2" />
+      <div class="flex gap-6">
+        <div class="w-[20%]">
+          <p>ID: {{ selectedMember.id }}</p>
+          <p>会員番号：{{ selectedMember.member_cd }}</p>
+          <p>
+            姓名：{{ selectedMember.last_name }} {{ selectedMember.first_name }}
+          </p>
+          <p>
+            姓名カナ：{{ selectedMember.last_name_kana }}
+            {{ selectedMember.first_name_kana }}
+          </p>
+          <p>電話番号：{{ selectedMember.tel }}</p>
+        </div>
+        <div class="w-[40%]">
+          <p>メールアドレス：{{ selectedMember.mail }}</p>
+          <p>
+            住所：{{ selectedMember.province }}{{ selectedMember.locality
+            }}{{ selectedMember.street_address
+            }}{{ selectedMember.other_address }}
+          </p>
+          <p>ポイント保有数：{{ selectedMember.point }}</p>
+          <p>ステータス：{{ selectedMember.division_status_value }}</p>
+        </div>
+        <div class="w-[40%]">
+          <p>備考1：{{ selectedMember.remarks_1 }}</p>
+          <p>備考2：{{ selectedMember.remarks_2 }}</p>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-template>
+<!-- 共通テンプレート -->
+<ng-template #common>
+  <div class="w-1/3">
+    <app-select-suggest-container
+      nameAttrValue="reception_employee_id"
+      idAttrValue="reception-employee-id"
+      placeholder="選択してください"
+      [formCtrl]="fc.reception_employee_id"
+      [suggests]="employeeSuggests"
+      [invalid]="formControlStateManager(fc.reception_employee_id)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '受付担当者', required: 'true' }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: fc.reception_employee_id }"
+        message></ng-container>
+    </app-select-suggest-container>
+  </div>
+  <div class="w-1/3">
+    <app-select-suggest-container
+      nameAttrValue="store_id"
+      idAttrValue="store-id"
+      placeholder="選択してください"
+      [formCtrl]="fc.store_id"
+      [suggests]="storeSuggests"
+      [invalid]="formControlStateManager(fc.store_id)">
+      <ng-container
+        *ngTemplateOutlet="
+          labels;
+          context: { label: '店舗', required: 'true' }
+        "></ng-container>
+      <ng-container
+        *ngTemplateOutlet="errors; context: { ctrl: fc.store_id }"
+        message></ng-container>
+    </app-select-suggest-container>
+  </div>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <ng-container
+      *ngIf="
+        ctrl === generalFc.last_name_kana || ctrl === generalFc.first_name_kana
+      ">
+      <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+        {{ errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION }}
+      </p>
+    </ng-container>
+    <ng-container *ngIf="ctrl === fc.tel">
+      <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+        {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+      </p>
+    </ng-container>
+    <ng-container
+      *ngIf="
+        ctrl === fc.shipping_address ||
+        ctrl === fc.remarks_1 ||
+        ctrl === fc.remarks_2 ||
+        ctrl === fc.tel
+      ">
+      <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['maxlength']">
+        {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+      </p>
+    </ng-container>
+  </ng-container>
+</ng-template>

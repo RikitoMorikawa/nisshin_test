@@ -1,0 +1,7 @@
+button {
+  @apply bg-iron-blue-400 rounded text-center shadow-md px-8 py-2;
+  @apply hover:bg-iron-blue-300;
+}
+input {
+  @apply hidden;
+}

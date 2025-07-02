@@ -1,0 +1,27 @@
+<!-- ↓ 入力フォーム ↓ -->
+<app-text-container
+  class="w-1/3"
+  [formCtrl]="ctrls.name"
+  [suggests]="nameSuggests"
+  idAttrValue="custom-tag-{{ index }}-name">
+  <span>タグ名</span>
+</app-text-container>
+<app-text-container
+  class="w-1/3"
+  [formCtrl]="ctrls.value"
+  [suggests]="valueSuggests"
+  idAttrValue="custom-tag-{{ index }}-value">
+  <span>値</span>
+</app-text-container>
+
+<!-- ↓ 追加・削除ボタン ↓ -->
+<div class="flex items-center gap-4 mt-6">
+  <app-icon icon="add-line" class="cursor-pointer w-6" (click)="add.emit()">
+  </app-icon>
+  <app-icon
+    *ngIf="index"
+    icon="delete-bin-line"
+    class="cursor-pointer w-6 fill-red-500"
+    (click)="remove.emit(index)">
+  </app-icon>
+</div>

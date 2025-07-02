@@ -1,0 +1,45 @@
+<!-- ↓ ラベル ↓ -->
+<app-label [for]="timestamp" [required]="required">
+  <ng-content></ng-content>
+</app-label>
+
+<div class="flex items-center">
+  <div class="grow relative">
+    <!-- ↓ 入力フォーム ↓ -->
+    <input
+      class="p-2 block w-full border border-iron-blue-400 rounded focus:placeholder-transparent focus:outline-none focus:border focus:border-primary focus:ring-1"
+      [ngClass]="{
+        'outline-none ring-1 ring-warning': invalid() || invalidOverride,
+        'text-right': alignRight
+      }"
+      [type]="type"
+      [id]="timestamp"
+      [formControl]="formCtrl"
+      (focus)="onFocus()"
+      (blur)="onBlur()" />
+    <!-- ↓ サジェスト ↓ -->
+    <ul
+      *ngIf="results"
+      class="absolute w-full z-10 border border-t-0 shadow"
+      (mouseover)="isHover = true"
+      (mouseout)="isHover = false">
+      <li
+        *ngFor="let result of results"
+        class="bg-white hover:bg-slate-100 cursor-pointer p-2"
+        (click)="onClick(result)">
+        {{ result }}
+      </li>
+    </ul>
+  </div>
+  <!-- ↓ クリアボタン ↓ -->
+  <app-icon
+    *ngIf="useClear"
+    icon="close-circle-fill"
+    class="w-6 ml-1 fill-slate-500 cursor-pointer"
+    (click)="clear()">
+  </app-icon>
+</div>
+
+<!-- ↓ エラーメッセージ ↓ -->
+<app-error-messages *ngIf="invalid()" [errors]="formCtrl.errors">
+</app-error-messages>

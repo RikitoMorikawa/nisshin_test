@@ -1,0 +1,27 @@
+<div>
+  <form [formGroup]="searchForm" (ngSubmit)="handleClickSubmitButton()">
+    <div class="flex">
+      <app-text-container class="w-1/3" [formCtrl]="searchForm.controls.name">
+        <ng-content></ng-content>
+      </app-text-container>
+    </div>
+    <div class="mt-2">
+      <app-button class="mr-4" (click)="handleClickClearButton()">
+        入力内容クリア
+      </app-button>
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        [buttonDisabled]="searchForm.invalid || searchForm.pristine">
+        絞り込み実行
+      </app-button>
+    </div>
+    <p class="mt-2 text-sm text-red">
+      ※
+      入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+    </p>
+  </form>
+</div>

@@ -1,0 +1,53 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/role', text: '権限一覧' },
+    { text: '権限詳細' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">権限詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/setting/role"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <ng-container *ngIf="!common.loading">
+      <app-last-updater-org>
+        最終更新者：{{
+          last_update_user ? last_update_user : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </ng-container>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{ role ? role['name'] : 'データ取得中...' }}
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            *ngFor="let roleKey of roleKeys"
+            class="flex flex-row items-center border-b border-b-gray-200">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">
+              {{ logicalNames[roleKey] }}
+            </div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ role ? role[roleKey] : '' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

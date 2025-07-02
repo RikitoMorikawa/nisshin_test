@@ -1,0 +1,54 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="eventListener.next($event)"
+  (checkItem)="selectItemList($event)">
+  レンタル商品一覧
+
+  <div class="">
+    <div class="mt-1 mb-1">
+      <form [formGroup]="changeList" class="flex flex-row">
+        <app-select-container
+          nameAttrValue="status_division_id"
+          idAttrValue="status_division_id"
+          [formCtrl]="statusFc.status_division_id"
+          [options]="statusLists"
+          class="basis-1/2">
+        </app-select-container>
+        <input
+          type="text"
+          style="display: none; margin: 0; padding: 0"
+          formControlName="idlist" />
+        <div class="basis-1/2 mt-1 mb-1">
+          &nbsp;
+          <app-button
+            class=""
+            (click)="handleClickChangeStatus()"
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="button_status"
+            >ステータス変更</app-button
+          >
+        </div>
+        <div class="basis-1/2 mt-1 mb-1">
+          &nbsp;
+          <app-button
+            (click)="reset()"
+            btnType="button"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="button_status"
+            >選択解除</app-button
+          >
+        </div>
+      </form>
+    </div>
+  </div>
+</app-table-with-pagination>

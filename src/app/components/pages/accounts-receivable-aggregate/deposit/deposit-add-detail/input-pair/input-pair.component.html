@@ -1,0 +1,58 @@
+<app-text-container
+  class="w-40"
+  [formCtrl]="ctrls.deposit_client_id"
+  idAttrValue="deposit-detail-{{ index }}-deposit_client_id">
+</app-text-container>
+<app-select-suggest-container
+  class="w-52"
+  [formCtrl]="ctrls.deposit_client_name"
+  idAttrValue="deposit-client-name"
+  nameAttrValue="deposit_client_name"
+  placeholder="選択してください"
+  [suggests]="clientSuggests"
+  [invalid]="formControlStateManager(ctrls.deposit_client_name)"
+  (idValueChanges)="clientChange($event)">
+</app-select-suggest-container>
+
+<app-select-clear-container
+  class="w-40"
+  [formCtrl]="ctrls.deposit_detail_division_code"
+  idAttrValue="deposit-detail-division-code"
+  nameAttrValue="deposit_detail_division_code"
+  [options]="depositClassficationOption"
+  labelSize="sm">
+</app-select-clear-container>
+<app-text-container
+  class="w-40"
+  [textRight]="true"
+  [formCtrl]="ctrls.deposit_amount"
+  inputType="number"
+  idAttrValue="deposit-detail-{{ index }}-deposit_amount">
+</app-text-container>
+<div class="w-40">
+  <ng-container *ngIf="loading">
+    {{ billing_amount ? '入金予定額：' + billing_amount.toLocaleString() : ''
+    }}<br />
+    {{ balance ? '残高：' + balance.toLocaleString() : '' }}
+  </ng-container>
+</div>
+<app-text-container
+  class="w-52"
+  [formCtrl]="ctrls.remarks_1"
+  idAttrValue="deposit-detail-{{ index }}-remarks"
+  [invalid]="formControlStateManager(ctrls.remarks_1)">
+</app-text-container>
+<!-- ↓ 追加・削除ボタン ↓ -->
+<div class="flex items-center gap-4">
+  <app-icon icon="add-line" class="cursor-pointer w-6" (click)="add.emit()">
+  </app-icon>
+  <app-icon
+    *ngIf="index; else falseContent"
+    icon="delete-bin-line"
+    class="cursor-pointer w-6 fill-red-500"
+    (click)="remove.emit(index)">
+  </app-icon>
+  <ng-template #falseContent>
+    <div class="w-6 width:24px;">　</div>
+  </ng-template>
+</div>

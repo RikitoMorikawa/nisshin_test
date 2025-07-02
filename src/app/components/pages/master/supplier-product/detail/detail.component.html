@@ -1,0 +1,12 @@
+<!-- ↓ 詳細画面のテンプレート ↓ -->
+<app-template-detail
+  class="[&_app-last-updater-org]:hidden"
+  [backToListPath]="listPagePath">
+  <!-- ↓ ページタイトル ↓ -->
+  <ng-container pageTitle>仕入先商品詳細</ng-container>
+  <!-- ↓ 詳細情報見出し ↓ -->
+  <ng-container detailTitle>{{ title }}</ng-container>
+
+  <!-- ↓ 詳細情報 ↓ -->
+  <app-detail-list detailContent [details]="details"></app-detail-list>
+</app-template-detail>

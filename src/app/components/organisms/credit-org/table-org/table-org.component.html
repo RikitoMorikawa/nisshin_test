@@ -1,0 +1,6 @@
+<app-table-with-pagination
+  [params]="tableParams"
+  [loading]="common.loading"
+  (pageChange)="tableEvent.next($event)">
+  クレジット一覧
+</app-table-with-pagination>

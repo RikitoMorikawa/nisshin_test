@@ -1,0 +1,85 @@
+<!-- ↓ 詳細画面のテンプレート ↓ -->
+<app-template-detail [remove$]="remove$">
+  <!-- ↓ ページタイトル ↓ -->
+  <ng-container pageTitle>仕入先詳細</ng-container>
+  <!-- ↓ 最終更新者 ↓ -->
+  <ng-container updater>{{ updater }}</ng-container>
+  <!-- ↓ 詳細情報見出し ↓ -->
+  <div detailTitle>{{ title }}</div>
+
+  <!-- ↓ 追加のリンク ↓ -->
+  <app-icon-container
+    optionalLink
+    class="cursor-pointer"
+    icon="list-unordered"
+    appendClassForIcon="fill-emerald-600 group-hover:fill-emerald-400"
+    routerLink="./products">
+    <span class="group-hover:text-emerald-400">仕入先商品一覧</span>
+  </app-icon-container>
+
+  <!-- ↓ 詳細情報 ↓ -->
+  <div class="mt-2" detailContent>
+    <app-icon-container
+      icon="money-cny-box-line"
+      appendClassForIcon="w-8 fill-warning">
+      <p class="text-2xl">前回買掛残：{{ receivable }} 円</p>
+    </app-icon-container>
+    <div class="mt-4 flex gap-6">
+      <img [src]="logo" alt="ロゴ画像" class="w-[240px] self-start" />
+      <div class="grow">
+        <div class="ml-1 flex gap-4 text-sm">
+          <p>仕入先Webシステムでの状態：</p>
+          <app-icon-container icon="eye-line" appendClassForIcon="fill-success">
+            見える
+          </app-icon-container>
+          <app-icon-container
+            icon="eye-off-line"
+            appendClassForIcon="fill-danger">
+            見えない
+          </app-icon-container>
+        </div>
+
+        <!-- ↓ リスト表示部分（表示状態があるので独自に定義）↓ -->
+        <table class="mt-1 w-full shadow">
+          <tr *ngFor="let item of listItems" class="border border-slate-200">
+            <td class="p-4 w-1/4 bg-slate-100" [ngSwitch]="item.visibility">
+              <app-icon-container
+                icon="eye-line"
+                appendClassForIcon="fill-success"
+                *ngSwitchCase="'visible'">
+                {{ item.name_jp }}
+              </app-icon-container>
+              <app-icon-container
+                icon="eye-off-line"
+                appendClassForIcon="fill-danger"
+                *ngSwitchCase="'hidden'">
+                {{ item.name_jp }}
+              </app-icon-container>
+              <app-icon-container
+                icon="edit-2-line"
+                appendClassForIcon="fill-warning"
+                *ngSwitchDefault>
+                {{ item.name_jp }}
+              </app-icon-container>
+            </td>
+            <td class="p-4">{{ item.value }}</td>
+          </tr>
+        </table>
+
+        <!-- ↓ カスタムタグ表示 ↓ -->
+        <table class="mt-6 w-full shadow">
+          <tr *ngFor="let tag of tags" class="border border-slate-200">
+            <td class="p-4 w-1/4 bg-slate-100">
+              <app-icon-container
+                icon="eye-off-line"
+                appendClassForIcon="fill-danger">
+                カスタムタグ
+              </app-icon-container>
+            </td>
+            <td class="p-4">{{ tag }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-template-detail>

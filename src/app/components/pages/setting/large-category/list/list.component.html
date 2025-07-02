@@ -1,0 +1,25 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '大分類一覧' }
+  ]"></app-breadcrumb-org>
+<main class="mt-8 mb-20">
+  <div>
+    <app-search-org
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+      大分類名で絞り込み</app-search-org
+    >
+  </div>
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/setting/large-category/add"></app-new-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <app-table-org
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table-org>
+  </div>
+</main>

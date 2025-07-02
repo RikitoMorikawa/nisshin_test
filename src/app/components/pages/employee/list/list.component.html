@@ -1,0 +1,24 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '社員一覧' }]"></app-breadcrumb-org>
+<main>
+  <div>
+    <app-employee-search-org
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)"></app-employee-search-org>
+  </div>
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/employee/add"></app-new-registration-link-org>
+    </div>
+    <div>
+      <app-bulk-registration-link-org
+        path="/employee/bulk-add"></app-bulk-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <app-employee-table-org
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-employee-table-org>
+  </div>
+</main>

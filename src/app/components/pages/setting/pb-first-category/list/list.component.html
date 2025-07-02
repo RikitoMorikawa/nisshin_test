@@ -1,0 +1,29 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: '商品ブック第1分類一覧' }
+  ]"></app-breadcrumb-org>
+<main class="mt-8 mb-20">
+  <div>
+    <app-search
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+      商品ブック第1分類名で絞り込み</app-search
+    >
+  </div>
+  <div class="flex items-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/setting/product-book-first-category/add"></app-new-registration-link-org>
+    </div>
+    <div>
+      <app-bulk-registration-link-org
+        path="/setting/product-book-first-category/bulk-add"></app-bulk-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <app-table
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

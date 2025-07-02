@@ -1,0 +1,14 @@
+<app-label
+  [forAttrValue]="idAttrValue"
+  labelSize="base"
+  class="block ml-1 mb-1">
+  <ng-content></ng-content>
+</app-label>
+<app-textarea
+  [nameAttrValue]="nameAttrValue"
+  [idAttrValue]="idAttrValue"
+  [formCtrl]="formCtrl"
+  [placeholder]="placeholder"
+  [invalid]="invalid"
+  [rows]="rows"></app-textarea>
+<ng-content select="[message]"></ng-content>

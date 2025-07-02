@@ -1,0 +1,541 @@
+<!-- ↓ 登録・編集画面のテンプレート ↓ -->
+<app-template-add-edit
+  [service]="service"
+  [formCtrl]="form"
+  [modFn]="modifyFormValue"
+  (statusChange)="common.loading = !!$event">
+  <!-- ↓ ページタイトル ↓ -->
+  <ng-container pageTitle>
+    {{ id ? '商品編集' : '商品新規登録' }}
+  </ng-container>
+
+  <!-- ↓ 最終更新者 ↓ -->
+  <ng-container updater>{{ updater }}</ng-container>
+  <ng-container authorname>{{ authorname }}</ng-container>
+  <!-- ↓ 仕入先情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>仕入先情報入力</ng-container>
+    <div class="flex flex-col gap-4" formContent>
+      <div class="flex flex-row gap-6">
+        <app-input
+          nameAttrValue="supplier_id"
+          idAttrValue="supplier-id"
+          class="w-3/12"
+          [formCtrl]="fc.supplier_id"
+          [useClear]="false">
+          仕入先ID（半角数字）
+        </app-input>
+        <app-real-time-suggest-container
+          class="w-9/12"
+          [idCtrl]="fc.supplier_id"
+          [nameCtrl]="fc.supplier_name"
+          nameAttrValue="supplier_name"
+          idAttrValue="supplier-name"
+          [apiInput]="getSuggests()"
+          (idValueChanges)="onIdValueChanges($event)">
+          仕入先名
+        </app-real-time-suggest-container>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input class="w-3/12" [formCtrl]="fc.supplier_product_cd">
+          仕入先商品コード（10文字以内）
+        </app-input>
+        <div class="w-9/12"></div>
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ 商品情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>商品情報入力</ng-container>
+    <div formContent class="flex flex-col gap-4">
+      <app-input [formCtrl]="fc.name"
+        >商品名（{{
+          productConst.CHARACTER_LIMITS.NAME_MAX_LENGTH
+        }}文字以内）</app-input
+      >
+      <app-input [formCtrl]="fc.name_kana">
+        商品名カナ（全角カナ{{
+          productConst.CHARACTER_LIMITS.NAME_KANA_MAX_LENGTH
+        }}文字以内）
+      </app-input>
+      <div class="flex gap-6">
+        <app-input class="w-2/3" [formCtrl]="fc.standard"
+          >規格（{{
+            productConst.CHARACTER_LIMITS.STANDARD_MAX_LENGTH
+          }}文字以内）</app-input
+        >
+        <app-input class="w-1/3" [formCtrl]="fc.part_number"
+          >品番（{{
+            productConst.CHARACTER_LIMITS.PART_NUMBER_MAX_LENGTH
+          }}文字以内）</app-input
+        >
+      </div>
+      <div class="flex gap-6">
+        <app-input class="w-1/4" [formCtrl]="fc.basic_shipping_fee"
+          >配送料金（半角数字）</app-input
+        >
+        <app-input class="w-1/4" [formCtrl]="fc.shipping_surcharge"
+          >配送追加料金（半角数字）</app-input
+        >
+      </div>
+      <div
+        class="mt-2 shadow border border-gray-300 border-t-warning-hover border-t-2 [&_app-label]:hidden">
+        <div
+          class="flex gap-6 px-6 py-4 border-b border-b-gray-300 [&>*]:w-1/5">
+          <div></div>
+          <div>単位</div>
+          <div>入数</div>
+          <div class="flex gap-2 items-center">
+            JANコード
+            <ng-container *ngTemplateOutlet="required"></ng-container>
+          </div>
+          <div class="flex gap-2 items-center">
+            発注用
+            <ng-container *ngTemplateOutlet="required"></ng-container>
+          </div>
+        </div>
+        <div
+          class="flex gap-6 px-6 py-4 border-b border-b-gray-300 [&>*]:w-1/5">
+          <p>バラ</p>
+          <app-select
+            [formCtrl]="fc.unit_division_id"
+            [options]="opts.unit_division_id">
+          </app-select>
+          <app-input [formCtrl]="fc.quantity" [alignRight]="true"></app-input>
+          <app-input
+            [formCtrl]="fc.barcode"
+            (change)="
+              changeOrderingTargetBarcode(1, fc.barcode.value)
+            "></app-input>
+          <div class="flex items-center">
+            <!-- ラジオボタンに ReactiveForm の機能を使用した場合、活性/非活性の調整など
+                 微妙な挙動の調整が難しかったため、(change) などを利用して独自に設定しています。 -->
+            <input
+              class="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
+              type="radio"
+              name="radio"
+              [disabled]="!fc.barcode.value"
+              [checked]="flg_ordering_target_barcode === 1"
+              (change)="setOrderingTargetBarcode(1, fc.barcode.value)" />
+          </div>
+        </div>
+        <div
+          class="flex gap-6 px-6 py-4 border-b border-b-gray-300 [&>*]:w-1/5">
+          <p>小分け</p>
+          <app-select
+            [formCtrl]="fc.b_unit_division_id"
+            [options]="opts.b_unit_division_id">
+          </app-select>
+          <app-input [formCtrl]="fc.b_quantity" [alignRight]="true"></app-input>
+          <app-input
+            [formCtrl]="fc.b_barcode"
+            (change)="
+              changeOrderingTargetBarcode(2, fc.b_barcode.value)
+            "></app-input>
+          <div class="flex items-center">
+            <input
+              class="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
+              type="radio"
+              name="radio"
+              [disabled]="!fc.b_barcode.value"
+              [checked]="flg_ordering_target_barcode === 2"
+              (change)="setOrderingTargetBarcode(2, fc.b_barcode.value)" />
+          </div>
+        </div>
+        <div
+          class="flex gap-6 px-6 py-4 border-b border-b-gray-300 [&>*]:w-1/5">
+          <p>ケース</p>
+          <app-select
+            [formCtrl]="fc.c_unit_division_id"
+            [options]="opts.c_unit_division_id">
+          </app-select>
+          <app-input [formCtrl]="fc.c_quantity" [alignRight]="true"></app-input>
+          <app-input
+            [formCtrl]="fc.c_barcode"
+            (change)="
+              changeOrderingTargetBarcode(3, fc.c_barcode.value)
+            "></app-input>
+          <div class="flex items-center">
+            <input
+              class="w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 cursor-pointer"
+              type="radio"
+              name="radio"
+              [disabled]="!fc.c_barcode.value"
+              [checked]="flg_ordering_target_barcode === 3"
+              (change)="setOrderingTargetBarcode(3, fc.c_barcode.value)" />
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-6 [&>*]:w-1/3">
+        <app-select
+          [formCtrl]="fc.large_category_id"
+          [options]="opts.large_category_id">
+          大分類
+        </app-select>
+        <app-select
+          [formCtrl]="fc.medium_category_id"
+          [options]="opts.medium_category_id">
+          中分類
+        </app-select>
+        <app-select
+          [formCtrl]="fc.small_category_id"
+          [options]="opts.small_category_id">
+          小分類
+        </app-select>
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ 区分情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>各種区分情報入力</ng-container>
+    <div formContent class="flex flex-col gap-4">
+      <div class="flex gap-6 [&>*]:w-1/3">
+        <app-select
+          [formCtrl]="fc.point_division_id"
+          [options]="opts.point_division_id">
+          ポイント区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.issuance_warranty_division_id"
+          [options]="opts.issuance_warranty_division_id">
+          保証書発行区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.discount_division_id"
+          [options]="opts.discount_division_id">
+          値引区分
+        </app-select>
+      </div>
+      <div class="flex gap-6 [&>*]:w-1/3">
+        <app-select
+          [formCtrl]="fc.price_tag_division_id"
+          [options]="opts.price_tag_division_id">
+          ポップシール区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.seal_print_division_id"
+          [options]="opts.seal_print_division_id">
+          ラベルシール印刷区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.seal_price_indication"
+          [options]="seal_price_indication_option">
+          ラベルシール価格表示区分
+        </app-select>
+      </div>
+      <div class="flex gap-6 [&>*]:w-1/3">
+        <app-select
+          [formCtrl]="fc.product_division_id"
+          [options]="opts.product_division_id"
+          (change)="getValue($event)">
+          商品区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.data_permission_division_id"
+          [options]="opts.data_permission_division_id">
+          データ公開区分
+        </app-select>
+        <div></div>
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ 価格情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>価格情報入力</ng-container>
+    <div formContent class="flex flex-col gap-4 [&_input]:text-right">
+      <div class="flex gap-6 [&>*]:w-1/4">
+        <app-select
+          [formCtrl]="fc.sales_tax_division_id"
+          [options]="opts.sales_tax_division_id">
+          商品消費税区分（売上用）
+        </app-select>
+        <app-select
+          [formCtrl]="fc.sales_fraction_division_id"
+          [options]="opts.sales_fraction_division_id">
+          商品販売端数区分（売上用）
+        </app-select>
+        <app-select
+          [formCtrl]="fc.supplier_sales_tax_division_id"
+          [options]="opts.supplier_sales_tax_division_id">
+          仕入先消費税区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.supplier_sales_fraction_division_id"
+          [options]="opts.supplier_sales_fraction_division_id">
+          仕入先消費税端数区分
+        </app-select>
+      </div>
+
+      <div
+        class="mt-2 shadow border border-gray-300 border-t-warning-hover border-t-2 py-6">
+        <!-- バラ -->
+        <div class="flex flex-1 gap-4 px-4">
+          <div class="w-[10%] flex items-center justify-center">
+            <div class="mt-[24px]">
+              <span>バラ</span>
+            </div>
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.supplier_cost_price"
+              >仕入単価（円）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.gross_profit_rate"
+              >粗利率（％）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.selling_price">売価（円）</app-input>
+          </div>
+          <!-- 計算・クリアボタン -->
+          <div class="w-[30%] mt-7 flex flex-row gap-6 justify-end">
+            <app-button
+              btnType="button"
+              (click)="handleClickClearValueButton('バラ')">
+              値をクリア
+            </app-button>
+            <app-button
+              btnType="button"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              (click)="handleClickCalcButton('バラ')"
+              [buttonDisabled]="
+                notAbleToCalcMessage.piece !== null ||
+                fc.supplier_cost_price.hasError('pattern') ||
+                fc.supplier_cost_price.hasError('required') ||
+                fc.gross_profit_rate.hasError('required') ||
+                fc.gross_profit_rate.hasError('pattern')
+              ">
+              売価を計算
+            </app-button>
+          </div>
+        </div>
+        <!-- エラーメッセージ -->
+        <div
+          *ngIf="notAbleToCalcMessage.piece !== null"
+          class="px-4 flex justify-end">
+          <p class="mt-4 text-rose-500">{{ notAbleToCalcMessage.piece }}</p>
+        </div>
+        <hr class="my-4" />
+        <!-- 小分け -->
+        <div class="flex gap-4 px-4">
+          <div class="w-[10%] flex items-center justify-center">
+            <div class="mt-[24px]">
+              <span>小分け</span>
+            </div>
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.b_supplier_cost_price"
+              >仕入単価（円）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.b_gross_profit_rate"
+              >粗利率（％）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.b_selling_price">売価（円）</app-input>
+          </div>
+          <div class="w-[30%] mt-7 flex flex-row gap-6 justify-end">
+            <app-button
+              btnType="button"
+              (click)="handleClickClearValueButton('小分け')">
+              値をクリア
+            </app-button>
+            <app-button
+              btnType="button"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              (click)="handleClickCalcButton('小分け')"
+              [buttonDisabled]="
+                notAbleToCalcMessage.set !== null ||
+                fc.b_supplier_cost_price.hasError('pattern') ||
+                fc.b_gross_profit_rate.hasError('pattern') ||
+                fc.b_gross_profit_rate.value === ''
+              ">
+              <!-- 小分けは必須じゃないので、b_xxxx.value == ''がないと新規登録読み込み時にボタンが非アクティブにならない -->
+              売価を計算
+            </app-button>
+          </div>
+        </div>
+        <!-- エラーメッセージ -->
+        <div
+          *ngIf="notAbleToCalcMessage.set !== null"
+          class="px-4 flex justify-end">
+          <p class="mt-4 text-rose-500">{{ notAbleToCalcMessage.set }}</p>
+        </div>
+        <hr class="my-4" />
+        <!-- ケース -->
+        <div class="flex gap-4 px-4">
+          <div class="w-[10%] flex items-center justify-center">
+            <div class="mt-[24px]">
+              <span>ケース</span>
+            </div>
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.c_supplier_cost_price"
+              >仕入単価（円）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.c_gross_profit_rate"
+              >粗利率（％）</app-input
+            >
+          </div>
+          <div class="w-[25%]">
+            <app-input [formCtrl]="fc.c_selling_price">売価（円）</app-input>
+          </div>
+          <!-- 計算・クリアボタン -->
+          <div class="w-[30%] mt-7 flex flex-row gap-6 justify-end">
+            <app-button
+              btnType="button"
+              (click)="handleClickClearValueButton('ケース')">
+              値をクリア
+            </app-button>
+            <app-button
+              btnType="button"
+              btnFillColor="bg-success"
+              btnHoverColor="hover:bg-success-hover"
+              btnTextColor="text-white"
+              btnLineColor="border-success"
+              btnLineHoverColor="hover:border-success-hover"
+              (click)="handleClickCalcButton('ケース')"
+              [buttonDisabled]="
+                notAbleToCalcMessage.case !== null ||
+                fc.c_supplier_cost_price.hasError('pattern') ||
+                fc.c_supplier_cost_price.hasError('required') ||
+                fc.c_gross_profit_rate.hasError('pattern') ||
+                fc.c_gross_profit_rate.hasError('required')
+              ">
+              売価を計算
+            </app-button>
+          </div>
+        </div>
+        <!-- エラーメッセージ -->
+        <div
+          *ngIf="notAbleToCalcMessage.case !== null"
+          class="px-4 flex justify-end">
+          <p class="mt-4 text-rose-500">{{ notAbleToCalcMessage.case }}</p>
+        </div>
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ 在庫管理情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>在庫管理情報入力</ng-container>
+    <div
+      formContent
+      class="mt-6 shadow border border-gray-300 border-t-warning-hover border-t-2">
+      <div class="flex gap-6 px-6 py-4 [&>*]:w-1/4">
+        <app-input [formCtrl]="fc.minimum_order_quantity"
+          >最小発注数（半角数字）</app-input
+        >
+        <app-input [formCtrl]="fc.regulated_stock_num"
+          >規定在庫数（半角数字）</app-input
+        >
+        <app-input [formCtrl]="fc.ordering_point">発注点（半角数字）</app-input>
+        <div class="flex">
+          <app-input class="grow" [formCtrl]="fc.order_lead_time"
+            >リードタイム（半角数字）</app-input
+          >
+          <span class="ml-2 pt-9">日</span>
+        </div>
+      </div>
+      <div class="flex gap-6 px-6 py-4 [&>*]:w-1/4">
+        <app-select
+          [formCtrl]="fc.shelf_division_id"
+          [options]="opts.shelf_division_id">
+          陳列棚
+        </app-select>
+        <app-select
+          [formCtrl]="fc.shelf_col_division_id"
+          [options]="opts.shelf_col_division_id">
+          陳列棚 - 列
+        </app-select>
+        <div></div>
+        <!-- スペーサー -->
+        <div></div>
+        <!-- スペーサー -->
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ その他属性情報 ↓ -->
+  <app-form-block form>
+    <ng-container formTitle>その他属性情報入力</ng-container>
+    <ng-container formContent>
+      <div class="pb-8 flex border-b border-gray-300">
+        <app-file-with-preview
+          class="w-1/3"
+          [fileCtrl]="fc.image"
+          [pathCtrl]="fc.image_path">
+          <p class="text-sm">※ 画像のファイルサイズは最大3Mバイト</p>
+        </app-file-with-preview>
+        <div class="grow flex flex-col gap-4">
+          <app-textarea [formCtrl]="fc.remarks_1" [rows]="2"
+            >備考1（{{
+              productConst.CHARACTER_LIMITS.REMARKS_1_MAX_LENGTH
+            }}文字以内）</app-textarea
+          >
+          <app-textarea [formCtrl]="fc.remarks_2" [rows]="2"
+            >備考2（{{
+              productConst.CHARACTER_LIMITS.REMARKS_2_MAX_LENGTH
+            }}文字以内）</app-textarea
+          >
+          <app-textarea [formCtrl]="fc.remarks_3" [rows]="2">
+            備考3（レジ備考）（{{
+              productConst.CHARACTER_LIMITS.REMARKS_3_MAX_LENGTH
+            }}文字以内）
+          </app-textarea>
+          <app-textarea [formCtrl]="fc.remarks_4" [rows]="2"
+            >備考4（{{
+              productConst.CHARACTER_LIMITS.REMARKS_4_MAX_LENGTH
+            }}文字以内）</app-textarea
+          >
+        </div>
+      </div>
+      <div class="mt-6 pb-8 flex gap-6 [&>*]:w-1/3 border-b border-gray-300">
+        <app-select
+          [formCtrl]="fc.custom_large_category_id"
+          [options]="opts.custom_large_category_id">
+          カスタム大分類
+        </app-select>
+        <app-select
+          [formCtrl]="fc.custom_medium_category_id"
+          [options]="opts.custom_medium_category_id">
+          カスタム中分類
+        </app-select>
+        <app-select
+          [formCtrl]="fc.custom_small_category_id"
+          [options]="opts.custom_small_category_id">
+          カスタム小分類
+        </app-select>
+      </div>
+      <app-custom-tag-form
+        class="block mt-6"
+        [formArray]="fc.product_custom_tag">
+        カスタムタグ
+      </app-custom-tag-form>
+    </ng-container>
+  </app-form-block>
+</app-template-add-edit>
+
+<!-- ↓ 必須アイコンのテンプレート ↓ -->
+<ng-template #required>
+  <span
+    class="px-3 py-0.5 shrink-0 text-xs text-white bg-warning-dark rounded-full">
+    必須
+  </span>
+</ng-template>

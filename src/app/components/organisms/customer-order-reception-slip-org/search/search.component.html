@@ -1,0 +1,142 @@
+<!-- ↓ パネル開閉ボタン ↓ -->
+<div class="mt-8 mb-4">
+  <app-button (click)="panelOpenButtonOnClick()">
+    <app-icon class="w-6" icon="filter-2-line"></app-icon>
+    <span class="inline-block ml-1 mr-2">
+      {{ hasPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示' }}
+    </span>
+    <app-icon
+      class="w-6"
+      [class]="rotateAnimation"
+      icon="arrow-down-s-fill"></app-icon>
+  </app-button>
+</div>
+<!-- ↓ 絞り込みフォーム ↓ -->
+<div class="mb-6">
+  <div
+    class="purchase-order-search width-limit-break bg-white"
+    [ngClass]="hasPanelOpened ? 'is-open shadow' : ''">
+    <form
+      class="w-[1280px] mx-auto px-4"
+      (ngSubmit)="handleClickSubmitButton()">
+      <div class="flex gap-6 mb-6">
+        <app-text-clear-container class="w-1/5" [formCtrl]="ctrls.id"
+          >管理コード</app-text-clear-container
+        >
+        <div class="w-1/5">
+          <app-select-suggest-container
+            nameAttrValue="reception_employee_id"
+            idAttrValue="reception-employee-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.reception_employee_id"
+            [suggests]="employeeSuggests"
+            [invalid]="invalid(ctrls.reception_employee_id)">
+            受付担当者
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/5">
+          <app-text-clear-container
+            (change)="changeNumber(ctrls.tel)"
+            class="w-1/6"
+            [formCtrl]="ctrls.tel"
+            >電話番号</app-text-clear-container
+          >
+        </div>
+        <div class="w-1/5">
+          <app-text-clear-container class="w-1/6" [formCtrl]="ctrls.last_name"
+            >お客様名</app-text-clear-container
+          >
+        </div>
+      </div>
+      <div class="flex gap-6 mb-6">
+        <div class="w-1/6">
+          <app-select-suggest-container
+            nameAttrValue="status_division_id"
+            idAttrValue="reception-employee-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.status_division_id"
+            [suggests]="statusOptions"
+            [invalid]="invalid(ctrls.status_division_id)">
+            ステータス
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/6">
+          <app-select-suggest-container
+            nameAttrValue="settle_status_division_id"
+            idAttrValue="settle-status-division-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.settle_status_division_id"
+            [suggests]="settleStatusOptions"
+            [invalid]="invalid(ctrls.settle_status_division_id)">
+            精算
+          </app-select-suggest-container>
+        </div>
+        <div class="w-2/6">
+          <app-select-suggest-container
+            nameAttrValue="supplier_id"
+            idAttrValue="supplier-id"
+            placeholder="選択してください"
+            [formCtrl]="ctrls.supplier_id"
+            [suggests]="supplierOptions"
+            (change)="supplierChange($event)"
+            [invalid]="invalid(ctrls.supplier_id)">
+            仕入れ先
+          </app-select-suggest-container>
+        </div>
+      </div>
+      <div class="flex gap-6 mb-6">
+        <app-date-term-clear-container
+          [dateFromFormCtrl]="ctrls.quotation_date.controls.from"
+          [dateToFormCtrl]="ctrls.quotation_date.controls.to"
+          [invalid]="!!ctrls.quotation_date.errors">
+          <span>見積日</span>
+          <ng-container
+            *ngIf="ctrls.quotation_date.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+        <app-date-term-clear-container
+          [dateFromFormCtrl]="ctrls.created_at.controls.from"
+          [dateToFormCtrl]="ctrls.created_at.controls.to"
+          [invalid]="!!ctrls.created_at.errors">
+          <span>登録日</span>
+          <ng-container
+            *ngIf="ctrls.created_at.errors?.['beforeFromDate'] then beforeFromDate"
+            message></ng-container>
+        </app-date-term-clear-container>
+      </div>
+
+      <div class="flex gap-8 mt-10">
+        <app-button (click)="handleClickClearButton()">
+          入力内容クリア
+        </app-button>
+        <app-button
+          *ngIf="form.valid; else disable"
+          (click)="handleClickSubmitButton()"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          btnLineHoverColor="hover:border-success-hover">
+          絞り込み実行
+        </app-button>
+      </div>
+      <p class="mt-2 text-sm text-red">
+        ※
+        入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+      </p>
+    </form>
+  </div>
+</div>
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

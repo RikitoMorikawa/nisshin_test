@@ -1,0 +1,75 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '支払データ一覧' },
+    { path: slipListPagePath, text: '支払伝票一覧' },
+    { text: '支払伝票詳細' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">支払伝票詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ slipListPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <ng-container>
+        <app-edit-link-org [path]="'./edit'"></app-edit-link-org>
+        <!--app-delete-link [removeMethod$]="remove$" redirectPath="../../">
+        </app-delete-link-->
+      </ng-container>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">伝票ヘッダー</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <table class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[50px]">
+              <p class="text-xm">返品<br />値引</p>
+            </td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">仕入ID</td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">仕入日</td>
+            <td class="border bg-slate-100 p-4 min-w-[360px]">仕入先名</td>
+            <td class="border bg-slate-100 p-4 min-w-[360px]">発注担当者</td>
+          </tr>
+          <tr *ngIf="purchase" class="border border-slate-200">
+            <td class="p-4">
+              {{ isDiscount ? '返金・割引' : '通常' }}
+            </td>
+            <td class="border p-4">{{ purchase.id }}</td>
+            <td class="border p-4">
+              {{ purchase.purchase_date | date : 'yyyy年MM月dd日' }}
+            </td>
+            <td class="border p-4">{{ purchase.supplier_name }}</td>
+            <td class="border p-4">
+              {{ purchase.order_employee_last_name }}
+              {{ purchase.order_employee_first_name }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ↓ 絞り込みフォーム ↓-->
+  <app-slipdetail-search (event)="filter = $event"></app-slipdetail-search>
+
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-end gap-8 mt-4">
+    <!-- ↓ スペース調整用の空 div ↓ -->
+    <div></div>
+  </div>
+  <app-purchase-detail-table
+    [params]="tableParams"
+    [loading]="common.loading"
+    [showTaxColumn]="shouldShowTaxColumn()"
+    (pageChange)="pages = $event"
+    [isDiscount]="isDiscount"
+    [total_cost]="tortal_cost">
+  </app-purchase-detail-table>
+</main>

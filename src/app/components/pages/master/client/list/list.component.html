@@ -1,0 +1,68 @@
+<!-- ↓ 一覧画面のテンプレート ↓ -->
+<app-template-list
+  [tableParams]="tableParams"
+  [formCtrl]="form"
+  [export$]="export$"
+  (paramsChange)="updateTable($event)"
+  (exportStatusChange)="onExportStatusChange($event)"
+  [fileNamePrefix]="fileNamePrefix">
+  <!-- ↓ 投影するテーブルのタイトル ↓ -->
+  <ng-container tableTitle>得意先一覧</ng-container>
+
+  <!-- ↓ 投影する絞り込みフォーム ↓ -->
+  <ng-container search>
+    <div class="flex gap-6">
+      <app-input class="w-1/2" [formCtrl]="fc.name" [useClear]="true">
+        得意先名
+      </app-input>
+      <app-input class="w-1/4" [formCtrl]="fc.client_cd" [useClear]="true">
+        得意先コード
+      </app-input>
+      <app-input class="w-1/4" [formCtrl]="fc.billing_cd" [useClear]="true">
+        請求先コード
+      </app-input>
+    </div>
+    <div class="flex gap-6 mt-6">
+      <app-select
+        class="w-1/3"
+        [formCtrl]="fc.province"
+        [options]="options.province"
+        [useClear]="true">
+        都道府県
+      </app-select>
+      <app-input class="w-1/3" [formCtrl]="fc.locality" [useClear]="true">
+        市区町村
+      </app-input>
+      <app-input class="w-1/3" [formCtrl]="fc.tel" [useClear]="true">
+        電話番号
+      </app-input>
+    </div>
+    <div class="flex gap-6 mt-6">
+      <app-select
+        class="w-1/6"
+        [formCtrl]="fc.cutoff_date_billing"
+        [options]="options.cutoff_date_billing"
+        [useClear]="true">
+        締日
+      </app-select>
+      <app-date-term-clear-container
+        class="w-3/6"
+        [dateFromFormCtrl]="fc.next_credit_confirmation_date.controls.from"
+        [dateToFormCtrl]="fc.next_credit_confirmation_date.controls.to"
+        [invalid]="!!fc.next_credit_confirmation_date.errors">
+        与信の次回確認日
+        <ng-container
+          *ngIf="fc.next_credit_confirmation_date.errors?.['beforeFromDate'] then  beforeFromDate"
+          message>
+        </ng-container>
+      </app-date-term-clear-container>
+    </div>
+  </ng-container>
+</app-template-list>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}a
+  </p>
+</ng-template>

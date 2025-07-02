@@ -1,0 +1,18 @@
+.purchase-detail {
+  @apply text-sm;
+  thead {
+    tr {
+      @apply bg-slate-100;
+      th {
+        @apply sticky top-0 text-left border border-slate-400 bg-slate-100 p-1;
+      }
+    }
+  }
+  tbody {
+    tr {
+      td {
+        @apply top-0 border border-slate-400 p-1 duration-300;
+      }
+    }
+  }
+}

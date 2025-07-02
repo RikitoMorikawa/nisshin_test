@@ -1,0 +1,74 @@
+<app-label
+  [labelSize]="labelSize"
+  [forAttrValue]="idAttrValue"
+  class="block ml-1 mb-1">
+  <ng-content></ng-content>
+</app-label>
+<div class="relative">
+  <div
+    tabindex="0"
+    class="flex justify-between border bg-white border-iron-blue-400 rounded p-2 w-full h-[42px] items-center px-3 cursor-pointer whitespace-nowrap overflow-hidden focus:placeholder-transparent focus:outline-none focus:border focus:border-primary focus:ring-1"
+    [ngClass]="invalid ? 'outline-none ring-1 ring-warning' : ''"
+    (mousedown)="openSuggestPanel()">
+    <div>
+      <ng-container
+        *ngIf="selectedValue !== undefined; else selectValPlaceholder">
+        <p>{{ selectedValue.text }}</p>
+      </ng-container>
+      <ng-template #selectValPlaceholder>
+        <p class="text-slate-500">{{ placeholder }}</p>
+      </ng-template>
+    </div>
+    <div>
+      <ng-container *ngIf="selectedValue === undefined; else closeIcon">
+        <app-icon
+          class="w-6 ml-1 fill-slate-500 cursor-pointer"
+          icon="arrow-down-s-fill"></app-icon>
+      </ng-container>
+      <ng-template #closeIcon>
+        <app-icon
+          (mousedown)="deleteValue()"
+          class="w-6 ml-1 fill-slate-500 cursor-pointer"
+          icon="close-line"></app-icon>
+      </ng-template>
+    </div>
+  </div>
+  <select
+    hidden
+    [name]="nameAttrValue"
+    [id]="idAttrValue"
+    [formControl]="formCtrl">
+    <option [value]="selectedValue?.value">{{ selectedValue?.text }}</option>
+  </select>
+  <div
+    *ngIf="isOpen"
+    class="absolute w-full z-10 border border-slate-300 border-t-0 shadow-xl"
+    [ngClass]="{
+      'top-[44px]': !isAtBottom,
+      'bottom-0': isAtBottom
+    }">
+    <input
+      type="text"
+      [name]="nameAttrValue"
+      [id]="idAttrValue"
+      placeholder="選択してください"
+      class="cursor-pointer"
+      [formControl]="suggestCtrl"
+      (focus)="onFocus()"
+      (blur)="onBlur()" />
+    <ul
+      *ngIf="results"
+      class="max-h-[180px] overflow-auto"
+      (mouseover)="onMouseover()"
+      (mouseout)="onMouseout()">
+      <li class="bg-white"></li>
+      <li
+        *ngFor="let result of results"
+        class="bg-white hover:bg-slate-100 cursor-pointer p-2"
+        (click)="onClick(result)">
+        {{ result.text }}
+      </li>
+    </ul>
+  </div>
+</div>
+<ng-content select="[message]"></ng-content>

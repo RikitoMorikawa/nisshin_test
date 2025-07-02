@@ -1,0 +1,70 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: '/setting/liquidation', text: '精算項目一覧' },
+    { text: '精算項目詳細' }
+  ]">
+</app-breadcrumb-org>
+
+<main>
+  <!-- ↓ ヘッダ・メニュー部 ↓ -->
+  <h1 class="mt-8 text-xl">精算項目詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/setting/liquidation"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org
+        routerLink="/setting/liquidation/edit/{{
+          liquidation.id
+        }}"></app-edit-link-org>
+      <app-delete-link
+        [removeMethod$]="removeMethod$"
+        redirectPath="setting/liquidation"></app-delete-link>
+    </div>
+    <app-last-updater-org>
+      最終更新者：{{ updater ? updater : 'データ取得中...' }}
+    </app-last-updater-org>
+  </div>
+
+  <hr class="width-limit-break border-t border-gray-400" />
+
+  <!-- ↓ 仕入先情報 ↓ -->
+  <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <!-- ↓ 仕入先情報ヘッダ ↓ -->
+    <p class="text-lg">
+      {{ liquidation.name ? liquidation.name : 'データ取得中...' }}
+    </p>
+    <p class="mt-1 mb-2 text-lg">
+      {{
+        liquidation.abbreviation_name
+          ? liquidation.abbreviation_name
+          : 'データ取得中...'
+      }}
+    </p>
+    <hr class="border-t-primary-light-hover border-t-4 mb-2" />
+
+    <!-- ↓ ロゴ画像 ↓ -->
+    <div class="mt-6 flex flex-row gap-10">
+      <!-- ↓ リスト部分 ↓ -->
+      <div class="grow">
+        <ul class="border-t border-y border-gray-200 shadow">
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200"
+            *ngFor="let item of listItems">
+            <div class="px-4 py-3 bg-slate-100 min-w-[200px]">
+              {{ item.name }}
+            </div>
+            <div class="px-4 py-3 border-l border-l-gray-200 grow">
+              {{ item.value }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ↓ ローディング画面 ↓ -->
+<app-loading-container [isLoading]="loading"></app-loading-container>

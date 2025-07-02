@@ -1,0 +1,11 @@
+<input
+  type="{{ inputType }}"
+  name="{{ nameAttrValue }}"
+  id="{{ idAttrValue }}"
+  min="{{ min }}"
+  [attr.maxLength]="maxLength ?? null"
+  [formControl]="formCtrl"
+  [placeholder]="placeholder ?? ''"
+  [ngClass]="{ invalid: invalid, 'text-right': textRight }"
+  (focus)="focusEvent.emit($event)"
+  (blur)="blurEvent.emit($event)" />

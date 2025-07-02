@@ -1,0 +1,33 @@
+<app-label
+  [labelSize]="labelSize"
+  [forAttrValue]="idAttrValue"
+  class="block ml-1 mb-1">
+  <ng-content></ng-content>
+</app-label>
+<div class="relative">
+  <app-text
+    [inputType]="inputType"
+    [nameAttrValue]="nameAttrValue"
+    [idAttrValue]="idAttrValue"
+    [maxLength]="maxLength"
+    [formCtrl]="formCtrl"
+    [placeholder]="placeholder"
+    [invalid]="invalid"
+    [textRight]="textRight"
+    (focusEvent)="onFocus()"
+    (blurEvent)="onBlur()">
+  </app-text>
+  <ul
+    *ngIf="results"
+    class="absolute w-full z-10 border border-t-0 shadow"
+    (mouseover)="isHover = true"
+    (mouseout)="isHover = false">
+    <li
+      *ngFor="let result of results"
+      class="bg-white hover:bg-slate-100 cursor-pointer p-2"
+      (click)="onClick(result)">
+      {{ result }}
+    </li>
+  </ul>
+</div>
+<ng-content select="[message]"></ng-content>

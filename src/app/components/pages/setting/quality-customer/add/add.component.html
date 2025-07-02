@@ -1,0 +1,172 @@
+<!-- パン屑リスト -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: qualityCustomerRootPath, text: '客層一覧' },
+    { text: '客層新規登録' }
+  ]">
+</app-breadcrumb-org>
+<!-- ヘッダー的なところ -->
+<main class="mb-20">
+  <h1 class="mt-8 text-xl">客層新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author ? author.last_name + ' ' + author.first_name : 'データ取得中'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t boerder-gray-400" />
+  <!-- 入力フォーム -->
+  <ng-container *ngIf="!isLoading">
+    <form
+      [formGroup]="qualityCustomerAddForm"
+      (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">客層情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <!-- 客層名・客層名カナ -->
+              <div class="flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [formCtrl]="qualityCustomerAddForm.controls.name"
+                  [invalid]="isInvalid(qualityCustomerAddForm.controls.name)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">
+                      客層名（10文字以内）
+                    </span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+                      必須
+                    </span>
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="isInvalid(qualityCustomerAddForm.controls.name)"
+                    message>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/2"
+                  inputType="text"
+                  nameAttrValue="furi"
+                  idAttrValue="furi"
+                  [formCtrl]="qualityCustomerAddForm.controls.furi"
+                  [invalid]="isInvalid(qualityCustomerAddForm.controls.furi)">
+                  <div class="items-center">
+                    <span class="inline-block mr-2">
+                      客層名カナ（全角カナ7文字以内）
+                    </span>
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="isInvalid(qualityCustomerAddForm.controls.furi)"
+                    message>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.furi.errors?.['maxlength']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.furi.errors?.['pattern']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="
+                        fullWidthKatakanaRestrictionViolation
+                      ">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+              <!-- 客層コード -->
+              <div class="mt-4 flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/4"
+                  inputType="text"
+                  nameAttrValue="code"
+                  idAttrValue="code"
+                  [formCtrl]="qualityCustomerAddForm.controls.code"
+                  [invalid]="isInvalid(qualityCustomerAddForm.controls.code)">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">
+                      客層コード（半角数字2桁以内）
+                    </span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full">
+                      必須
+                    </span>
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="isInvalid(qualityCustomerAddForm.controls.code)"
+                    message>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.code.errors?.['required']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="qualityCustomerAddForm.controls.code.errors?.['maxlength']"
+                      [ngTemplateOutlet]="errorMessage"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <div class="w-3/4"></div>
+                <!-- スペース調整用 -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- 保存ボタン -->
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button (click)="onClickReset()">クリア</app-button>
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="
+            qualityCustomerAddForm.invalid || qualityCustomerAddForm.pristine
+          "
+          >保存
+        </app-button>
+      </div>
+    </form>
+  </ng-container>
+</main>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #errorMessage let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

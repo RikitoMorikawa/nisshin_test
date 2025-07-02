@@ -1,0 +1,8 @@
+<app-label [labelSize]="labelSize" class="block mb-2">
+  <ng-content></ng-content>
+</app-label>
+<app-file
+  [formCtrl]="formCtrl"
+  [text]="buttonText"
+  [accept]="accept"></app-file>
+<ng-content select="[message]"></ng-content>

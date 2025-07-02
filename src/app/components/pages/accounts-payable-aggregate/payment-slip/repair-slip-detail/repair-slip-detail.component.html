@@ -1,0 +1,104 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '支払データ一覧' },
+    { path: slipListPagePath, text: '支払伝票一覧' },
+    { text: '修理品詳細' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">修理品詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ slipListPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">修理品</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div>
+      <!-- 受付票に紐付く修理商品情報 -->
+      <ng-container *ngIf="repairs">
+        <table
+          class="mt-2 w-[100%] table-fixed border-collapse border border-slate-500">
+          <thead class="text-sm">
+            <th class="border border-slate-500">適用</th>
+          </thead>
+          <tbody class="text-sm">
+            <ng-container *ngIf="repairs.length > 0">
+              <ng-container
+                #tempTop
+                *ngFor="let repair of repairs; let i = index">
+                <tr>
+                  <td class="border border-slate-500 p-2">
+                    <div>
+                      <p>
+                        修理個票番号：{{ repair.id }}　お客様ご予算：{{
+                          repair.customer_budget?.toLocaleString()
+                        }}
+                        円　登録日：{{
+                          repair.created_at | date : 'YYYY/MM/dd HH:mm'
+                        }}
+                        　　登録者：{{ repair.employee_created_last_name }}
+                        {{ repair.employee_created_first_name }}
+                        　　更新日：{{
+                          repair.updated_at | date : 'YYYY/MM/dd HH:mm'
+                        }}
+                        　　更新者：{{ repair.employee_updated_last_name }}
+                        {{ repair.employee_updated_first_name }}
+                      </p>
+                      <hr class="my-2 border-slate-200" />
+                      <ng-container
+                        *ngIf="
+                          repair.division_repair_type_code ===
+                          repairConst.REPAIR_TYPE_CODE.REPAIR
+                        ">
+                        <p>故障状況</p>
+                        <p>{{ repair.failure_status }}</p>
+                        <p class="mt-2">機種</p>
+                        <p class="mt-1">{{ repair.product_name }}</p>
+                        <p class="mt-2">メーカー名</p>
+                        <p class="mt-1">{{ repair.maker_name }}</p>
+                        <p class="mt-2">作業工賃原価</p>
+                        <p class="mt-1">
+                          {{ repair.quote_cost.toLocaleString() }}
+                        </p>
+                        <p class="mt-2">作業工賃売価</p>
+                        <p class="mt-1">
+                          {{ repair.quote_selling_price.toLocaleString() }}
+                        </p>
+                      </ng-container>
+                      <ng-container
+                        *ngIf="
+                          repair.division_repair_type_code ===
+                          repairConst.REPAIR_TYPE_CODE.POLISHING
+                        ">
+                        <p>
+                          研磨：{{ repair.polishing_number }} 枚（{{
+                            repair.product_name
+                          }}）
+                        </p>
+                      </ng-container>
+                      <div class="mt-2 px-3 py-2 bg-slate-100 rounded-md">
+                        <p class="text-xs">備考及びアドバイス</p>
+                        <hr />
+                        <p class="mt-1">
+                          {{ repair.remarks ? repair.remarks : 'なし' }}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </table>
+        <!-- 商品の追加・編集中のローディング表示機能 -->
+      </ng-container>
+    </div>
+  </div>
+</main>

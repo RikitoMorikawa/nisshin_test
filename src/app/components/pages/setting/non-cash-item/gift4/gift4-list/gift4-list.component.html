@@ -1,0 +1,32 @@
+<!-- パン屑 -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { text: 'ギフト4一覧' }
+  ]">
+</app-breadcrumb-org>
+<!-- トグルボタン -->
+<app-toggle-button></app-toggle-button>
+<main class="mt-8 mb-20">
+  <div>
+    <!-- 絞り込みフォーム -->
+    <app-search-org
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+      ギフト4名で絞込み
+    </app-search-org>
+  </div>
+  <div class="flex flex-center justify-end my-2">
+    <div class="mr-8">
+      <app-new-registration-link-org
+        path="/setting/non-cash-item/gift4/add"></app-new-registration-link-org>
+    </div>
+  </div>
+  <div>
+    <!-- テーブル -->
+    <app-table-org
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)">
+    </app-table-org>
+  </div>
+</main>

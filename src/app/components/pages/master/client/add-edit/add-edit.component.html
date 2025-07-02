@@ -1,0 +1,369 @@
+<!-- ↓ 登録・編集画面のテンプレート ↓ -->
+<app-template-add-edit
+  [service]="apiService"
+  [formCtrl]="form"
+  [modFn]="modifyFormValue"
+  (statusChange)="listenStateChange($event)">
+  <!-- ↓ ページタイトル ↓ -->
+  <ng-container pageTitle>
+    {{ id ? '得意先編集' : '得意先新規登録' }}
+  </ng-container>
+  <!-- ↓ 最終更新者 ↓ -->
+  <ng-container updater>{{ updater }}</ng-container>
+  <ng-container authorname>{{ authorname }}</ng-container>
+  <!-- ↓ 得意先基本情報フォーム ↓ -->
+  <app-form-block form>
+    <ng-container formTitle> 得意先 基本情報入力 </ng-container>
+
+    <div formContent class="flex flex-col gap-4">
+      <!-- 得意先フォーム -->
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.name"
+          class="w-2/3"
+          nameAttrValue="client_name"
+          idAttrValue="client-name">
+          得意先名（{{ clientConst.CHARACTER_LIMITS.NAME_MAX_LENGTH }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.client_cd"
+          class="w-1/3"
+          nameAttrValue="client_cd"
+          idAttrValue="client-cd">
+          得意先コード（半角数字{{
+            clientConst.CHARACTER_LIMITS.CLIENT_CD_MAX_LENGTH
+          }}桁以内）
+        </app-input>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.name_kana"
+          class="w-2/3"
+          nameAttrValue="name_kana"
+          idAttrValue="name-kana">
+          得意先名カナ（全角カナ{{
+            clientConst.CHARACTER_LIMITS.NAME_KANA_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.billing_cd"
+          class="w-1/3"
+          nameAttrValue="billing_cd"
+          idAttrValue="billing-cd">
+          請求先コード（半角数字{{
+            clientConst.CHARACTER_LIMITS.BILLING_CD_MAX_LENGTH
+          }}桁以内）
+        </app-input>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.pic_name"
+          class="w-96"
+          nameAttrValue="pic_name"
+          idAttrValue="pic-name">
+          担当者名（{{
+            clientConst.CHARACTER_LIMITS.PIC_NAME_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.pic_name_kana"
+          class="w-96"
+          nameAttrValue="pic_name_kana"
+          idAttrValue="pic-name-kana">
+          担当者名カナ（全角カナ{{
+            clientConst.CHARACTER_LIMITS.PIC_NAME_KANA_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <div class="w-1/3"></div>
+        <!-- スペース調整 -->
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.postal_code"
+          class="w-96"
+          nameAttrValue="postal_code"
+          idAttrValue="postal-code">
+          郵便番号（ハイフンなし半角数字{{
+            clientConst.CHARACTER_LIMITS.POSTAL_CODE_MAX_LENGTH
+          }}桁）
+        </app-input>
+        <app-select
+          [formCtrl]="fc.province"
+          [options]="options.province"
+          class="w-96"
+          nameAttrValue="client_province"
+          idAttrValue="client-province">
+          都道府県
+        </app-select>
+        <div class="w-1/3"></div>
+        <!-- スペース調整 -->
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.locality"
+          class="w-1/3"
+          nameAttrValue="client_locality"
+          idAttrValue="client-locality">
+          市区町村（{{
+            clientConst.CHARACTER_LIMITS.LOCALITY_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.street_address"
+          class="w-1/3"
+          nameAttrValue="street_address"
+          idAttrValue="street-address">
+          町名番地（{{
+            clientConst.CHARACTER_LIMITS.STREET_ADDRESS_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.other_address"
+          class="w-1/3"
+          nameAttrValue="other_address"
+          idAttrValue="other-address">
+          建物名など（{{
+            clientConst.CHARACTER_LIMITS.OTHER_ADDRESS_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.mail"
+          class="w-1/3"
+          nameAttrValue="client_mail"
+          idAttrValue="client-mail">
+          メールアドレス（{{
+            clientConst.CHARACTER_LIMITS.MAIL_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <div class="w-1/3"></div>
+        <!-- スペース調整 -->
+        <div class="w-1/3"></div>
+        <!-- スペース調整 -->
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.tel"
+          class="w-1/3"
+          nameAttrValue="client_tel"
+          idAttrValue="client-tel">
+          電話番号（ハイフンなし半角数字{{
+            clientConst.CHARACTER_LIMITS.TEL_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <app-input
+          [formCtrl]="fc.fax"
+          class="w-1/3"
+          nameAttrValue="client_fax"
+          idAttrValue="client-fax">
+          FAX番号（ハイフンなし半角数字{{
+            clientConst.CHARACTER_LIMITS.FAX_MAX_LENGTH
+          }}文字以内）
+        </app-input>
+        <div class="w-1/3"></div>
+        <!-- スペース調整 -->
+      </div>
+    </div>
+  </app-form-block>
+
+  <!-- ↓ 得意先 詳細情報入力フォーム ↓ -->
+  <app-form-block form>
+    <ng-container formTitle> 得意先 詳細情報入力 </ng-container>
+    <div formContent class="flex flex-col gap-6">
+      <div class="flex flex-row gap-6">
+        <app-select
+          [formCtrl]="fc.payment_division_id"
+          [options]="options.payment_division_id"
+          class="w-1/6"
+          nameAttrValue="payment_division_id"
+          idAttrValue="payment-division-id">
+          支払区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.cutoff_date_billing"
+          [options]="options.cutoff_date_billing"
+          class="w-1/6"
+          nameAttrValue="cutoff_date_billing"
+          idAttrValue="cutoff-date-billing">
+          締日
+        </app-select>
+        <app-select
+          [formCtrl]="fc.payment_term"
+          [options]="options.payment_term"
+          class="w-1/6"
+          nameAttrValue="payment_term"
+          idAttrValue="payment-term">
+          支払いサイト
+        </app-select>
+        <app-select
+          [formCtrl]="fc.scheduled_payment_date"
+          [options]="options.scheduled_payment_date"
+          class="w-1/6"
+          nameAttrValue="scheduled_payment_date"
+          idAttrValue="scheduled-payment-date">
+          支払予定日
+        </app-select>
+        <app-date-term
+          [formCtrl]="fc.next_billing_date"
+          class="w-1/6"
+          nameAttrValue="next_billing_date"
+          idAttrValue="next-billing-date">
+          次回請求日
+        </app-date-term>
+        <!-- スペース調整 -->
+        <div class="w-1/6"></div>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-input
+          [formCtrl]="fc.credit"
+          class="w-1/6"
+          nameAttrValue="client_credit"
+          idAttrValue="client-credit">
+          売掛限度額({{ clientConst.CHARACTER_LIMITS.CREDIT_MAX_LENGTH }}桁以内)
+        </app-input>
+        <app-date-term
+          [formCtrl]="fc.next_credit_confirmation_date"
+          class="w-1/6"
+          nameAttrValue="next_credit_confirmation_date"
+          idAttrValue="next-credit-confirmation-date">
+          次回与信確認日
+        </app-date-term>
+        <app-select
+          [formCtrl]="fc.sales_tax_division_id"
+          [options]="options.sales_tax_division_id"
+          class="w-1/6"
+          nameAttrValue="sales_tax_division_id"
+          idAttrValue="sales-tax-division-id">
+          消費税区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.sales_tax_calc_division_id"
+          [options]="options.sales_tax_calc_division_id"
+          class="w-1/6"
+          nameAttrValue="sales_tax_calc_division_id"
+          idAttrValue="sales-tax-calc-division-id">
+          消費税計算区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.sales_tax_fraction_division_id"
+          [options]="options.sales_tax_fraction_division_id"
+          class="w-1/6"
+          nameAttrValue="sales_tax_fraction_division_id"
+          idAttrValue="sales-tax-fraction-division-id">
+          消費税端数区分
+        </app-select>
+        <app-select
+          [formCtrl]="fc.sales_fraction_division_id"
+          [options]="options.sales_fraction_division_id"
+          class="w-1/6"
+          nameAttrValue="sales_fraction_division_id"
+          idAttrValue="division-sales-fraction-code">
+          販売端数区分
+        </app-select>
+      </div>
+      <div class="flex flex-row gap-6">
+        <app-select
+          [formCtrl]="fc.rank_division_id"
+          [options]="options.rank_division_id"
+          class="w-1/6"
+          nameAttrValue="rank_division_id"
+          idAttrValue="rank-division-id">
+          ランク価格
+        </app-select>
+        <app-select
+          [formCtrl]="fc_title.title_division_id"
+          [options]="options.title_division_id"
+          class="w-1/6"
+          nameAttrValue="title_division_id"
+          idAttrValue="title-division-id"
+          (change)="getSelectTitleDivisionId($event)">
+          敬称
+        </app-select>
+        <div class="w-1/4" *ngIf="is_user_specified_title">
+          <app-text-container
+            nameAttrValue="custom_title"
+            idAttrValue="custom-title"
+            [formCtrl]="fc_title.custom_title">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label:
+                    '指定敬称(' +
+                    clientConst.CHARACTER_LIMITS.CUSTOM_TITLE_MAX_LENGTH +
+                    '文字以内)',
+                  required: false
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: fc_title.custom_title }
+              "
+              message></ng-container>
+          </app-text-container>
+          <!-- ↓ 独自のエラーメッセージ ↓ -->
+          <p
+            *ngIf="fc.title.errors?.['isRequired']"
+            class="ml-1 text-sm text-red">
+            {{ errorConst.FORM_ERROR.OPPONENT_SELECTION_REQUIRED_ITEM }}
+          </p>
+        </div>
+        <app-select
+          [formCtrl]="fc.print_division_id"
+          [options]="options.print_division_id"
+          class="w-1/6"
+          nameAttrValue="print_division_id"
+          idAttrValue="print-division-id">
+          印刷区分
+        </app-select>
+        <app-input
+          [formCtrl]="fc.line_num"
+          class="w-1/6"
+          nameAttrValue="line_num"
+          idAttrValue="line-num">
+          明細行数({{ clientConst.CHARACTER_LIMITS.LINE_NUM_MAX_LENGTH }}桁以内)
+        </app-input>
+        <!-- スペース調整 -->
+        <div class="w-1/6"></div>
+      </div>
+    </div>
+  </app-form-block>
+
+  <app-form-block form>
+    <ng-container formTitle> その他属性情報入力 </ng-container>
+
+    <div formContent class="flex flex-col gap-4">
+      <app-textarea [formCtrl]="fc.remarks_1" [rows]="2">
+        備考1（{{ clientConst.CHARACTER_LIMITS.REMARKS_1_MAX_LENGTH }}文字以内）
+      </app-textarea>
+      <app-textarea [formCtrl]="fc.remarks_2" [rows]="2">
+        備考2（{{ clientConst.CHARACTER_LIMITS.REMARKS_2_MAX_LENGTH }}文字以内）
+      </app-textarea>
+      <app-custom-tag-form [formArray]="fc.client_custom_tag">
+        カスタムタグ
+      </app-custom-tag-form>
+    </div>
+  </app-form-block>
+</app-template-add-edit>
+
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.OPPONENT_SELECTION_REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>

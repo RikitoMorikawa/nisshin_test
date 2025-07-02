@@ -1,0 +1,34 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { text: '支払消込一覧' }
+  ]"></app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search (event)="filter = $event"></app-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-end gap-8 mt-4">
+  <!-- ↓ スペース調整用の空 div ↓ -->
+  <div></div>
+  <app-new-registration-link-org
+    path="../payment-clearing/add"></app-new-registration-link-org>
+  <app-export-link
+    [export$]="export$"
+    [fileNamePrefix]="fileNamePrefix"
+    (statusChange)="onExportStatusChange($event)"
+    text="支払消込一覧CSVダウンロード　">
+  </app-export-link>
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<app-table-with-pagination
+  class="block mt-2"
+  [params]="tableParams"
+  (pageChange)="pages = $event">
+  支払消込一覧
+</app-table-with-pagination>

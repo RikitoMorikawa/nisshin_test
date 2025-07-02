@@ -1,0 +1,173 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: divisionRootPath, text: '区分一覧' },
+    { text: '区分新規登録' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">区分新規登録</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="
+          author && author.role_name ? author.role_name : 'データ取得中...'
+        ">
+        登録者：{{
+          author
+            ? author.last_name + ' ' + author.first_name
+            : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container *ngIf="!common.loading">
+    <form [formGroup]="divisionAddForm" (ngSubmit)="handleClickSaveButton()">
+      <div
+        class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+        <h2 class="text-lg">区分情報入力</h2>
+        <hr class="border-t-primary-light-hover border-t-4" />
+        <div class="mt-6 flex flex-row gap-10">
+          <div class="grow">
+            <div
+              class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+              <div class="flex flex-row gap-4">
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="name"
+                  idAttrValue="name"
+                  [formCtrl]="divisionAddForm.controls.name"
+                  [invalid]="
+                    formControlStateManager(divisionAddForm.controls.name)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">区分名（255文字以内）</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(divisionAddForm.controls.name)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.name.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.name.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="value"
+                  idAttrValue="value"
+                  [formCtrl]="divisionAddForm.controls.value"
+                  [invalid]="
+                    formControlStateManager(divisionAddForm.controls.value)
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2">区分値（255文字以内）</span>
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(divisionAddForm.controls.value)
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.value.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.value.errors?.['maxlength']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+                <app-text-container
+                  class="w-1/3"
+                  inputType="text"
+                  nameAttrValue="division_code"
+                  idAttrValue="division-code"
+                  [formCtrl]="divisionAddForm.controls.division_code"
+                  [invalid]="
+                    formControlStateManager(
+                      divisionAddForm.controls.division_code
+                    )
+                  ">
+                  <div class="flex flex-row items-center">
+                    <span class="inline-block mr-2"
+                      >区分コード（半角数字）</span
+                    >
+                    <span
+                      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                      >必須</span
+                    >
+                  </div>
+                  <div
+                    class="mt-1 pl-1 text-sm"
+                    *ngIf="
+                      formControlStateManager(
+                        divisionAddForm.controls.division_code
+                      )
+                    "
+                    message>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.division_code.errors?.['required']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="requiredItem">
+                    </ng-container>
+                    <ng-container
+                      *ngIf="divisionAddForm.controls.division_code.errors?.['pattern']"
+                      [ngTemplateOutlet]="em"
+                      [ngTemplateOutletContext]="numericLimitViolation">
+                    </ng-container>
+                  </div>
+                </app-text-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+        <app-button
+          btnType="submit"
+          btnFillColor="bg-success"
+          btnHoverColor="hover:bg-success-hover"
+          btnTextColor="text-white"
+          btnLineColor="border-success"
+          [buttonDisabled]="
+            divisionAddForm.invalid || divisionAddForm.pristine
+          ">
+          保存</app-button
+        >
+      </div>
+    </form>
+  </ng-container>
+</main>
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

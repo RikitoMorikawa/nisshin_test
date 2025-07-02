@@ -1,0 +1,30 @@
+<!-- ↓ 詳細画面のテンプレート ↓ -->
+<app-template-detail [remove$]="remove$">
+  <!-- ↓ ページタイトル ↓ -->
+  <ng-container pageTitle>得意先詳細</ng-container>
+  <!-- ↓ 最終更新者 ↓ -->
+  <ng-container updater>{{ updater }}</ng-container>
+
+  <!-- ↓ 詳細情報見出し ↓ -->
+  <div detailTitle>
+    {{ title }}
+  </div>
+
+  <!-- ↓ 詳細情報 ↓ -->
+  <div class="mt-2" detailContent>
+    <div class="mt-4 flex gap-6">
+      <div class="grow">
+        <!-- ↓ 各項目の表示 ↓ -->
+        <app-detail-list [details]="listItems"></app-detail-list>
+
+        <!-- ↓ カスタムタグ表示 ↓ -->
+        <table class="mt-6 w-full shadow">
+          <tr *ngFor="let tag of tags" class="border border-slate-200">
+            <td class="p-4 w-1/4 bg-slate-100">カスタムタグ</td>
+            <td class="p-4">{{ tag }}</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</app-template-detail>

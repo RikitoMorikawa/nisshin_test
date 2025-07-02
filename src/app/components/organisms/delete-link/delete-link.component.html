@@ -1,0 +1,11 @@
+<!-- ↓ 削除ボタン ↓ -->
+<div class="cursor-pointer" (click)="onClick()">
+  <app-icon-container
+    icon="delete-bin-line"
+    appendClassForIcon="fill-danger group-hover:fill-danger-hover">
+    <p class="text-gray-900 group-hover:text-danger-hover">削除</p>
+  </app-icon-container>
+</div>
+
+<!-- ↓ ローディング画面 ↓ -->
+<app-loading-container [isLoading]="loading"></app-loading-container>

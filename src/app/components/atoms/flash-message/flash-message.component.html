@@ -1,0 +1,19 @@
+<div
+  class="z-50 w-[700px] min-h-80 bg-iron-blue-100 absolute inset-x-0 top-8 mx-auto flex flex-row items-start gap-4 p-4 border-solid border-1 border-t-4 shadow-lg {{
+    properties.topBarColor
+  }} shadow-md">
+  <div class="flex-none {{ properties.iconColor }}">
+    <app-icon [icon]="properties.iconType" class="w-6 h-6"></app-icon>
+  </div>
+  <div class="grow">
+    <p>
+      {{ properties.message }}
+    </p>
+  </div>
+  <div class="flex-none fill-black cursor-pointer">
+    <app-icon
+      (click)="closeFlashMessage()"
+      icon="close-circle-line"
+      class="w-6 h-6"></app-icon>
+  </div>
+</div>

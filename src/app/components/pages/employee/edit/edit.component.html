@@ -1,0 +1,645 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/employee/list', text: '社員一覧' },
+    { path: '/employee/detail/' + selectedId, text: '社員詳細' },
+    { text: '社員編集' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">社員編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org
+        [roleTypeName]="employee ? employee['role_name'] : 'データ取得中'">
+        最終更新者：{{ lastUpdaterName ? lastUpdaterName : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="employeeEditForm" (ngSubmit)="handleClickSaveButton()">
+    <div
+      class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">社員情報入力</h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <div class="mt-6 flex flex-row gap-10">
+        <div class="max-w-[300px] w-[300px]">
+          <div class="px-2 pb-2">
+            <p class="text-sm">
+              ※ 画像のファイルサイズは最大{{ maxFileSizeForDisplay }}Mバイト
+            </p>
+            <app-file
+              [formCtrl]="employeeEditForm.controls.image"
+              text="プロフィール画像変更"
+              accept="image/png, image/jpeg">
+            </app-file>
+            <div
+              class="mt-4"
+              *ngIf="
+                employee.image_path !== undefined &&
+                  employee.image_path !== '' &&
+                  imageUrl === undefined;
+                else selectedImage
+              ">
+              <ng-container *ngIf="!common.loading">
+                <img
+                  class="border border-gray-200 shadow rounded-md"
+                  [src]="employee.image_path" />
+                <div class="mt-2 text-center">
+                  <p>設定中の画像</p>
+                </div>
+              </ng-container>
+            </div>
+            <ng-template #selectedImage>
+              <div
+                class="mt-2 text-sm text-danger"
+                *ngIf="
+                  employeeEditForm.controls.image.invalid;
+                  else correctImage
+                ">
+                <ng-container
+                  *ngIf="employeeEditForm.controls.image.errors?.['limitFileSize']"
+                  [ngTemplateOutlet]="em"
+                  [ngTemplateOutletContext]="exceededFileSizeLimit">
+                </ng-container>
+              </div>
+              <ng-template #correctImage>
+                <div class="mt-4" *ngIf="imageUrl">
+                  <img
+                    class="border border-gray-200 shadow rounded-md"
+                    [src]="imageUrl"
+                    alt="アップロード画像" />
+                  <div class="flex flex-row items-center mt-2">
+                    <p>{{ fileName }}</p>
+                    <app-icon
+                      class="w-6 cursor-pointer ml-2 fill-red-500"
+                      icon="delete-bin-line"
+                      (click)="handleClickDeleteIcon()">
+                    </app-icon>
+                  </div>
+                </div>
+              </ng-template>
+            </ng-template>
+          </div>
+        </div>
+        <div class="grow">
+          <div
+            class="p-6 border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+            <div class="flex flex-row gap-4">
+              <app-select-container
+                class="w-1/4"
+                [formCtrl]="employeeEditForm.controls.status_division_id"
+                [options]="statusDivisionOptions"
+                nameAttrValue="status_division_id"
+                idAttrValue="status-division-id"
+                [invalid]="
+                  formControlStateManager(
+                    employeeEditForm.controls.status_division_id
+                  )
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2">{{
+                    logicalNames.status_division_id
+                  }}</span>
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.status_division_id
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.status_division_id.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.status_division_id.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-select-container>
+              <app-select-container
+                class="w-1/4"
+                [formCtrl]="employeeEditForm.controls.role_id"
+                [options]="roleOptions"
+                nameAttrValue="role_id"
+                idAttrValue="role-id"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.role_id)
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2">{{
+                    logicalNames.role_id
+                  }}</span>
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.role_id)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.role_id.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.role_id.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-select-container>
+              <app-select-container
+                class="w-1/4"
+                [formCtrl]="employeeEditForm.controls.store_id"
+                [options]="storeOptions"
+                nameAttrValue="store_id"
+                idAttrValue="store-id"
+                [invalid]="formControlStateManager(employeeEditForm.controls.store_id) || employeeEditForm.controls.store_id.errors?.['notContains']">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2">{{
+                    logicalNames.store_id
+                  }}</span>
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1 text-sm"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.store_id)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.store_id.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.store_id.errors?.['notContains']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-select-container>
+              <app-text-container
+                class="w-1/4"
+                inputType="text"
+                nameAttrValue="code"
+                idAttrValue="code"
+                [formCtrl]="employeeEditForm.controls.code"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.code)
+                ">
+                <span class="inline-block mr-2">{{ logicalNames.code }}</span>
+                <span
+                  class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                  >必須</span
+                >
+                <div
+                  class="mt-1 pl-1 text-sm"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.code)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.code.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.code.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.code.errors?.['pattern']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="numericLimitViolation">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+            <div class="mt-6 flex flex-row gap-4">
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="last_name"
+                idAttrValue="last-name"
+                [formCtrl]="employeeEditForm.controls.last_name"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.last_name)
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2"
+                    >{{ logicalNames.last_name }}（10文字以内）</span
+                  >
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1 text-sm"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.last_name)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.last_name.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.last_name.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-text-container>
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="first_name"
+                idAttrValue="first-name"
+                [formCtrl]="employeeEditForm.controls.first_name"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.first_name)
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2"
+                    >{{ logicalNames.first_name }}（10文字以内）</span
+                  >
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.first_name
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.first_name.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.first_name.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+            <div class="mt-6 flex flex-row gap-4">
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="last_name_kana"
+                idAttrValue="last-name-kana"
+                [formCtrl]="employeeEditForm.controls.last_name_kana"
+                [invalid]="
+                  formControlStateManager(
+                    employeeEditForm.controls.last_name_kana
+                  )
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2"
+                    >{{
+                      logicalNames.last_name_kana
+                    }}（全角カナ7文字以内）</span
+                  >
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.last_name_kana
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.last_name_kana.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.last_name_kana.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.last_name_kana.errors?.['pattern']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="
+                      fullWidthKatakanaRestrictionViolation
+                    ">
+                  </ng-container>
+                </div>
+              </app-text-container>
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="first_name_kana"
+                idAttrValue="first-name-kana"
+                [formCtrl]="employeeEditForm.controls.first_name_kana"
+                [invalid]="
+                  formControlStateManager(
+                    employeeEditForm.controls.first_name_kana
+                  )
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2"
+                    >{{
+                      logicalNames.first_name_kana
+                    }}（全角カナ7文字以内）</span
+                  >
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.first_name_kana
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.first_name_kana.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.first_name_kana.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.first_name_kana.errors?.['pattern']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="
+                      fullWidthKatakanaRestrictionViolation
+                    ">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+            <div class="mt-6 flex flex-row gap-4">
+              <app-text-container
+                class="w-1/2"
+                inputType="mail"
+                nameAttrValue="mail"
+                idAttrValue="mail"
+                [formCtrl]="employeeEditForm.controls.mail"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.mail)
+                ">
+                <div class="flex flex-row items-center">
+                  <span class="inline-block mr-2">{{ logicalNames.mail }}</span>
+                  <span
+                    class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+                    >必須</span
+                  >
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.mail)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.mail.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.mail.errors?.['email']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="emailFormatViolation">
+                  </ng-container>
+                </div>
+              </app-text-container>
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="tel"
+                idAttrValue="tel"
+                [formCtrl]="employeeEditForm.controls.tel"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.tel)
+                ">
+                {{ logicalNames.tel }}（半角数字10~14文字）
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="formControlStateManager(employeeEditForm.controls.tel)"
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.tel.errors?.['minlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.tel.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.tel.errors?.['pattern']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="numericLimitViolation">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+            <div class="mt-6 flex flex-row gap-4">
+              <app-text-container
+                class="w-1/2"
+                inputType="password"
+                nameAttrValue="pos_password"
+                idAttrValue="pos-password"
+                [formCtrl]="
+                  employeeEditForm.controls.posPasswordGroup.controls
+                    .pos_password
+                "
+                [invalid]="
+                  formControlStateManager(
+                    employeeEditForm.controls.posPasswordGroup.controls
+                      .pos_password
+                  )
+                ">
+                {{ logicalNames.pos_password }}
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.posPasswordGroup.controls
+                        .pos_password
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.posPasswordGroup.controls.pos_password.errors?.['minlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMinLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.posPasswordGroup.controls.pos_password.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.posPasswordGroup.controls.pos_password.errors?.['pattern']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="numericLimitViolation">
+                  </ng-container>
+                </div>
+              </app-text-container>
+              <app-text-container
+                class="w-1/2"
+                inputType="password"
+                nameAttrValue="confirm_pos_password"
+                idAttrValue="confirm-pos-password"
+                [formCtrl]="
+                  employeeEditForm.controls.posPasswordGroup.controls
+                    .confirm_pos_password
+                "
+                [invalid]="formControlStateManager(employeeEditForm.controls.posPasswordGroup.controls.confirm_pos_password) || employeeEditForm.controls.posPasswordGroup.errors?.['isRequired'] || employeeEditForm.controls.posPasswordGroup.errors?.['isPasswordSame']">
+                POS用パスワード（確認用）
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="employeeEditForm.controls.posPasswordGroup.errors?.['isRequired']"
+                  message>
+                  <ng-container
+                    *ngTemplateOutlet="em; context: opponentEnteredRequireItem">
+                  </ng-container>
+                </div>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="employeeEditForm.controls.posPasswordGroup.errors?.['isPasswordSame']"
+                  message>
+                  <ng-container
+                    *ngTemplateOutlet="em; context: passwordMatchViolation">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+            <p class="mt-1 pl-1 text-sm text-primary">※ 半角数字4~7文字</p>
+            <div class="mt-6 flex flex-row gap-4">
+              <app-text-container
+                class="w-1/2"
+                inputType="number"
+                nameAttrValue="barcode"
+                idAttrValue="barcode"
+                [formCtrl]="employeeEditForm.controls.barcode"
+                [invalid]="
+                  formControlStateManager(employeeEditForm.controls.barcode)
+                ">
+                <span class="inline-block mr-2">{{
+                  logicalNames.barcode
+                }}</span>
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(employeeEditForm.controls.barcode)
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.barcode.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.barcode.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="exceededCharacterMaxLimit">
+                  </ng-container>
+                </div>
+              </app-text-container>
+              <app-text-container
+                class="w-1/2"
+                inputType="text"
+                nameAttrValue="max_discount_rate"
+                idAttrValue="max_discount_rate"
+                [formCtrl]="employeeEditForm.controls.max_discount_rate"
+                [invalid]="
+                  formControlStateManager(
+                    employeeEditForm.controls.max_discount_rate
+                  )
+                ">
+                {{ logicalNames.max_discount_rate }}
+                <div
+                  class="mt-1 pl-1"
+                  *ngIf="
+                    formControlStateManager(
+                      employeeEditForm.controls.max_discount_rate
+                    )
+                  "
+                  message>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.max_discount_rate.errors?.['required']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                  <ng-container
+                    *ngIf="employeeEditForm.controls.max_discount_rate.errors?.['maxlength']"
+                    [ngTemplateOutlet]="em"
+                    [ngTemplateOutletContext]="requiredItem">
+                  </ng-container>
+                </div>
+              </app-text-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+      <app-button btnType="button" (click)="handleClickClearButton()"
+        >クリア</app-button
+      >
+      <app-button
+        btnType="submit"
+        btnFillColor="bg-success"
+        btnHoverColor="hover:bg-success-hover"
+        btnTextColor="text-white"
+        btnLineColor="border-success"
+        [buttonDisabled]="employeeEditForm.invalid || formInvalid"
+        >保存</app-button
+      >
+    </div>
+  </form>
+</main>
+
+<!-- エラーメッセージテンプレート -->
+<ng-template #em let-content="message">
+  <p class="text-sm text-red">
+    {{ content }}
+  </p>
+</ng-template>

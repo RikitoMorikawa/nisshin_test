@@ -1,0 +1,57 @@
+<!-- パン屑 -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: '/setting', text: '設定一覧' },
+    { path: gift3ListPath, text: 'ギフト3一覧' },
+    { text: 'ギフト3詳細' }
+  ]">
+</app-breadcrumb-org>
+<main class="mb-20">
+  <!-- ヘッダ的なところ -->
+  <h1 class="mt-8 text-xl">ギフト3詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="/setting/non-cash-item/gift3">
+        一覧へ戻る
+      </app-back-to-link-org>
+      <app-edit-link-org [path]="gift3EditPath"></app-edit-link-org>
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+    <ng-container *ngIf="!common.loading">
+      <app-last-updater-org>
+        最終更新者：{{
+          lastUpdaterFullName ? lastUpdaterFullName : 'データ取得中...'
+        }}
+      </app-last-updater-org>
+    </ng-container>
+  </div>
+  <!-- ギフト3詳細 -->
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="!common.loading"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">
+      {{ gift3 ? gift3['name'] : ' ' }}
+    </h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <ul
+          class="border-t border-r border-l border-t-gray-200 border-r-gray-200 border-l-gray-200 shadow">
+          <li
+            class="flex flex-row items-center border-b border-b-gray-200"
+            *ngFor="let item of items">
+            <div class="px-2 py-3 bg-slate-100 min-w-[200px]">
+              {{ item ? item.name : ' ' }}
+            </div>
+            <div class="px-2 py-3 border-l border-l-gray-200 grow">
+              {{ item ? item.value : ' ' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

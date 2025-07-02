@@ -1,0 +1,1561 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: 'レンタル受付票一覧' },
+    { text: 'レンタル受付票編集' }
+  ]"></app-breadcrumb-org>
+<main class="mb-8">
+  <h1 class="mt-8 text-xl">レンタル受付票編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ lastUpdater ? lastUpdater : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <form [formGroup]="commonForm" (ngSubmit)="handleClickSaveButton()">
+    <div class="mt-8 pt-8 pb-8 px-6 bg-white border border-gray-300">
+      <!-- タイトル -->
+      <div class="px-6 pb-1 flex justify-between items-end">
+        <h2 class="items-end">レンタル受付票情報入力</h2>
+      </div>
+
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/3">
+          <app-select-suggest-container
+            nameAttrValue="reception_employee_id"
+            idAttrValue="reception-employee-id"
+            placeholder="選択してください"
+            [formCtrl]="commonFc.reception_employee_id"
+            [suggests]="employeeSuggests"
+            [invalid]="formControlStateManager(commonFc.reception_employee_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '受付担当者', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: commonFc.reception_employee_id }
+              "
+              message></ng-container>
+          </app-select-suggest-container>
+        </div>
+
+        <div class="w-1/6">
+          <app-date-term
+            nameAttrValue="reception_date"
+            idAttrValue="reception-date"
+            [formCtrl]="commonFc.reception_date"
+            [invalid]="formControlStateManager(commonFc.reception_date)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '受付日', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: commonFc.reception_date }
+              "
+              message></ng-container>
+          </app-date-term>
+        </div>
+
+        <div class="w-1/3">
+          <app-select-suggest-container
+            nameAttrValue="store_id"
+            idAttrValue="store-id"
+            placeholder="選択してください"
+            [formCtrl]="commonFc.store_id"
+            [suggests]="storeSuggests"
+            [invalid]="formControlStateManager(commonFc.store_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: '店舗', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: commonFc.store_id }"
+              message></ng-container>
+          </app-select-suggest-container>
+        </div>
+        <div class="w-1/3">
+          <ng-container *ngTemplateOutlet="common"></ng-container>
+        </div>
+      </div>
+      <div class="flex gap-6 mt-6 flex justify-between">
+        <div class="w-1/3">
+          <app-select-container
+            nameAttrValue="customer_type_division_id"
+            idAttrValue="customer-type-division-id"
+            [options]="customerTypes"
+            [formCtrl]="commonFc.customer_type_division_id"
+            (change)="resetCustomerInfo()"
+            [invalid]="
+              simpleFormControlStateManager(commonFc.customer_type_division_id)
+            ">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: 'お客様タイプ', required: 'true' }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: commonFc.customer_type_division_id }
+              "
+              message></ng-container>
+          </app-select-container>
+        </div>
+        <!-- SMS送信 -->
+        <div class="flex w-1/5 pt-9">
+          <ng-container>
+            <div>
+              <label class="block relative pl-6 cursor-pointer">
+                <input
+                  type="checkbox"
+                  nameAttrValue="send_sms_flg"
+                  idAttrValue="send-sms-flg"
+                  name="send_sms_flg"
+                  class="w-4 h-4 cursor-pointer absolute top-0 bottom-0 left-0 m-auto"
+                  (change)="onCheckSmsSend($event)"
+                  [checked]="smsIsChecked" />
+                SMS送信する
+              </label>
+            </div>
+          </ng-container>
+        </div>
+        <div class="mt-4 px-6 flex pt-5 w-1/3">
+          <!-- 処理単位選択 -->
+          <ng-container *ngFor="let processingUnititem of processingUnits">
+            <div>
+              <label class="block relative pl-6 cursor-pointer">
+                <input
+                  type="radio"
+                  [checked]="processingUnititem.value === processingUnitValue"
+                  [id]="'processing-unit'"
+                  [name]="'processing-unit'"
+                  class="w-4 h-4 cursor-pointer absolute top-0 bottom-0 left-1 m-auto"
+                  [value]="processingUnititem.value"
+                  (change)="onProcessingUnitsRadioChange($event)" />
+                {{ processingUnititem.display }}
+              </label>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- お客様タイプによってコンテンツを切り替える -->
+      <ng-container *ngIf="selectedCustomerType">
+        <ng-container
+          *ngIf="
+            selectedCustomerCode === DIVISION_CUSTOMER_CODE_CLIENT;
+            then client
+          "></ng-container>
+        <ng-container
+          *ngIf="
+            selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER;
+            then member
+          "></ng-container>
+        <ng-container
+          *ngIf="
+            selectedCustomerCode === DIVISION_CUSTOMER_CODE_GENERAL;
+            then general
+          "></ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="selectedCustomerCode">
+        <div class="mt-6 flex gap-4">
+          <ng-container
+            *ngIf="
+              selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER ||
+              selectedCustomerCode === DIVISION_CUSTOMER_CODE_CLIENT
+            ">
+            <!-- 選択された会員フルネーム・得意先名のいずれかを表示する -->
+            <div class="w-[59%]">
+              <span>選択中お客様情報</span>
+              <ng-container
+                *ngIf="selectedCustomer?.id; else noCustomerInfoSelected">
+                <div
+                  class="mt-1 p-2 text-gray-800 border border-gray-300 rounded-md bg-blue-100">
+                  <p>
+                    お客様名：{{ selectedCustomer.fullName
+                    }}{{
+                      selectedCustomer.fullNameKana
+                        ? '（' + selectedCustomer.fullNameKana + '）'
+                        : ''
+                    }}
+                  </p>
+                  <p>{{ selectedCustomer.fullNameKana }}</p>
+                  <p>電話番号：{{ selectedCustomer.tel }}</p>
+                  <p>ご住所：{{ selectedCustomer.address }}</p>
+
+                  <div
+                    *ngIf="
+                      selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER
+                    ">
+                    <ng-container
+                      *ngIf="
+                        selectedCustomer.isIdConfirmationRequired;
+                        else idConfirmed
+                      ">
+                      <p>
+                        前回本人確認書類確認日：{{
+                          selectedCustomer.idConfirmationDate
+                        }}
+                        <span class="text-danger font-semibold"
+                          >（本人確認書類の確認が必要です！）</span
+                        >
+                      </p>
+                    </ng-container>
+                    <ng-template #idConfirmed>
+                      <p>
+                        前回本人確認書類確認日：{{
+                          selectedCustomer.idConfirmationDate
+                        }}
+                      </p>
+                    </ng-template>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #noCustomerInfoSelected>
+                <p
+                  class="mt-1 p-2 text-gray-500 border border-gray-300 rounded-md bg-blue-100">
+                  お客様を選択してください
+                </p>
+              </ng-template>
+            </div>
+
+            <div
+              *ngIf="
+                selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER &&
+                idConfirmationDate === true
+              ">
+              <div class="1/4 mt-7" *ngIf="selectedCustomer?.id">
+                <app-button (click)="confirmedIdentityVerificationDocuments()">
+                  本人確認書類を確認しました
+                </app-button>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+        <ng-container
+          *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_GENERAL">
+          <div class="flex gap-4">
+            <div class="w-3/6">
+              <app-text-container
+                nameAttrValue="shipping_address"
+                idAttrValue="shipping-address"
+                [formCtrl]="generalFc.shipping_address"
+                [invalid]="formControlStateManager(generalFc.shipping_address)">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: {
+                      label: '配送先住所（255文字以内）',
+                      required: false
+                    }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: '※必須項目です。' }
+                  "
+                  message></ng-container>
+              </app-text-container>
+            </div>
+            <div class="w-1/4">
+              <app-date-term
+                nameAttrValue="identification_document_confirmation_date"
+                idAttrValue="identification-document-confirmation-date"
+                [formCtrl]="generalFc.identification_document_confirmation_date"
+                [invalid]="
+                  formControlStateManager(
+                    generalFc.identification_document_confirmation_date
+                  )
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '本人確認書類確認日', required: 'true' }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      ctrl: generalFc.identification_document_confirmation_date
+                    }
+                  "
+                  message></ng-container>
+              </app-date-term>
+            </div>
+          </div>
+          <div class="flex gap-4">
+            <!--<div class="mt-2">
+              <p class="text-primary-light text-sm">
+                ※ 配送先が登録先と異なる場合、登録された電話番号以外に連絡を希望する携帯電話番号がある場合、上記の項目へ入力してください
+              </p>
+            </div>-->
+          </div>
+          <div class="mt-6 flex gap-4">
+            <!-- 選択された会員フルネーム・得意先名のいずれかを表示する -->
+            <div class="w-[59%]">
+              <span>選択中お客様情報</span>
+              <ng-container
+                *ngIf="selectedCustomer?.id; else noCustomerInfoSelected">
+                <div
+                  class="mt-1 p-2 text-gray-800 border border-gray-300 rounded-md bg-blue-100">
+                  <p>
+                    お客様名：{{
+                      this.generalFc.last_name.value +
+                        '' +
+                        this.generalFc.first_name.value
+                    }}{{
+                      selectedCustomer.fullNameKana
+                        ? '（' +
+                          this.generalFc.last_name.value +
+                          ' ' +
+                          this.generalFc.first_name.value +
+                          '）'
+                        : ''
+                    }}
+                  </p>
+                  <p>
+                    {{
+                      this.generalFc.last_name.value +
+                        ' ' +
+                        this.generalFc.first_name.value
+                    }}
+                  </p>
+                  <p>電話番号：{{ this.generalFc.tel.value }}</p>
+                  <p>ご住所：{{ this.generalFc.shipping_address.value }}</p>
+                </div>
+              </ng-container>
+              <ng-template #noCustomerInfoSelected>
+                <p
+                  class="mt-1 p-2 text-gray-500 border border-gray-300 rounded-md bg-blue-100">
+                  お客様を選択してください
+                </p>
+              </ng-template>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+      <div class="flex gap-6 mt-6">
+        <div class="w-1/2">
+          <app-textarea-container
+            nameAttrValue="remarks_1"
+            idAttrValue="remarks-1"
+            [formCtrl]="commonFc.remarks_1"
+            [invalid]="formControlStateManager(commonFc.remarks_1)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label: '備考1',
+                  required: false
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: commonFc.remarks_1 }"
+              message></ng-container>
+          </app-textarea-container>
+        </div>
+        <div class="w-1/2">
+          <app-textarea-container
+            nameAttrValue="remarks_2"
+            idAttrValue="remarks-2"
+            [formCtrl]="commonFc.remarks_2"
+            [invalid]="formControlStateManager(commonFc.remarks_2)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label: '備考2',
+                  required: false
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="errors; context: { ctrl: commonFc.remarks_2 }"
+              message></ng-container>
+          </app-textarea-container>
+        </div>
+      </div>
+      <ng-container
+        *ngIf="
+          selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER ||
+          selectedCustomerCode === DIVISION_CUSTOMER_CODE_CLIENT
+        ">
+        <div class="flex gap-4 mt-6">
+          <div class="w-4/6">
+            <ng-container
+              *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER">
+              <app-text-container
+                nameAttrValue="shipping_address"
+                idAttrValue="shipping-address"
+                [formCtrl]="memberCtrls.shipping_address"
+                [invalid]="
+                  formControlStateManager(memberCtrls.shipping_address)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: {
+                      label: '配送先住所（255文字以内）',
+                      required: false
+                    }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: memberCtrls.shipping_address }
+                  "
+                  message></ng-container>
+              </app-text-container>
+            </ng-container>
+            <ng-container
+              *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_CLIENT">
+              <app-text-container
+                nameAttrValue="shipping_address"
+                idAttrValue="shipping-address"
+                [formCtrl]="clientCtrls.shipping_address"
+                [invalid]="
+                  formControlStateManager(clientCtrls.shipping_address)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: {
+                      label: '配送先住所（255文字以内）',
+                      required: false
+                    }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: clientCtrls.shipping_address }
+                  "
+                  message></ng-container>
+              </app-text-container>
+            </ng-container>
+          </div>
+          <div class="w-2/6">
+            <app-text-container
+              nameAttrValue="mobile_number"
+              idAttrValue="mobile-number"
+              [formCtrl]="commonFc.mobile_number"
+              [invalid]="formControlStateManager(commonFc.mobile_number)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: {
+                    label: '携帯電話番号（半角数字16桁以内）',
+                    required: false
+                  }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="
+                  telAndMobileNumber;
+                  context: { ctrl: commonFc.mobile_number }
+                "
+                message></ng-container>
+            </app-text-container>
+          </div>
+        </div>
+        <div class="mt-2">
+          <p class="text-primary-light text-sm">
+            ※
+            配送先が登録先と異なる場合、登録された電話番号以外に連絡を希望する携帯電話番号がある場合、上記の項目へ入力してください
+          </p>
+        </div>
+      </ng-container>
+      <!-- 貸出期間 -->
+      <div class="mt-4 mx-4 flex gap-6">
+        <div class="w-1/2">
+          <ng-container *ngIf="showBulkSuggest">
+            <p>貸出期間設定（受付表単位）</p>
+            <form [formGroup]="rentalDateForms">
+              <table>
+                <tr>
+                  <th>貸出予定日</th>
+                  <th>返却予定日</th>
+                </tr>
+                <tr>
+                  <td>
+                    <div
+                      formGroupName="bulkScheduledDateGroup"
+                      class="mr-2 ml-2">
+                      <app-datepicker
+                        nameAttrValue="bulk_scheduled_rental_date"
+                        idAttrValue="bulk-scheduled-rental-date"
+                        [formCtrl]="getBulkScheduledRentalDateControl()"
+                        [invalid]="formControlStateManager(rentalDateForms.get('bulkScheduledDateGroup')?.get('bulk_scheduled_rental_date')) || rentalDateForms.get('bulkScheduledDateGroup')?.errors?.['isStartDateGreaterThanOrEqualToEndDate']">
+                      </app-datepicker>
+                    </div>
+                  </td>
+                  <td>
+                    <div
+                      formGroupName="bulkScheduledDateGroup"
+                      class="mr-2 ml-2">
+                      <app-datepicker
+                        nameAttrValue="bulk_scheduled_return_date"
+                        idAttrValue="bulk-scheduled-return-date"
+                        [formCtrl]="getBulkScheduledReturnDateControl()"
+                        [invalid]="formControlStateManager(rentalDateForms.get('bulkScheduledDateGroup')?.get('bulk_scheduled_return_date')) || rentalDateForms.get('bulkScheduledDateGroup')?.errors?.['isStartDateGreaterThanOrEqualToEndDate']">
+                      </app-datepicker>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </form>
+          </ng-container>
+        </div>
+      </div>
+      <div class="mt-4 mx-4 flex gap-6">
+        <form [formGroup]="rentalEmployeeForms" class="w-full flex">
+          <ng-container *ngIf="!rentalItemStatus">
+            <div class="w-1/4 mr-2 ml-2">
+              <app-select-container
+                nameAttrValue="rental_employee_id"
+                idAttrValue="rental-employee-id"
+                [formCtrl]="rentalEc.rental_employee_id"
+                [options]="employeeSuggests"
+                [invalid]="
+                  formControlStateManager(rentalEc.rental_employee_id)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '貸出担当者', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: rentalEc.rental_employee_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-container>
+            </div>
+            <div class="w-1/4 mr-2 ml-2">
+              <!-- idで社員を取得する -->
+              <app-text-container
+                nameAttrValue="get_rental_employee_id"
+                idAttrValue="get-rental-employee-id"
+                [formCtrl]="getEmployeeByIdFcRental.get_rental_employee_id"
+                [invalid]="
+                  formControlStateManager(
+                    getEmployeeByIdFcRental.get_rental_employee_id
+                  )
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '社員IDで選択', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      fc: getEmployeeByIdFcRental.get_rental_employee_id
+                    }
+                  "
+                  message>
+                </ng-container>
+              </app-text-container>
+            </div>
+          </ng-container>
+          <ng-container *ngIf="rentalItemStatus">
+            <div class="w-1/4 mr-2 ml-2">
+              <app-select-container
+                nameAttrValue="rental_employee_id"
+                idAttrValue="rental-employee-id"
+                [formCtrl]="rentalEc.rental_employee_id"
+                [options]="employeeSuggests"
+                [invalid]="
+                  formControlStateManager(rentalEc.rental_employee_id)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '貸出担当者', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: rentalEc.rental_employee_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-container>
+            </div>
+            <div class="w-1/4 mr-2 ml-2">
+              <!-- idで社員を取得する -->
+              <app-text-container
+                nameAttrValue="get_rental_employee_id"
+                idAttrValue="get-rental-employee-id"
+                [formCtrl]="getEmployeeByIdFcRental.get_rental_employee_id"
+                [invalid]="
+                  formControlStateManager(
+                    getEmployeeByIdFcRental.get_rental_employee_id
+                  )
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '社員IDで選択', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      fc: getEmployeeByIdFcRental.get_rental_employee_id
+                    }
+                  "
+                  message>
+                </ng-container>
+              </app-text-container>
+            </div>
+            <div class="w-1/4 mr-2 ml-2">
+              <app-select-container
+                nameAttrValue="return_employee_id"
+                idAttrValue="return-employee-id"
+                [formCtrl]="rentalEc.return_employee_id"
+                [options]="employeeSuggests"
+                [invalid]="
+                  formControlStateManager(rentalEc.return_employee_id)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '返却担当者', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { fc: rentalEc.return_employee_id }
+                  "
+                  message>
+                </ng-container>
+              </app-select-container>
+            </div>
+            <div class="w-1/4 mr-2 ml-2">
+              <!-- idで社員を取得する -->
+              <app-text-container
+                nameAttrValue="get_return_employee_id"
+                idAttrValue="get-return-employee-id"
+                [formCtrl]="getEmployeeByIdFcReturn.get_return_employee_id"
+                [invalid]="
+                  formControlStateManager(
+                    getEmployeeByIdFcReturn.get_return_employee_id
+                  )
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '社員IDで選択', required: false }
+                  ">
+                </ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: {
+                      fc: getEmployeeByIdFcReturn.get_return_employee_id
+                    }
+                  "
+                  message>
+                </ng-container>
+              </app-text-container>
+            </div>
+          </ng-container>
+        </form>
+      </div>
+    </div>
+
+    <div class="bg-rose-200 mb-24 shadow border border-gray-300 border-t-0">
+      <div class="px-6 pt-8 text-rose-700">
+        <p>
+          ・精算ステータスはPOSから連携されるデータのため、通常は操作しないでください。
+        </p>
+        <p>
+          ・インシデントステータスは重大なトラブルが発生した時のみ利用する項目のため、通常は操作しないでください。
+        </p>
+      </div>
+      <div class="flex gap-6 pt-4 pb-8 px-6">
+        <div class="w-1/2">
+          <app-select-container
+            nameAttrValue="settle_status_division_id"
+            idAttrValue="settle-status-division-id"
+            [formCtrl]="commonFc.settle_status_division_id"
+            [options]="settleDivisions"
+            [invalid]="
+              formControlStateManager(commonFc.settle_status_division_id)
+            ">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: { label: divisionConst.SETTLE_STATUS }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: commonFc.settle_status_division_id }
+              "
+              message></ng-container>
+          </app-select-container>
+        </div>
+        <div class="w-1/2">
+          <app-select-container
+            nameAttrValue="incident_division_id"
+            idAttrValue="incident-division-id"
+            [formCtrl]="commonFc.incident_division_id"
+            [options]="incidentDivisions"
+            [invalid]="formControlStateManager(commonFc.incident_division_id)">
+            <ng-container
+              *ngTemplateOutlet="
+                labels;
+                context: {
+                  label: divisionConst.INCIDENT,
+                  required: true
+                }
+              "></ng-container>
+            <ng-container
+              *ngTemplateOutlet="
+                errors;
+                context: { ctrl: commonFc.incident_division_id }
+              "
+              message></ng-container>
+          </app-select-container>
+        </div>
+      </div>
+    </div>
+
+    <!-- 保存ボタン -->
+    <ng-container *ngIf="selectedCustomerType">
+      <ng-container
+        *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_CLIENT">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8 edit_save_buttom">
+          <app-button (click)="onClickReset()">クリア</app-button>
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              commonForm.invalid ||
+              commonForm.pristine ||
+              clientForm.invalid ||
+              clientForm.pristine
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+      <ng-container
+        *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_MEMBER">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8 edit_save_buttom">
+          <app-button (click)="onClickReset()">クリア</app-button>
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              commonForm.invalid ||
+              commonForm.pristine ||
+              memberForm.invalid ||
+              memberForm.pristine
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+      <ng-container
+        *ngIf="selectedCustomerCode === DIVISION_CUSTOMER_CODE_GENERAL">
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8 edit_save_buttom">
+          <app-button (click)="onClickReset()">クリア</app-button>
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="
+              commonForm.invalid || commonForm.pristine || generalForm.invalid
+            "
+            >保存</app-button
+          >
+        </div>
+      </ng-container>
+    </ng-container>
+  </form>
+
+  <!-- 商品予約状況ブロック -->
+  <div class="mt-3 py-6 bg-white shadow border border-gray-300 rounded-b-md">
+    <!-- 選択された商品の情報を表示する TODO: 商品名の他ステータスなど必要な情報はニッシンさんと調整 -->
+    <div class="mt-6 px-6">
+      <span>選択中商品情報</span>
+      <ng-container *ngIf="!rentalAddFormArrayControls">
+        <div
+          class="mt-1 p-2 text-gray-500 border border-gray-300 rounded-md bg-blue-100">
+          <p>選択商品なし</p>
+        </div>
+      </ng-container>
+      <ng-container
+        *ngIf="
+          rentalAddFormArrayControls && rentalAddFormArrayControls.length > 0
+        ">
+        <form [formGroup]="rentalAddForms">
+          <table class="w-full border-collapse">
+            <thead>
+              <tr>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  RentalID
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  ID
+                </th>
+                <th
+                  class="border border-slate-200 text-left text-sm font-normal px-2 py-1 w-[300px]">
+                  商品名
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  基本料金
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  ステータス
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1 w-[140px]"
+                  [hidden]="!showOnebyoneSuggest">
+                  貸出予定日
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1 w-[140px]"
+                  [hidden]="!showOnebyoneSuggest">
+                  返却予定日
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1 w-[140px]">
+                  配送区分
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1 w-[140px]">
+                  回収区分
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  レンタル料金
+                </th>
+                <th
+                  class="border border-slate-200 text-sm font-normal px-2 py-1">
+                  削除
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="forms">
+              <ng-container>
+                <tr
+                  *ngFor="let form of rentalAddFormArrayControls; let i = index"
+                  [formGroupName]="i">
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    {{ form.value.id }}
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    {{ form.value.rental_product_id }}
+                  </td>
+                  <td class="border border-slate-200 text-sm px-2 py-1">
+                    {{ form.value.rental_product_name }}
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    {{ form.value.selling_price | number }} 円
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    {{ form.value.division_status_value }}
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1"
+                    [hidden]="!showOnebyoneSuggest">
+                    <div formGroupName="scheduledDateGroup">
+                      <app-datepicker
+                        nameAttrValue="scheduled_rental_date"
+                        idAttrValue="scheduled-rental-date"
+                        [formCtrl]="getScheduledRentalDateControl(form)"
+                        [invalid]="formControlStateManager(form.get('scheduledDateGroup')?.get('scheduled_rental_date')) || form.get('scheduledDateGroup')?.errors?.['isStartDateGreaterThanOrEqualToEndDate']">
+                      </app-datepicker>
+                    </div>
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1"
+                    [hidden]="!showOnebyoneSuggest">
+                    <div formGroupName="scheduledDateGroup">
+                      <ng-container
+                        *ngIf="
+                          form
+                            .get('scheduledDateGroup')
+                            ?.get('scheduled_rental_date')
+                        ">
+                        <app-datepicker
+                          nameAttrValue="scheduled_return_date"
+                          idAttrValue="scheduled-return-date"
+                          [formCtrl]="getScheduledReturnDateControl(form)"
+                          [invalid]="formControlStateManager(form.get('scheduledDateGroup')?.get('scheduled_return_date')) || form.get('scheduledDateGroup')?.get('scheduled_return_date')?.errors?.['isStartDateGreaterThanOrEqualToEndDate']">
+                        </app-datepicker>
+                      </ng-container>
+                    </div>
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    <div formGroupName="scheduledDateGroup">
+                      <app-select
+                        nameAttrValue="delivery_division_id"
+                        idAttrValue="delivery-division-id"
+                        [formCtrl]="
+                          getFormControlTypeValue(form, 'delivery_division_id')
+                        "
+                        [options]="deliveryDivisionOptions"
+                        [invalid]="
+                          formControlStateManager(
+                            getFormControlTypeValue(
+                              form,
+                              'delivery_division_id'
+                            )
+                          )
+                        ">
+                      </app-select>
+                    </div>
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    <div>
+                      <app-select
+                        nameAttrValue="collection_division_id"
+                        idAttrValue="collection-division-id"
+                        [formCtrl]="
+                          getFormControlTypeValue(
+                            form,
+                            'collection_division_id'
+                          )
+                        "
+                        [options]="collectionDivisionOptions"
+                        [invalid]="
+                          formControlStateManager(
+                            getFormControlTypeValue(
+                              form,
+                              'collection_division_id'
+                            )
+                          )
+                        ">
+                      </app-select>
+                    </div>
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    {{ form.value.rental_fee | number }} 円
+                  </td>
+                  <td
+                    class="border border-slate-200 text-sm text-center px-2 py-1">
+                    <div class="flex justify-center">
+                      <app-icon-container
+                        (click)="deleteSelectedRentalProductModal(i)"
+                        icon="delete-bin-line"
+                        class="h-6 w-6"
+                        appendClassForIcon="cursor-pointer fill-danger group-hover:fill-danger-hover">
+                      </app-icon-container>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </form>
+      </ng-container>
+    </div>
+
+    <!-- タイトル -->
+    <div class="px-6 flex justify-between items-end">
+      <h2>商品予約状況</h2>
+      <div>
+        <!-- 表示開始日入力フォーム -->
+        <app-date-term
+          nameAttrValue="display_start_date"
+          idAttrValue="display-start-date"
+          [formCtrl]="displayStartDateFc.display_start_date"
+          [invalid]="
+            formControlStateManager(displayStartDateFc.display_start_date)
+          ">
+          <ng-container
+            *ngTemplateOutlet="
+              labels;
+              context: { label: '表示開始日', required: false }
+            ">
+          </ng-container>
+          <ng-container
+            *ngTemplateOutlet="
+              errors;
+              context: { fc: displayStartDateFc.display_start_date }
+            "
+            message>
+          </ng-container>
+        </app-date-term>
+      </div>
+    </div>
+    <hr class="mt-2" />
+
+    <!-- ヘッダー -->
+    <div class="mt-6 px-6 flex justify-between">
+      <!-- 分類で絞り込みボタン -->
+      <div class="flex gap-2">
+        <app-button
+          (click)="toggleCategoryMenu()"
+          [buttonDisabled]="showProductNameSuggest || showProductIdSuggest"
+          >分類で絞り込み</app-button
+        >
+        <app-button
+          (click)="toggleProductNameSuggest()"
+          [buttonDisabled]="showProductIdSuggest || isCategoryMenuOpen"
+          >商品名で検索</app-button
+        >
+        <app-button
+          (click)="toggleProductIdSuggest()"
+          [buttonDisabled]="showProductNameSuggest || isCategoryMenuOpen"
+          >商品IDで検索</app-button
+        >
+      </div>
+
+      <!-- 商品ステータスでの絞り込みや表示項目の説明 -->
+      <div class="flex justify-end gap-8 items-end">
+        <!-- 商品ステータスでの表示切り替えラジオボタン -->
+        <div class="flex gap-6">
+          <ng-container
+            *ngFor="
+              let rentalProductAcquisitionType of rentalProductAcquisitionTypes
+            ">
+            <div>
+              <label
+                [ngClass]="{
+                  'cursor-not-allowed': showProductNameSuggest,
+                  'cursor-pointer': !showProductNameSuggest
+                }"
+                class="block relative pl-6 cursor-pointer">
+                <input
+                  type="radio"
+                  [checked]="
+                    rentalProductAcquisitionType.value ===
+                    RENTAL_PRODUCT_ACQUISITION_ALL
+                  "
+                  [id]="'rental-product-' + rentalProductAcquisitionType.value"
+                  [name]="
+                    'rental_product_' + +rentalProductAcquisitionType.value
+                  "
+                  class="w-4 h-4 absolute top-0 bottom-0 left-0 m-auto cursor-pointer"
+                  [value]="rentalProductAcquisitionType.value"
+                  (change)="onRentalProductAcquisitionTypeRadioChange($event)"
+                  [disabled]="showProductNameSuggest"
+                  [ngClass]="{
+                    'cursor-not-allowed': showProductNameSuggest,
+                    'cursor-pointer': !showProductNameSuggest
+                  }" />
+                {{ rentalProductAcquisitionType.display }}
+              </label>
+            </div>
+          </ng-container>
+        </div>
+        <div class="flex gap-1">
+          <p>○：予約可能、</p>
+          <p>△：予約中、</p>
+          <p>×：貸出中</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2 px-6"><hr /></div>
+
+    <!-- 商品名検索サジェスト 通常非表示 -->
+    <div
+      [ngClass]="{
+        'max-h-0 opacity-0 overflow-hidden': !showProductNameSuggest,
+        'search-panel-height mt-4 opacity-100': showProductNameSuggest
+      }"
+      class="my-4 px-6 flex transition-all duration-500 ease-linear">
+      <div class="w-2/3">
+        <app-search-suggest-container
+          nameAttrValue="product_name"
+          idAttrValue="product-name"
+          targetOptionData="text"
+          [fc]="productFc.product_name"
+          [apiInput]="getProductNameFormSuggests()"
+          (idValueChanges)="onProductSuggestIdChange($event)"
+          (selectedData)="onProductSuggestDataSelected($event)"
+          [invalid]="formControlStateManager(productFc.product_name)"
+          [buttonDisabled]="!showProductNameSuggest">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">商品名</span>
+          </div>
+        </app-search-suggest-container>
+      </div>
+    </div>
+
+    <!-- 商品ID検索サジェスト 通常非表示 -->
+    <div
+      [ngClass]="{
+        'max-h-0 opacity-0 overflow-hidden': !showProductIdSuggest,
+        'search-panel-height mt-4 opacity-100': showProductIdSuggest
+      }"
+      class="my-4 px-6 flex transition-all duration-500 ease-linear">
+      <div class="w-2/3">
+        <app-search-suggest-container
+          nameAttrValue="product_id"
+          idAttrValue="product-id"
+          targetOptionData="text"
+          [fc]="productFc.id"
+          [apiInput]="getProductIdFormSuggests()"
+          (idValueChanges)="onProductSuggestIdChange($event)"
+          (selectedData)="onProductSuggestDataSelected($event)"
+          [invalid]="formControlStateManager(productFc.product_name)"
+          [buttonDisabled]="!showProductIdSuggest">
+          <div class="flex items-center gap-2">
+            <span class="text-sm">商品ID</span>
+          </div>
+        </app-search-suggest-container>
+      </div>
+    </div>
+
+    <!-- 予約状況エリア -->
+    <div class="mt-2 mx-6 pb-3 flex relative overflow-x-hidden">
+      <!-- 分類サイドバー -->
+      <div
+        [ngClass]="{
+          '-translate-x-[324px]': !isCategoryMenuOpen,
+          'translate-x-0': isCategoryMenuOpen
+        }"
+        class="absolute top-0 w-[300px] min-w-[300px] transition-transform duration-500 ease-in-out transform border border-gray-200 shadow-md rounded-b-md">
+        <!-- タイトル -->
+        <div
+          class="sticky top-0 w-[300px] min-w-[300px] flex justify-between bg-iron-blue-400 px-4 py-2 items-center">
+          <div>
+            <app-icon
+              [ngClass]="{
+                'opacity-0 cursor-none': isLargeCategory,
+                'opacity-100 cursor-pointer': !isLargeCategory
+              }"
+              (click)="drillUpMenu()"
+              icon="arrow-left-s-line"
+              class="w-6 h-6x">
+            </app-icon>
+          </div>
+          <!-- ドリルダウン・アップで中分類・小分類と表示を切り替える -->
+          <div>{{ categoryTitle[currentCategoryLevel] }}</div>
+          <div>
+            <!-- スペーサー ボタン利用時は削除してください -->
+            <app-icon
+              icon="arrow-left-s-line"
+              class="w-6 h-6x opacity-0 cursor-none">
+            </app-icon>
+            <!-- TODO: 分類単位で予約状況を表示する場合に利用してください。ボタン利用時は下のコンテンツのtop-[47px]へ変更してください。 -->
+            <!-- <app-button btnSize="sm" [buttonDisabled]="true">決定</app-button> -->
+          </div>
+        </div>
+
+        <!-- 分類コンテンツ -->
+        <!-- 最後のコンテンツにはクラスへrounded-b-mdを付与 -->
+        <div
+          class="absolute top-[40px] max-h-[453px] w-[300px] min-w-[300px] overflow-y-auto border border-gray-200 shadow-md rounded-b-md">
+          <ng-container
+            *ngFor="let item of currentCategoryData; last as isLast">
+            <div
+              [ngClass]="{
+                'rounded-b-md': isLast
+              }"
+              (click)="drillDownMenu(item.id, item.has_children)"
+              class="flex justify-between px-4 py-2 border-t border-iron-blue-300 cursor-pointer bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+              <p>{{ item.name }}</p>
+              <app-icon
+                *ngIf="item.has_children"
+                icon="arrow-right-s-line"
+                class="w-6 h-6"></app-icon>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+
+      <!-- 予約状況表示エリア -->
+      <div
+        [ngClass]="{
+          'w-full': !isCategoryMenuOpen,
+          'w-[calc(100%-312px)] translate-x-[312px]': isCategoryMenuOpen
+        }"
+        class="transition-all duration-500 ease-in-out">
+        <div
+          class="overflow-x-auto transition-all duration-500 ease-in-out mx-1 shadow-md rounded-b-md border-t border-slate-100 relative">
+          <div class="rental-reservation-table">
+            <ng-container *ngIf="reservationStatusHeader.length > 0">
+              <!-- テーブルヘッダー -->
+              <div class="rental-reservation-table-header">
+                <ng-container *ngFor="let header of reservationStatusHeader">
+                  <span
+                    [ngClass]="{
+                      'justify-center text-center': header.isCenter,
+                      'sticky z-30 bg-white': header.leftPosition
+                    }"
+                    class="inline-flex h-[59px] {{ header.leftPosition }} {{
+                      header.width
+                    }} items-center px-1 py-2">
+                    {{ header.value1 }}
+                    <ng-container *ngIf="header.value2"
+                      ><br />{{ header.value2 }}</ng-container
+                    >
+                  </span>
+                </ng-container>
+              </div>
+            </ng-container>
+
+            <!-- テーブルボディ -->
+            <!-- 縦軸繰り返し -->
+            <ng-container *ngIf="reservationStatusBody.length > 0">
+              <ng-container
+                *ngFor="let data of reservationStatusBody; index as i">
+                <!-- データ縦軸用div 上下の隙間が出来るのを防止するためflexを付与 -->
+                <div class="flex">
+                  <!-- 横軸用div -->
+                  <div class="rental-reservation-table-body">
+                    <ng-container *ngFor="let body of data; first as isFirst">
+                      <!-- チェックボックス用 -->
+                      <ng-container *ngIf="isFirst; else normalColumn">
+                        <span
+                          [ngClass]="{
+                            'justify-center text-center': body.isCenter,
+                            'bg-iron-blue-100': i % 2 === 0,
+                            'bg-white': i % 2 !== 0,
+                            'sticky z-1': body.leftPosition
+                          }"
+                          class="flex relative {{ body.leftPosition }} {{
+                            body.width
+                          }} items-center px-1 py-2">
+                          <input
+                            type="checkbox"
+                            (change)="onCheckboxChange($event, body.value)"
+                            class="w-4 h-4 absolute top-0 bottom-0 left-0 right-0 m-auto cursor-pointer" />
+                        </span>
+                      </ng-container>
+
+                      <!-- 通常の列用 -->
+                      <ng-template #normalColumn>
+                        <span
+                          [ngClass]="{
+                            'justify-center text-center': body.isCenter,
+                            'bg-iron-blue-100': i % 2 === 0,
+                            'bg-white': i % 2 !== 0,
+                            'sticky z-10': body.leftPosition
+                          }"
+                          class="flex {{ body.leftPosition }} {{
+                            body.width
+                          }} items-center px-1 py-2">
+                          {{ body.value }}
+                        </span>
+                      </ng-template>
+                    </ng-container>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- 得意先選択時テンプレート -->
+<ng-template #client>
+  <div class="w-2/3 mt-6">
+    <div class="w-2/4">
+      <app-select-suggest-container
+        nameAttrValue="client_id"
+        idAttrValue="client-id"
+        placeholder="選択してください"
+        [formCtrl]="clientCtrls.client_id"
+        [suggests]="clientSuggests"
+        (suggestSelected)="onClientNameSuggestDataSelected($event)"
+        [invalid]="formControlStateManager(clientCtrls.client_id)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '得意先', required: 'true' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: clientCtrls.client_id }"
+          message></ng-container>
+      </app-select-suggest-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 会員選択時テンプレート -->
+<ng-template #member>
+  <div class="w-2/3 mt-6">
+    <div class="w-2/4">
+      <app-select-suggest-container
+        nameAttrValue="member_id"
+        idAttrValue="member-id"
+        placeholder="選択してください"
+        [formCtrl]="memberCtrls.member_id"
+        [suggests]="memberSuggests"
+        (suggestSelected)="onMemberNameSuggestDataSelected($event)"
+        [invalid]="formControlStateManager(memberCtrls.member_id)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '会員', required: 'true' }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: memberCtrls.member_id }"
+          message></ng-container>
+      </app-select-suggest-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 一般選択時テンプレート -->
+<ng-template #general>
+  <div class="mt-6 flex gap-4">
+    <div class="w-2/6">
+      <app-text-container
+        nameAttrValue="last_name"
+        idAttrValue="last-name"
+        [formCtrl]="generalFc.last_name"
+        [invalid]="formControlStateManager(generalFc.last_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '姓 名', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: generalFc.last_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="first_name"
+        idAttrValue="first-name"
+        [formCtrl]="generalFc.first_name"
+        [invalid]="formControlStateManager(generalFc.first_name)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '　', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: generalFc.first_name }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="tel"
+        idAttrValue="tel"
+        [formCtrl]="generalFc.tel"
+        [invalid]="formControlStateManager(generalFc.tel)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: {
+              label: '電話番号（半角数字16桁以内）',
+              required: 'false'
+            }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="errors; context: { ctrl: generalFc.tel }"
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+  <div class="mt-6 flex gap-4">
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="last_name_kana"
+        idAttrValue="last-name-kana"
+        [formCtrl]="generalFc.last_name_kana"
+        [invalid]="formControlStateManager(generalFc.last_name_kana)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'セイ メイ', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: generalFc.last_name_kana }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="first_name_kana"
+        idAttrValue="first-name-kana"
+        [formCtrl]="generalFc.first_name_kana"
+        [invalid]="formControlStateManager(generalFc.first_name_kana)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: '　', required: false }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: generalFc.first_name_kana }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+    <div class="w-1/3">
+      <app-text-container
+        nameAttrValue="mobile_number"
+        idAttrValue="mobile-number"
+        [formCtrl]="commonFc.mobile_number"
+        [invalid]="formControlStateManager(commonFc.mobile_number)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: {
+              label: '携帯電話番号（半角数字16桁以内）',
+              required: false
+            }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            telAndMobileNumber;
+            context: { ctrl: commonFc.mobile_number }
+          "
+          message></ng-container>
+      </app-text-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 共通テンプレート -->
+<ng-template #common>
+  <div class="flex gap-6">
+    <div class="">
+      <app-select-container
+        nameAttrValue="status_division_id"
+        idAttrValue="status-division-id"
+        [formCtrl]="commonFc.status_division_id"
+        [options]="statusDivisions"
+        [invalid]="formControlStateManager(commonFc.status_division_id)">
+        <ng-container
+          *ngTemplateOutlet="
+            labels;
+            context: { label: 'ステータス', required: true }
+          "></ng-container>
+        <ng-container
+          *ngTemplateOutlet="
+            errors;
+            context: { ctrl: commonFc.status_division_id }
+          "
+          message></ng-container>
+      </app-select-container>
+    </div>
+  </div>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ 必須エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 全角カタカナエラーメッセージのテンプレート ↓ -->
+<ng-template #fullWidthKatakana let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+      {{ errorConst.FORM_ERROR.FULL_WIDTH_KATAKANA_RESTRICTION_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ どちらか必須エラーメッセージのテンプレート ↓ -->
+<ng-template #eitherRequiredErrors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p
+      class="mt-1 pl-1 text-sm text-red"
+      *ngIf="ctrl.errors?.['eitherRequired']">
+      ※ 電話番号または携帯電話番号どちらか一方必須
+    </p>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ どちらか必須エラーメッセージのテンプレート ↓ -->
+<ng-template #telAndMobileNumber let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <ng-container *ngFor="let error of ctrl.errors | keyvalue">
+      <ng-container *ngIf="error.key === 'minlength'">
+        <p class="mt-1 pl-1 text-sm text-red">
+          {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MIN_LIMIT }}
+        </p>
+      </ng-container>
+      <ng-container *ngIf="error.key === 'maxlength'">
+        <p class="mt-1 pl-1 text-sm text-red">
+          {{ errorConst.FORM_ERROR.EXCEEDED_CHARACTER_MAX_LIMIT }}
+        </p>
+      </ng-container>
+      <ng-container *ngIf="error.key === 'pattern'">
+        <p class="mt-1 pl-1 text-sm text-red">
+          {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+        </p>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+</ng-template>
+
+<!-- ↓ 日付指定エラーメッセージのテンプレート ↓ -->
+<ng-template #dateErrors let-commonFc="commonFc">
+  <ng-container *ngIf="commonFc.errors?.['endingDateIsSmaller']">
+    <p class="mt-1 pl-1 text-sm text-red">
+      {{ errorConst.FORM_ERROR.DATE_SPECIFICATION_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

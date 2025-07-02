@@ -1,0 +1,20 @@
+<app-label
+  [labelSize]="labelSize"
+  [forAttrValue]="idAttrValue"
+  class="block ml-1 mb-1">
+  <ng-content></ng-content>
+</app-label>
+<div class="relative">
+  <app-text
+    [inputType]="inputType"
+    [nameAttrValue]="nameAttrValue"
+    [idAttrValue]="idAttrValue"
+    [formCtrl]="formCtrl"
+    [placeholder]="placeholder"
+    [invalid]="invalid"
+    [textRight]="textRight"
+    (focusEvent)="focusEvent.emit($event)"
+    (blurEvent)="blurEvent.emit($event)">
+  </app-text>
+</div>
+<ng-content select="[message]"></ng-content>

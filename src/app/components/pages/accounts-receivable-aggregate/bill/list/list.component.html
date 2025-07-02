@@ -1,0 +1,44 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { text: '請求一覧' }
+  ]"></app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<main>
+  <!-- 絞り込み -->
+  <div>
+    <app-billlist-search
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)"></app-billlist-search>
+  </div>
+
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-end mt-4">
+    <!-- ↓ スペース調整用の空 div ↓ -->
+    <div></div>
+    <app-export-link
+      [export$]="export$"
+      [fileNamePrefix]="fileNamePrefix"
+      (statusChange)="onExportStatusChange($event)"
+      text="請求一覧ダウンロード　">
+    </app-export-link>
+    <app-export-pdf-org
+      [apiResponse$]="exportPdf$"
+      [filename]="pdfFileNamePrefix"
+      (statusChange)="onExportStatusChange($event)"
+      text="請求書PDF一括ダウンロード　">
+    </app-export-pdf-org>
+  </div>
+
+  <!-- 一覧テーブル -->
+  <app-table
+    class="block mt-2"
+    [bulkIds]="bulkIds"
+    [eventListener]="parentTableEvent"
+    (errorEvent)="handleError($event)"
+    (bulkIdsChange)="handleBulkIdsChange($event)"></app-table>
+</main>

@@ -1,0 +1,263 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: listPagePath, text: '配送一覧' },
+    { path: detailPagePath, text: '配送詳細' },
+    { text: '配送編集' }
+  ]"></app-breadcrumb-org>
+<main>
+  <h1 class="mt-8 text-xl">配送編集</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div (click)="handleClickCancel()" class="cursor-pointer">
+      <app-cancel-link-org></app-cancel-link-org>
+    </div>
+    <div>
+      <app-last-updater-org>
+        最終更新者：{{ lastUpdater ? lastUpdater : 'データ取得中...' }}
+      </app-last-updater-org>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <ng-container
+    *ngIf="!common.loading && beforeUpdateDelivery; else duringAcquisition">
+    <div
+      class="mt-8 mb-24 pt-8 pb-20 px-6 bg-white shadow border border-gray-300">
+      <h2 class="text-lg">
+        {{ salesTypeName }}配送情報更新　お客様名：{{
+          beforeUpdateDelivery.name
+        }}
+      </h2>
+      <hr class="border-t-primary-light-hover border-t-4" />
+      <form
+        class="mt-6"
+        [formGroup]="form"
+        (ngSubmit)="handleClickSaveButton()">
+        <div class="flex gap-4">
+          <ng-container
+            *ngIf="salesTypeName === deliveryConst.RENTAL; else deliveryOnly">
+            <div class="w-2/6">
+              <app-select-container
+                [formCtrl]="fc.delivery_type_division_id"
+                nameAttrValue="delivery_type_division_id"
+                idAttrValue="delivery-type-division-id"
+                [options]="deliveryTypeOptions"
+                [invalid]="
+                  formControlStateManager(fc.delivery_type_division_id)
+                ">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '配送・回収の選択', required: true }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: fc.delivery_type_division_id }
+                  "
+                  message></ng-container>
+              </app-select-container>
+            </div>
+            <div class="w-2/6">
+              <app-date-term
+                [formCtrl]="fc.delivery_specified_time"
+                nameAttrValue="delivery_specified_time"
+                idAttrValue="delivery-specified-time"
+                [invalid]="formControlStateManager(fc.delivery_specified_time)">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '配送または回収日', required: true }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: fc.delivery_specified_time }
+                  "
+                  message></ng-container>
+              </app-date-term>
+            </div>
+          </ng-container>
+          <ng-template #deliveryOnly>
+            <div class="w-2/6">
+              <app-date-term
+                [formCtrl]="fc.delivery_specified_time"
+                nameAttrValue="delivery_specified_time"
+                idAttrValue="delivery-specified-time"
+                [invalid]="formControlStateManager(fc.delivery_specified_time)">
+                <ng-container
+                  *ngTemplateOutlet="
+                    labels;
+                    context: { label: '配送日', required: true }
+                  "></ng-container>
+                <ng-container
+                  *ngTemplateOutlet="
+                    errors;
+                    context: { ctrl: fc.delivery_specified_time }
+                  "
+                  message></ng-container>
+              </app-date-term>
+            </div>
+          </ng-template>
+          <div class="w-1/6">
+            <app-select-container
+              [formCtrl]="fc.delivery_hour"
+              nameAttrValue="delivery_hour"
+              idAttrValue="delivery-hour"
+              [options]="hourOptions"
+              [invalid]="formControlStateManager(fc.delivery_hour)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '時', required: true }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.delivery_hour }"
+                message></ng-container>
+            </app-select-container>
+          </div>
+          <div class="w-1/6">
+            <app-select-container
+              [formCtrl]="fc.delivery_minute"
+              nameAttrValue="delivery_minute"
+              idAttrValue="delivery-minute"
+              [options]="minuteOptions"
+              [invalid]="formControlStateManager(fc.delivery_minute)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '分', required: true }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="
+                  errors;
+                  context: { ctrl: fc.delivery_minute }
+                "
+                message></ng-container>
+            </app-select-container>
+          </div>
+        </div>
+        <p class="mt-4 text-rose-400">
+          ※ 連絡先電話番号・配送先に変更がある場合入力してください。
+        </p>
+        <p class="text-rose-400">
+          ※
+          こちらに入力された連絡先電話番号と配送先が最終的な配送情報として登録されます。
+        </p>
+        <div class="flex gap-6 mt-2">
+          <div class="w-1/4">
+            <app-text-container
+              [formCtrl]="fc.additional_tel"
+              nameAttrValue="additional_tel"
+              idAttrValue="additional-tel"
+              [invalid]="formControlStateManager(fc.additional_tel)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '連絡先電話番号', required: false }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.additional_tel }"
+                message></ng-container>
+            </app-text-container>
+          </div>
+          <div class="w-3/4">
+            <app-text-container
+              [formCtrl]="fc.shipping_address"
+              nameAttrValue="shipping_address"
+              idAttrValue="shipping-address"
+              [invalid]="formControlStateManager(fc.shipping_address)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '配送先', required: false }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="
+                  errors;
+                  context: { ctrl: fc.shipping_address }
+                "
+                message></ng-container>
+            </app-text-container>
+          </div>
+        </div>
+        <div class="flex gap-6 mt-4">
+          <div class="w-1/2">
+            <app-textarea-container
+              [formCtrl]="fc.remarks_1"
+              nameAttrValue="remarks_1"
+              idAttrValue="remarks-1"
+              [invalid]="formControlStateManager(fc.remarks_1)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '備考1', required: false }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_1 }"
+                message></ng-container>
+            </app-textarea-container>
+          </div>
+          <div class="w-1/2">
+            <app-textarea-container
+              [formCtrl]="fc.remarks_2"
+              nameAttrValue="remarks_2"
+              idAttrValue="remarks-2"
+              [invalid]="formControlStateManager(fc.remarks_2)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '備考2', required: false }
+                "></ng-container>
+              <ng-container
+                *ngTemplateOutlet="errors; context: { ctrl: fc.remarks_2 }"
+                message></ng-container>
+            </app-textarea-container>
+          </div>
+        </div>
+        <div
+          class="width-limit-break bg-primary-light flex flex-row justify-center bottom-[40px] left-0 right-0 p-2 fixed gap-8">
+          <app-button btnType="button" (click)="handleClickClearButton()"
+            >クリア</app-button
+          >
+          <app-button
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover"
+            [buttonDisabled]="form.invalid || formInvalid"
+            >保存</app-button
+          >
+        </div>
+      </form>
+    </div>
+  </ng-container>
+</main>
+<!-- データ取得中に表示するテンプレート -->
+<ng-template #duringAcquisition>
+  <p class="text-3xl text-center text-slate-500 mt-6">データ取得中...</p>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- ↓ エラーメッセージのテンプレート ↓ -->
+<ng-template #errors let-ctrl="ctrl">
+  <ng-container *ngIf="formControlStateManager(ctrl)">
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['required']">
+      {{ errorConst.FORM_ERROR.REQUIRED_ITEM }}
+    </p>
+    <p class="mt-1 pl-1 text-sm text-red" *ngIf="ctrl.errors?.['pattern']">
+      {{ errorConst.FORM_ERROR.NUMERIC_LIMIT_VIOLATION }}
+    </p>
+  </ng-container>
+</ng-template>

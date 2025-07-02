@@ -1,0 +1,25 @@
+<app-breadcrumb-org
+  [breadcrumbList]="[{ text: '配送受付一覧' }]"></app-breadcrumb-org>
+<main>
+  <div>
+    <app-search
+      (searchEvent)="parentSearchEvent.next($event)"
+      (errorEvent)="handleError($event)">
+    </app-search>
+  </div>
+  <div class="flex items-center justify-end my-2">
+    <!--<div class="mr-8">
+      <app-new-registration-link-org path="add"></app-new-registration-link-org>
+    </div>-->
+    <div>
+      <!--<app-export-link-org [apiResponse$]="delivery$" [mappings]="csvMappings" [filename]="filename"
+        (statusChange)="exportEventListener($event)">
+      </app-export-link-org>-->
+    </div>
+  </div>
+  <div>
+    <app-table
+      [tableEvent]="parentTableEvent"
+      (errorEvent)="handleError($event)"></app-table>
+  </div>
+</main>

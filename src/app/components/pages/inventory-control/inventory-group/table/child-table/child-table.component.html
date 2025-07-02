@@ -1,0 +1,51 @@
+<table class="whitespace-nowrap border-separate border-spacing-0 w-full">
+  <thead>
+    <tr>
+      <th
+        *ngFor="let item of header"
+        (click)="changeSort(item)"
+        class="font-normal border border-x-0 border-slate-300 px-3 py-4 hover:transition-all duration-300"
+        [ngClass]="
+          item ? 'hover:bg-iron-blue-200 cursor-pointer' : 'cursor-auto'
+        ">
+        <div class="flex gap-1">
+          <span>{{ item }}</span>
+          <app-icon
+            *ngIf="item"
+            class="w-6"
+            [icon]="
+              sort.column === item && sort.order === 'desc'
+                ? 'sort-desc'
+                : 'sort-asc'
+            "
+            [ngClass]="
+              sort.column === item ? 'fill-primary' : 'fill-slate-300'
+            ">
+          </app-icon>
+        </div>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    <ng-container *ngFor="let row of data; first as isFirst">
+      <tr
+        class="bg-white even:bg-iron-blue-100 hover:bg-iron-blue-200 hover:transition-all duration-300">
+        <td
+          *ngFor="let item of row"
+          class="px-3 py-4"
+          [ngClass]="[!isFirst ? 'border-t border-t-iron-blue-300' : '']">
+          <ng-container *ngIf="isLinkData(item); else normalData">
+            <a
+              class="text-primary-light border-b border-primary-light hover:text-primary-light-hover hover:border-primary-light-hover"
+              [routerLink]="item.href">
+              {{ item.text }}
+            </a>
+          </ng-container>
+          <ng-template #normalData>
+            {{ item }}
+          </ng-template>
+        </td>
+      </tr>
+    </ng-container>
+  </tbody>
+</table>

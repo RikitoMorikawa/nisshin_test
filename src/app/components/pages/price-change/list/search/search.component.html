@@ -1,0 +1,135 @@
+<div class="mt-8">
+  <app-button (click)="handleClickSearchPaneToggleButton()" btnType="button">
+    <span class="w-6">
+      <app-icon icon="filter-2-line"></app-icon>
+    </span>
+    <span class="inline-block ml-1 mr-2">
+      {{
+        hasSearchPanelOpened ? '絞り込みフォーム非表示' : '絞り込みフォーム表示'
+      }}
+    </span>
+    <span [class]="rotateAnimation" class="inline-block w-6">
+      <app-icon icon="arrow-down-s-fill"></app-icon>
+    </span>
+  </app-button>
+  <div class="mt-6">
+    <div
+      [class.is-open]="hasSearchPanelOpened"
+      [class.shadow]="hasSearchPanelOpened"
+      class="price-change-search width-limit-break bg-white">
+      <form
+        class="w-[1280px] mx-auto px-4"
+        [formGroup]="searchForm"
+        (ngSubmit)="handleClickSearchSubmitButton()"
+        autocomplete="off">
+        <div class="flex gap-4">
+          <div class="w-1/4">
+            <app-real-time-suggest-container
+              [idCtrl]="sfc.product_id"
+              [nameCtrl]="sfc.product_name"
+              nameAttrValue="product_name"
+              idAttrValue="product-name"
+              [apiInput]="getProductSuggests()"
+              [invalid]="formControlStateManager(sfc.product_id)">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '商品', required: false }
+                "></ng-container>
+            </app-real-time-suggest-container>
+          </div>
+          <div class="w-1/4"></div>
+          <div class="w-1/4"></div>
+          <div class="w-1/4"></div>
+        </div>
+        <div class="flex gap-4 mt-6">
+          <div class="w-1/2">
+            <app-date-term-clear-container
+              nameAttrValue="scheduled_price_change_date_from"
+              idAttrValue="scheduled-price-change-date-from"
+              toNameAttrValue="scheduled_price_change_date_to"
+              toIdAttrValue="scheduled-price-change-date-to"
+              [dateFromFormCtrl]="sfc.scheduled_price_change_date.controls.from"
+              [dateToFormCtrl]="sfc.scheduled_price_change_date.controls.to"
+              [invalid]="!!sfc.scheduled_price_change_date.errors">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '価格変更予定日', required: false }
+                "></ng-container>
+              <ng-container
+                *ngIf="sfc.scheduled_price_change_date.errors?.['beforeFromDate'] then beforeFromDate"
+                message></ng-container>
+            </app-date-term-clear-container>
+          </div>
+          <div class="w-1/2">
+            <app-date-term-clear-container
+              nameAttrValue="price_change_completion_date_from"
+              idAttrValue="price-change-completion-date-from"
+              toNameAttrValue="price_change_completion_date_to"
+              toIdAttrValue="price-change-completion-date-to"
+              [dateFromFormCtrl]="
+                sfc.price_change_completion_date.controls.from
+              "
+              [dateToFormCtrl]="sfc.price_change_completion_date.controls.to"
+              [invalid]="!!sfc.price_change_completion_date.errors">
+              <ng-container
+                *ngTemplateOutlet="
+                  labels;
+                  context: { label: '価格変更完了日', required: false }
+                "></ng-container>
+              <ng-container
+                *ngIf="sfc.price_change_completion_date.errors?.['beforeFromDate'] then beforeFromDate"
+                message></ng-container>
+            </app-date-term-clear-container>
+          </div>
+        </div>
+        <div class="flex gap-8 mt-10">
+          <app-button btnType="button" (click)="handleClickSearchClearButton()">
+            入力内容クリア
+          </app-button>
+          <app-button
+            *ngIf="searchForm.valid; else disable"
+            btnType="submit"
+            btnFillColor="bg-success"
+            btnHoverColor="hover:bg-success-hover"
+            btnTextColor="text-white"
+            btnLineColor="border-success"
+            btnLineHoverColor="hover:border-success-hover">
+            絞り込み実行
+          </app-button>
+        </div>
+        <p class="mt-2 text-sm text-red">
+          ※
+          入力内容をクリアした後に絞り込み実行ボタンをクリックすることで全てのデータを取得できます。
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ↓ 絞り込み実行ボタン（非活性）のテンプレート ↓ -->
+<ng-template #disable>
+  <app-button btnFillColor="text-white bg-slate-300 hover:bg-slate-300">
+    絞り込み実行
+  </app-button>
+</ng-template>
+
+<!-- ↓ app-text-container に渡すコンテンツのテンプレート ↓ -->
+<ng-template #labels let-label="label" let-required="required">
+  <div class="flex items-center gap-2">
+    <span>{{ label }}</span>
+    <span
+      *ngIf="required"
+      class="px-3 py-0.5 text-xs text-white bg-warning-dark rounded-full"
+      >必須</span
+    >
+  </div>
+</ng-template>
+
+<!-- 日付エラーメッセージテンプレート -->
+<ng-template #beforeFromDate>
+  <p class="mt-1 pl-1 text-sm text-red">
+    {{ errorConst.FORM_ERROR.DATE_TERM_TO_BEFORE_FROM }}
+  </p>
+</ng-template>

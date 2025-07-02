@@ -1,0 +1,17 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="[{ text: '在庫' }]"> </app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-stock-search
+  class="block mb-4"
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)">
+</app-stock-search>
+
+<!-- ↓ テーブル ↓ -->
+<app-stock-table
+  [tableEvent]="parentTableEvent"
+  (errorEvent)="handleError($event)"></app-stock-table>

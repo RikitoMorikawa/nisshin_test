@@ -1,0 +1,39 @@
+<!-- ↓ タイトル ↓ -->
+<h2 class="mt-8 text-xl">
+  <!-- ↓ コンテンツ投影 ↓ -->
+  <ng-content select="[pageTitle]"></ng-content>
+</h2>
+
+<!-- ↓ 各種ボタンと更新者 ↓ -->
+<div class="flex items-center justify-between mt-6 mb-2">
+  <div class="flex gap-6">
+    <app-back-to-link-org routerLink="{{ backToListPath }}">
+      一覧へ戻る
+    </app-back-to-link-org>
+    <!-- role_id が 4 でない場合のみ表示 -->
+    <ng-container
+      *ngIf="hasEditPage && authorService.author?.role_name !== '一般ユーザー'">
+      <app-edit-link-org routerLink="../../edit/{{ id }}"></app-edit-link-org>
+      <app-delete-link [removeMethod$]="remove$" redirectPath="../../">
+      </app-delete-link>
+    </ng-container>
+    <!-- ↓ コンテンツ投影（追加リンク）↓ -->
+    <ng-content select="[optionalLink]"></ng-content>
+  </div>
+  <app-last-updater-org>
+    <!-- ↓ コンテンツ投影 ↓ -->
+    最終更新者：<ng-content select="[updater]"></ng-content>
+  </app-last-updater-org>
+</div>
+<hr class="width-limit-break border-t border-gray-400" />
+
+<!-- ↓ 詳細表示 ↓ -->
+<div class="mt-8 p-8 bg-white shadow border border-gray-300">
+  <h2 class="text-lg">
+    <!-- ↓ コンテンツ投影 ↓ -->
+    <ng-content select="[detailTitle]"></ng-content>
+  </h2>
+  <hr class="block mb-6 w-full border-t-primary-light-hover border-t-4" />
+  <!-- ↓ コンテンツ投影 ↓ -->
+  <ng-content select="[detailContent]"></ng-content>
+</div>

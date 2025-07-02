@@ -1,0 +1,24 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org [breadcrumbList]="[{ text: '棚卸一覧' }]">
+</app-breadcrumb-org>
+
+<!-- ↓ トグル切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-inventory-group-search
+  class="block mb-4"
+  (searchEvent)="parentSearchEvent.next($event)"
+  (errorEvent)="handleError($event)">
+</app-inventory-group-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<!--<div class="flex justify-end gap-8 mb-4">
+  <app-export-pdf-org [apiResponse$]="inventory$" [filename]="filename" (statusChange)="exportEventListener($event)">
+  </app-export-pdf-org>
+</div>-->
+
+<!-- ↓ テーブル ↓ -->
+<app-inventory-group-table
+  [tableEvent]="parentTableEvent"
+  (errorEvent)="handleError($event)"></app-inventory-group-table>

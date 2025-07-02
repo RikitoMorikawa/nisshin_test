@@ -1,0 +1,165 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { path: listPagePath, text: '請求一覧' },
+    { text: '請求伝票一覧' }
+  ]"></app-breadcrumb-org>
+
+<main>
+  <h1 class="mt-8 text-xl">請求伝票一覧</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org path="{{ listPagePath }}"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <div (click)="handleClickDelete()" class="cursor-pointer">
+        <app-delete-link-org></app-delete-link-org>
+      </div>
+    </div>
+  </div>
+  <hr class="width-limit-break border-t border-gray-400" />
+  <div
+    *ngIf="accountsReceivableAggregate"
+    class="mt-8 py-8 px-6 bg-white shadow border border-gray-300">
+    <h2 class="text-lg">請求ヘッダー</h2>
+    <hr class="border-t-primary-light-hover border-t-4" />
+
+    <div class="flex justify-end mt-6">
+      <div></div>
+      <div>
+        <table class="w-1/3">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[120px]">8%対象</td>
+            <td class="border text-right p-4">
+              {{
+                accountsReceivableAggregate.reduced_tax_rate_target_amount.toLocaleString()
+              }}
+            </td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">10%対象</td>
+            <td class="border text-right p-4">
+              {{
+                accountsReceivableAggregate.consumption_tax_rate_target_amount.toLocaleString()
+              }}
+            </td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[120px]">消費税8%</td>
+            <td class="border text-right p-4">
+              {{ accountsReceivableAggregate.reduced_tax.toLocaleString() }}
+            </td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">消費税10%</td>
+            <td class="border text-right p-4">
+              {{ accountsReceivableAggregate.consumption_tax.toLocaleString() }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-6 flex flex-row gap-10">
+      <div class="grow">
+        <table class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[100px]">請求ID</td>
+            <td class="border bg-slate-100 p-4 min-w-[410px]">請求先</td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">請求日</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">請求額</td>
+            <td class="border bg-slate-100 p-4 min-w-[120px]">入金予定日</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">残高</td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border p-4">{{ accountsReceivableAggregate.id }}</td>
+            <td class="border p-4">
+              {{ accountsReceivableAggregate.client_name }}
+            </td>
+            <td class="border p-4">
+              {{ getDateFormat(accountsReceivableAggregate.billing_date) }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ accountsReceivableAggregate.billing_amount.toLocaleString() }}
+            </td>
+            <td class="border p-4">
+              {{ getDateFormat(accountsReceivableAggregate.payment_exp_date) }}
+            </td>
+            <td class="border p-4">
+              {{
+                accountsReceivableAggregate.balance
+                  ? accountsReceivableAggregate.balance.toLocaleString()
+                  : ''
+              }}
+            </td>
+          </tr>
+        </table>
+        <table class="w-full">
+          <tr class="border border-slate-200">
+            <td class="border bg-slate-100 p-4 min-w-[150px]">前回請求額</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">入金額</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">繰越額</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">伝票枚数</td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">
+              当月税込買上額
+            </td>
+            <td class="border bg-slate-100 p-4 min-w-[150px]">内消費税額</td>
+          </tr>
+          <tr class="border border-slate-200">
+            <td class="border p-4 text-right">
+              {{
+                accountsReceivableAggregate.previous_invoice_total.toLocaleString()
+              }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ accountsReceivableAggregate.payment_total.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{
+                accountsReceivableAggregate.carried_over_amount.toLocaleString()
+              }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ accountsReceivableAggregate.slip_quantity.toLocaleString() }}
+            </td>
+            <td class="border p-4 text-right">
+              {{
+                accountsReceivableAggregate.purchase_total_including_tax.toLocaleString()
+              }}
+            </td>
+            <td class="border p-4 text-right">
+              {{ accountsReceivableAggregate.tax_total.toLocaleString() }}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ↓ 絞り込みフォーム ↓ -->
+  <app-sliplist-search (event)="filter = $event"></app-sliplist-search>
+
+  <!-- ↓ 各種ボタン ↓ -->
+  <div class="flex justify-end gap-8 mt-4">
+    <!-- ↓ スペース調整用の空 div ↓ -->
+    <div></div>
+  </div>
+
+  <!-- ↓ テーブル ↓ -->
+  <app-table-with-pagination
+    class="block mt-2"
+    [params]="tableParams"
+    (pageChange)="pages = $event">
+    請求伝票一覧
+  </app-table-with-pagination>
+
+  <app-sliplist-deposit-detail-search
+    [depositDetailsOrg]="depositDetailsOrg"
+    (event)="depositDetailFilter = $event"></app-sliplist-deposit-detail-search>
+
+  <app-table-container
+    class="block mt-2"
+    [tableHeader]="depositDetailsHeaders"
+    [tableData]="depositDetails"
+    [totalItems]="depositDetailsTotalItems"
+    (sender)="depositDetailPages = $event">
+    入金一覧
+  </app-table-container>
+</main>

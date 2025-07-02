@@ -1,0 +1,65 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: topPagePath, text: '設定一覧' },
+    { text: '買掛残一覧' }
+  ]"></app-breadcrumb-org>
+
+<!-- ↓ マスタ切り替えボタン ↓ -->
+<app-toggle-button></app-toggle-button>
+
+<!-- ↓ 集計コントロールフォーム ↓ -->
+<div class="mt-6 pt-3 pb-3 px-3 bg-white shadow border border-gray-300">
+  <div class="pb-3 text-base font-bold ng-star-inserted">集計</div>
+  <form>
+    <div class="flex gap-6 mt-3 mb-3">
+      <div class="w-1/5">
+        <app-text-container
+          class="w-40"
+          nameAttrValue="payment_date"
+          idAttrValue="payment-date"
+          [formCtrl]="ctrls.payment_date"
+          [invalid]="formControlStateManager(ctrls.payment_date)">
+        </app-text-container>
+      </div>
+      <div class="w-1/5">
+        <app-date-term
+          nameAttrValue="payment_date_picker"
+          idAttrValue="payment-date-picker"
+          [formCtrl]="ctrls.payment_date_picker">
+        </app-date-term>
+      </div>
+      <div class="w-1/5 mt-1">
+        <app-button
+          btnFillColor="text-white bg-success hover:bg-success-hover"
+          [buttonDisabled]="form.invalid"
+          (click)="onClickSubmit()">
+          集計
+        </app-button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- ↓ 絞り込みフォーム ↓ -->
+<app-search (event)="filter = $event"></app-search>
+
+<!-- ↓ 各種ボタン ↓ -->
+<div class="flex justify-between mt-4">
+  <!-- ↓ スペース調整用の空 div ↓ -->
+  <div></div>
+  <app-export-link
+    [export$]="export$"
+    [fileNamePrefix]="fileNamePrefix"
+    (statusChange)="onExportStatusChange($event)"
+    text="買掛残CSVダウンロード　">
+  </app-export-link>
+</div>
+
+<!-- ↓ テーブル ↓ -->
+<app-table-with-pagination
+  class="app-table block mt-2"
+  [params]="tableParams"
+  (pageChange)="pages = $event">
+  買掛残高一覧
+</app-table-with-pagination>

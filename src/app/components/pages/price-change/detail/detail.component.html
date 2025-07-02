@@ -1,0 +1,189 @@
+<!-- ↓ パンくずリスト ↓ -->
+<app-breadcrumb-org
+  [breadcrumbList]="[
+    { path: settingMenuPath, text: '設定一覧' },
+    { path: listPagePath, text: '価格変更一覧' },
+    { text: '価格変更詳細' }
+  ]">
+</app-breadcrumb-org>
+<main>
+  <!-- ↓ ヘッダ・メニュー部 ↓ -->
+  <h1 class="mt-8 text-xl">価格変更詳細</h1>
+  <div class="mt-6 mb-2 flex flex-row items-center justify-between">
+    <div class="flex flex-row items-center gap-6">
+      <app-back-to-link-org [path]="listPagePath"
+        >一覧へ戻る</app-back-to-link-org
+      >
+      <app-edit-link-org [path]="editPagePath">編集</app-edit-link-org>
+      <app-delete-link-org
+        (click)="handleDeleteLinkClick()"></app-delete-link-org>
+    </div>
+    <app-last-updater-org>
+      最終更新者：{{
+        updater ? updater : 'データ取得中...'
+      }}</app-last-updater-org
+    >
+  </div>
+
+  <hr class="width-limit-break border-t border-gray-400" />
+
+  <div class="mt-8 bg-white border-t border-y border-gray-200 shadow">
+    <ul class="">
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">商品ID</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.product_id }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">商品名</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.product_name }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">価格変更予定日</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.scheduled_price_change_date | date : 'yyyy/MM/dd' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">価格変更完了日時</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{
+            priceChange.price_change_completion_date
+              | date : 'yyyy/MM/dd HH:mm:ss'
+          }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">バラ仕入単価</div>
+        <div
+          *ngIf="priceChange.cost_price && priceChange.cost_price !== 0"
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.cost_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">小分け仕入単価</div>
+        <div
+          *ngIf="priceChange.b_cost_price && priceChange.b_cost_price !== 0"
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.b_cost_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">ケース仕入単価</div>
+        <div
+          *ngIf="priceChange.c_cost_price && priceChange.c_cost_price !== 0"
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.c_cost_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">バラ粗利率</div>
+        <div
+          *ngIf="
+            priceChange.gross_profit_rate && priceChange.gross_profit_rate !== 0
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.gross_profit_rate | number : '1.0-0' }} %
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">小分け粗利率</div>
+        <div
+          *ngIf="
+            priceChange.b_gross_profit_rate &&
+            priceChange.b_gross_profit_rate !== 0
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.b_gross_profit_rate | number : '1.0-0' }} %
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">ケース粗利率</div>
+        <div
+          *ngIf="
+            priceChange.c_gross_profit_rate &&
+            priceChange.c_gross_profit_rate !== 0
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.c_gross_profit_rate | number : '1.0-0' }} %
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">バラ売価</div>
+        <div
+          *ngIf="priceChange.selling_price && priceChange.selling_price !== 0"
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.selling_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">小分け売価</div>
+        <div
+          *ngIf="
+            priceChange.b_selling_price && priceChange.b_selling_price !== 0
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.b_selling_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">ケース売価</div>
+        <div
+          *ngIf="
+            priceChange.c_selling_price && priceChange.c_selling_price !== 0
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.c_selling_price | number : '1.0-0' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">登録者</div>
+        <!-- ↓ のif文がないと、読み込み中にundefinedが表示される -->
+        <div
+          *ngIf="
+            priceChange.employee_created_last_name &&
+            priceChange.employee_created_first_name
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{
+            priceChange.employee_created_last_name +
+              ' ' +
+              priceChange.employee_created_first_name
+          }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">登録日時</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.created_at | date : 'yyyy/MM/dd HH:mm:ss' }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">最終更新者</div>
+        <!-- ↓ のif文がないと、読み込み中にundefinedが表示される -->
+        <div
+          *ngIf="
+            priceChange.employee_updated_last_name &&
+            priceChange.employee_updated_first_name
+          "
+          class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{
+            priceChange.employee_updated_last_name +
+              ' ' +
+              priceChange.employee_updated_first_name
+          }}
+        </div>
+      </li>
+      <li class="flex flex-row items-center border-b border-b-gray-200">
+        <div class="px-2 py-3 bg-slate-100 min-w-[200px]">最終更新日時</div>
+        <div class="px-2 py-3 border-l border-l-gray-200 grow">
+          {{ priceChange.updated_at | date : 'yyyy/MM/dd HH:mm:ss' }}
+        </div>
+      </li>
+    </ul>
+  </div>
+</main>
