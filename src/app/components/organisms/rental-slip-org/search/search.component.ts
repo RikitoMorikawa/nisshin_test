@@ -73,7 +73,10 @@ export class SearchComponent implements OnInit {
   clientSuggests!: SelectOption[];
 
   // 会員サジェスト
-  memberSuggests!: SelectOption[];
+  //memberSuggests!: SelectOption[];
+
+  // 会員番号サジェスト
+  //memberCdSuggests: SelectOption[] = [];
 
   // 商品サジェスト
   productSuggests: SelectOption[] = [];
@@ -117,6 +120,7 @@ export class SearchComponent implements OnInit {
     shipping_address: '',
     client_id: '',
     member_id: '',
+    member_cd: '',
     status_division_id: '',
     reception_employee_id: '',
     rental_slip_id: '',
@@ -160,7 +164,6 @@ export class SearchComponent implements OnInit {
       forkJoin([
         this.employeeService.getAsSelectOptions(),
         this.clientService.getAsSelectOptions(),
-        this.memberService.getAll({ $select: 'id,last_name,first_name' }),
         this.divisionService.getAsSelectOptions(),
         this.rentalSlipService.getAll(),
         this.rentalService.getAll({
@@ -182,15 +185,11 @@ export class SearchComponent implements OnInit {
             return;
           }
 
-          const [employees, clients, members, divisions, slips, rentals] = res;
+          const [employees, clients, divisions, slips, rentals] = res;
 
           // サジェスト設定
           this.employeeSuggests = employees;
           this.clientSuggests = clients;
-          this.memberSuggests = members.data.map((x: Member) => ({
-            text: `${x.last_name} ${x.first_name}`,
-            value: x.id,
-          }));
 
           // ステータス・精算区分
           const statusDivisionsRes: Record<string, SelectOption[]> = divisions;
@@ -334,10 +333,38 @@ export class SearchComponent implements OnInit {
    * @returns void
    */
   handleClickSubmitButton(): void {
+    const memberCd = this.fc.member_cd.value;
+    if (memberCd) {
+      // 会員番号から会員ID取得
+      this.subscription.add(
+        this.memberService
+          .getAll({ member_cd: memberCd })
+          .pipe(
+            catchError(() => {
+              return of(null);
+            })
+          )
+          .subscribe((res) => {
+            if (res && res.data && res.data.length > 0) {
+              this.fc.member_id.setValue(String(res.data[0].id));
+            } else {
+              this.fc.member_id.setValue('');
+            }
+            this.executeSearch();
+          })
+      );
+    } else {
+      this.executeSearch();
+    }
+  }
+
+  // 検索処理
+  private executeSearch(): void {
     this.form.controls.mobile_number.setValue(this.form.controls.tel.value);
     const searchValue = this.form.value;
-    console.log(searchValue);
-    const flatted = flattingFormValue(searchValue);
+    const searchParams = { ...searchValue };
+    delete searchParams.member_cd;
+    const flatted = flattingFormValue(searchParams);
     this.searchEvent.emit(removeNullsAndBlanks(flatted));
   }
 

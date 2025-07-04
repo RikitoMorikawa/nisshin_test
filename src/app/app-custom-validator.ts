@@ -173,9 +173,15 @@ export class CustomValidators {
     return (control: AbstractControl): ValidationErrors | null => {
       const from = control.get('from')?.value;
       const to = control.get('to')?.value;
-      return from && new Date(from) > new Date(to)
-        ? { beforeFromDate: true }
-        : null;
+      if (!from || !to) return null;
+      const fromDate = new Date(from);
+      const toDate = new Date(to);
+
+      // 時間をリセットして日付のみで比較
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(0, 0, 0, 0);
+
+      return fromDate > toDate ? { beforeFromDate: true } : null;
     };
   }
 

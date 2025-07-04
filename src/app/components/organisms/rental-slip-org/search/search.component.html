@@ -64,14 +64,7 @@
           </app-select-suggest-container>
         </div>
         <div class="w-1/4">
-          <app-select-suggest-container
-            nameAttrValue="member_id"
-            idAttrValue="member-id"
-            [formCtrl]="fc.member_id"
-            [suggests]="memberSuggests"
-            [invalid]="invalid(fc.member_id)">
-            会員名
-          </app-select-suggest-container>
+          <app-input-container [formCtrl]="fc.member_cd">会員番号</app-input-container>
         </div>
         <div class="w-1/4">
           <app-select-suggest-container
