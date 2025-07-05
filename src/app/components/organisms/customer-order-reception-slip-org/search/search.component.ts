@@ -50,6 +50,9 @@ export class SearchComponent implements OnInit, OnDestroy {
     message: string;
   }>();
 
+  // ストレージキー
+  private localStorageKey = 'filterParams-customer-order-reception-slip';
+
   employeeSuggests!: SelectOption[];
 
   // 絞り込みパネル開閉フラグ
@@ -207,9 +210,13 @@ export class SearchComponent implements OnInit, OnDestroy {
           // 重複削除
           let product_sids: number[] = Array.from(new Set(product_ids));
           let product_id: string = product_sids.join(',');
-          this.getSupplierList(product_id);
-          this._initSearch();
-          console.log(res[3]);
+          if (product_id) {
+            // 仕入先データも読み込んでから最終処理
+            this.getSupplierList(product_id);
+          } else {
+            // 仕入先データがない場合は即座に最終処理
+            this.completeInitialization();
+          }
         })
     );
   }
@@ -241,15 +248,138 @@ export class SearchComponent implements OnInit, OnDestroy {
       forkJoin([this.supplierService.getAll({ id: supplier_id })])
         .pipe()
         .subscribe((res) => {
+          this.supplierOptions = [];
           for (let i in res[0].data) {
             this.supplierOptions.push({
               value: res[0].data[i].id,
               text: res[0].data[i].name,
             });
           }
+          // 全てのデータが揃ったので最終処理を実行
+          this.completeInitialization();
         })
     );
   }
+
+  /**
+   * 全データ読み込み完了後の最終処理
+   */
+  private completeInitialization(): void {
+    // 保存された検索条件を取得
+    const savedParams = this.loadFilterParams();
+
+    if (savedParams) {
+      // 保存されたパラメータでフォームを復元
+      this.restoreFormValues(savedParams);
+      this.handleClickSubmitButton();
+    } else {
+      // デフォルト検索実行
+      this._initSearch();
+    }
+  }
+
+  /**
+   * 保存されたフォーム値
+   */
+  private restoreFormValues(params: any): void {
+    // 全てのフィールドを復元
+    Object.keys(params).forEach((key) => {
+      const control = this.form.get(key);
+      if (control && params[key] !== undefined) {
+        let value = params[key];
+
+        // プルダウン系の処理
+        if (
+          [
+            'status_division_id',
+            'settle_status_division_id',
+            'supplier_id',
+            'reception_employee_id',
+          ].includes(key)
+        ) {
+          // 空文字や無効な値の場合はスキップ
+          if (
+            params[key] === '' ||
+            params[key] === null ||
+            params[key] === undefined
+          ) {
+            return;
+          }
+          value = Number(params[key]);
+          // 変換後が0またはNaNの場合もスキップ
+          if (value === 0 || isNaN(value)) {
+            return;
+          }
+          // optionに存在するかチェック
+          let options: SelectOption[] = [];
+          if (key === 'status_division_id') options = this.statusOptions;
+          else if (key === 'settle_status_division_id')
+            options = this.settleStatusOptions;
+          else if (key === 'supplier_id') options = this.supplierOptions;
+          else if (key === 'reception_employee_id')
+            options = this.employeeSuggests;
+          const foundOption = options?.find(
+            (opt) => Number(opt.value) === value
+          );
+          if (!foundOption) {
+            return;
+          }
+        }
+
+        control.patchValue(value);
+      }
+    });
+    setTimeout(() => {
+      this.forceUpdateSelectSuggestComponents();
+    }, 100);
+  }
+
+  /**
+   * select-suggestコンポーネントの表示を更新
+   */
+  private forceUpdateSelectSuggestComponents(): void {
+    // 各プルダウンの値をオブジェクト形式で再設定
+    this.setSelectSuggestValue('status_division_id', this.statusOptions);
+    this.setSelectSuggestValue(
+      'settle_status_division_id',
+      this.settleStatusOptions
+    );
+    this.setSelectSuggestValue('supplier_id', this.supplierOptions);
+    this.setSelectSuggestValue('reception_employee_id', this.employeeSuggests);
+  }
+
+  /**
+   * select-suggestコンポーネントの値を設定
+   */
+  private setSelectSuggestValue(
+    fieldName: string,
+    options: SelectOption[]
+  ): void {
+    const control = this.form.get(fieldName);
+    if (!control || !options?.length) {
+      return;
+    }
+    const currentValue = control.value;
+    // 無効な値（0、null、undefined、空文字）の場合はスキップ
+    if (!currentValue || currentValue === 0 || currentValue === '') {
+      return;
+    }
+    const foundOption = options.find(
+      (opt) => Number(opt.value) === Number(currentValue)
+    );
+    if (foundOption) {
+      const selectValue = {
+        value: foundOption.value,
+        text: foundOption.text,
+      };
+      control.patchValue(selectValue, { emitEvent: true });
+      // その後、正しい値に戻す
+      setTimeout(() => {
+        control.patchValue(foundOption.value, { emitEvent: false });
+      }, 50);
+    }
+  }
+
   /**
    * 仕入れ先からcustomer_slip_idを抽出する。
    */
@@ -340,6 +470,8 @@ export class SearchComponent implements OnInit, OnDestroy {
         x.patchValue('');
       }
     });
+    // ローカルストレージクリア
+    this.clearFilterParams();
   }
 
   /**
@@ -349,7 +481,10 @@ export class SearchComponent implements OnInit, OnDestroy {
   handleClickSubmitButton(): void {
     const searchValue = this.form.value;
     const flatted = OrderFn.flattingFormValue(searchValue);
-    this.searchEvent.emit(OrderFn.removeNullsAndBlanks(flatted));
+    const filterParams = OrderFn.removeNullsAndBlanks(flatted);
+    // 現在のフォーム状態を保存
+    this.saveFilterParams(this.form.value);
+    this.searchEvent.emit(filterParams);
   }
 
   /**
@@ -363,5 +498,25 @@ export class SearchComponent implements OnInit, OnDestroy {
       title: '客注受付票一覧絞り込み：' + modalConst.TITLE.HAS_ERROR,
       message: message,
     });
+  }
+
+  /**
+   * 検索条件をローカルストレージに保存
+   */
+  private saveFilterParams(filter: any): void {
+    localStorage.setItem(this.localStorageKey, JSON.stringify(filter));
+  }
+  /**
+   * ローカルストレージから検索条件を取得
+   */
+  private loadFilterParams(): any | null {
+    const params = localStorage.getItem(this.localStorageKey);
+    return params ? JSON.parse(params) : null;
+  }
+  /**
+   * ローカルストレージから検索条件をクリア
+   */
+  private clearFilterParams(): void {
+    localStorage.removeItem(this.localStorageKey);
   }
 }
